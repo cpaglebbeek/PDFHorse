@@ -15,7 +15,9 @@ def test_health_returns_ok():
     assert body["status"] == "ok"
     assert body["service"] == "pdfhorse"
     assert body["version"]
-    assert body["codename"] == "Warnock"
+    # Codenaam wordt gelezen uit version.json en muteert per release;
+    # we accepteren elke niet-lege string.
+    assert isinstance(body["codename"], str) and body["codename"]
 
 
 def test_limits_returns_numbers():

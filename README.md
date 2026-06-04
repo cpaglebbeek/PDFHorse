@@ -1,8 +1,8 @@
 # PDFHorse
 
-> **iCt Horse dienst — browser-first PDF-bewerker met merge, split, OCR, invullen en ondertekenen.**
+> **iCt Horse tooling SaaS — browser-first PDF-bewerker met merge, split, OCR, invullen en ondertekenen.**
 >
-> Versie: **v0.0.1-Warnock** · Licentie: **AGPL-3.0** · Status: **skeleton (init)**
+> Versie: **v0.1.0-Geschke** · Licentie: **AGPL-3.0** · Status: **first feature live (client-side merge)**
 
 Live (gepland): https://icthorse.nl/PDFHorse/
 
@@ -10,16 +10,16 @@ Live (gepland): https://icthorse.nl/PDFHorse/
 
 Eén anonieme webpagina waar je een PDF opent, bewerkt en weer downloadt — zonder account, zonder permanente cloud-opslag.
 
-| Functie | Locatie | Notitie |
-|---|---|---|
-| **Merge** — meerdere PDF's samenvoegen | client (pdf-lib) | Geen upload — alles in browser |
-| **Split** — één PDF opdelen | client (pdf-lib) | Geen upload |
-| **Invullen** — tekstvelden op PDF plaatsen | client (pdf-lib + canvas) | Geen AcroForm vereist |
-| **Handtekening** — bitmap upload / SVG upload / live tekenen | client (signature_pad + Fabric.js) | 3 invoer-modi |
-| **OCR** — gescande PDF → doorzoekbare PDF | server (Tesseract NL+EN) | Tijdelijke upload, direct gewist na render |
-| **Output: download** | client | Standaard |
-| **Output: print** | client | Browser-print-dialog |
-| **Output: mail** | server (SMTP) | Vanaf `pdfservice@icthorse.nl` |
+| Functie | Locatie | Status | Notitie |
+|---|---|---|---|
+| **Merge** — meerdere PDF's samenvoegen | client (pdf-lib) | ✅ v0.1.0-Geschke | Geen upload — alles in browser, drag-to-reorder |
+| **Split** — één PDF opdelen | client (pdf-lib) | 🚧 v0.2.0 (gepland) | Geen upload |
+| **Invullen** — tekstvelden op PDF plaatsen | client (pdf-lib + canvas) | 🚧 gepland | Geen AcroForm vereist |
+| **Handtekening** — bitmap upload / SVG upload / live tekenen | client (signature_pad + Fabric.js) | 🚧 gepland | 3 invoer-modi |
+| **OCR** — gescande PDF → doorzoekbare PDF | server (Tesseract NL+EN) | 🚧 wacht op mailbox+deploy | Tijdelijke upload, direct gewist na render |
+| **Output: download** | client | ✅ (na merge) | Standaard |
+| **Output: print** | client | 🚧 gepland | Browser-print-dialog |
+| **Output: mail** | server (SMTP) | 🚧 wacht op mailbox | Vanaf `pdfservice@icthorse.nl` |
 
 ## Architectuur (kort)
 
@@ -59,12 +59,16 @@ Versies krijgen namen van mensen die PDF (en Adobe) mogelijk maakten:
 | Versie | Codenaam | Reden |
 |---|---|---|
 | v0.0.1 | **Warnock** | John Warnock, mede-uitvinder PostScript + PDF + mede-oprichter Adobe |
-| v0.1.0 | **Geschke** | Charles Geschke, andere mede-oprichter Adobe |
-| v1.0.0 | **Brotz** | Doug Brotz, mede-architect PostScript/PDF |
+| v0.0.2 | **Warnock** | Runnable skelet (FastAPI + Alpine/Tailwind, 5 tabs, 4/4 pytest, deploy-artefacten) |
+| **v0.1.0** | **Geschke** | **Charles Geschke, mede-oprichter Adobe — eerste werkende feature: client-side merge via pdf-lib** |
+| v0.2.0 (gepland) | Wozencraft | Split-feature (page-ranges) |
+| v1.0.0 (gepland) | Brotz | Doug Brotz, mede-architect PostScript/PDF |
 
 ## Status
 
-Dit is een **skeleton-init** repo. Geen code geschreven; alleen architectuur, vastlegging, licentie. Eerste runnable versie: v0.0.2 (zie `ACTIONS.md`).
+**v0.1.0-Geschke (2026-06-04):** Eerste echte feature live — client-side merge via pdf-lib 1.17.1 (CDN), volledig in browser, geen upload. Drag-to-reorder, size-limits 50/100 MB, encrypted-PDF detect. Backend (FastAPI) ongewijzigd t.o.v. v0.0.2-Warnock. Tests: 4/4 pytest groen + Node smoke-test merge.
+
+Volledige backlog en volgende stappen: zie [`ACTIONS.md`](ACTIONS.md).
 
 ## Ecosysteem
 

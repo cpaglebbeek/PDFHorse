@@ -1,8 +1,8 @@
 {
-  "version": "0.6.0",
-  "codename": "Paxton",
+  "version": "0.7.0",
+  "codename": "Knuth",
   "released": "2026-06-05",
-  "status": "docx-merge",
+  "status": "convert-tab",
   "theme": "PDF-pioniers",
-  "notes": "v0.6.0-Paxton (oranje bump): server-side docx → PDF conversie via LibreOffice headless (soffice). Nieuw endpoint POST /api/convert/docx-to-pdf. Merge-tab accepteert nu zowel .pdf als .docx; docx-files worden eerst geconverteerd via backend, daarna client-side gemerged via pdf-lib. Privacy: temp uploads in /tmp/pdfhorse/<uuid>/ direct gewist na response. Max 20MB per docx. Backend dep: libreoffice-core + libreoffice-writer op HC55. Codename Brotz blijft gereserveerd voor v1.0.0."
+  "notes": "v0.7.0-Knuth (oranje bump): nieuwe Convert-tab — batch-conversie van docx/xlsx/png/jpg naar PDF, met toggle 'Combineer alle tot 1 PDF'. docx + xlsx via backend LibreOffice (xlsx nieuw endpoint /api/convert/xlsx-to-pdf, gedeelde helper met docx). png + jpg client-side via pdf-lib embedPng/embedJpg met fit-to-A4. Codename Donald Knuth, TeX-pionier voor document-typografie. Brotz blijft gereserveerd voor v1.0.0."
 }

@@ -57,6 +57,24 @@ def test_convert_rejects_empty_upload():
     assert r.status_code == 400
 
 
+def test_xlsx_rejects_non_xlsx_extension():
+    r = client.post(
+        "/api/convert/xlsx-to-pdf",
+        files={"file": ("notxlsx.pdf", b"%PDF-1.4", "application/pdf")},
+    )
+    assert r.status_code == 415
+
+
+def test_xlsx_returns_503_when_soffice_absent(monkeypatch):
+    from backend import main as backend_main
+    monkeypatch.setattr(backend_main, "SOFFICE_BIN", "/usr/bin/definitely-not-soffice-xyz")
+    r = client.post(
+        "/api/convert/xlsx-to-pdf",
+        files={"file": ("x.xlsx", b"PK\x03\x04minimal", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")},
+    )
+    assert r.status_code == 503
+
+
 def test_convert_returns_503_when_soffice_absent(monkeypatch):
     # Forceer FileNotFoundError door SOFFICE_BIN op een niet-bestaand commando te zetten.
     monkeypatch.setenv("SOFFICE_BIN", "/usr/bin/definitely-not-soffice-xyz")

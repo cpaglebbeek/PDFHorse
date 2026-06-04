@@ -44,12 +44,14 @@ ALLOWED_ORIGIN = os.environ.get("ALLOWED_ORIGIN", "https://horsecloud55.ddns.net
 MAX_UPLOAD_SIZE_BYTES = int(os.environ.get("MAX_UPLOAD_SIZE_BYTES", str(50 * 1024 * 1024)))
 MAX_SESSION_TOTAL_BYTES = int(os.environ.get("MAX_SESSION_TOTAL_BYTES", str(100 * 1024 * 1024)))
 MAX_DOCX_BYTES = int(os.environ.get("MAX_DOCX_BYTES", str(20 * 1024 * 1024)))
+MAX_XLSX_BYTES = int(os.environ.get("MAX_XLSX_BYTES", str(20 * 1024 * 1024)))
 SESSION_TIMEOUT_S = int(os.environ.get("SESSION_TIMEOUT_S", "1800"))
 TMP_DIR = Path(os.environ.get("TMP_DIR", "/tmp/pdfhorse"))
 SOFFICE_BIN = os.environ.get("SOFFICE_BIN", "soffice")
 SOFFICE_TIMEOUT_S = int(os.environ.get("SOFFICE_TIMEOUT_S", "60"))
 
 DOCX_MIME = "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+XLSX_MIME = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -98,22 +100,25 @@ async def limits() -> dict[str, object]:
     }
 
 
-@app.post("/api/convert/docx-to-pdf")
-async def convert_docx_to_pdf(file: UploadFile = File(...)) -> FileResponse:
-    """Converteert een .docx naar PDF via LibreOffice headless (`soffice`).
+async def _office_to_pdf(
+    file: UploadFile,
+    *,
+    ext: str,
+    mime: str,
+    max_bytes: int,
+) -> FileResponse:
+    """Generieke `soffice --headless --convert-to pdf` wrapper.
 
-    Privacy: input + output worden opgeslagen in een unieke `/tmp/pdfhorse/<uuid>/`-map
-    en met `shutil.rmtree` verwijderd na de response — geen content-logging.
+    Privacy: input + output in unieke `/tmp/pdfhorse/<uuid>/`-map, opgeruimd
+    via `BackgroundTask shutil.rmtree` na de response. Geen content-logging.
     """
-    # Validatie filename + mime
-    name = file.filename or "upload.docx"
-    if not (name.lower().endswith(".docx") or file.content_type == DOCX_MIME):
+    name = file.filename or f"upload.{ext}"
+    if not (name.lower().endswith(f".{ext}") or file.content_type == mime):
         raise HTTPException(
             status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
-            detail="Alleen .docx-bestanden worden geaccepteerd.",
+            detail=f"Alleen .{ext}-bestanden worden geaccepteerd.",
         )
 
-    # Lees + size-check (streaming-arme aanpak: chunked tot limiet)
     chunks: list[bytes] = []
     total = 0
     while True:
@@ -121,26 +126,22 @@ async def convert_docx_to_pdf(file: UploadFile = File(...)) -> FileResponse:
         if not chunk:
             break
         total += len(chunk)
-        if total > MAX_DOCX_BYTES:
+        if total > max_bytes:
             raise HTTPException(
                 status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
-                detail=f"Bestand groter dan {MAX_DOCX_BYTES // (1024 * 1024)} MB.",
+                detail=f"Bestand groter dan {max_bytes // (1024 * 1024)} MB.",
             )
         chunks.append(chunk)
     data = b"".join(chunks)
-
     if not data:
         raise HTTPException(status_code=400, detail="Lege upload.")
 
-    # Werkmap
     work = TMP_DIR / uuid.uuid4().hex
     work.mkdir(parents=True, exist_ok=False)
-    in_path = work / "in.docx"
+    in_path = work / f"in.{ext}"
     in_path.write_bytes(data)
 
     try:
-        # soffice --headless --convert-to pdf --outdir <work> <in.docx>
-        # `-env:UserInstallation` voorkomt conflict bij concurrente runs.
         result = subprocess.run(
             [
                 SOFFICE_BIN,
@@ -164,21 +165,14 @@ async def convert_docx_to_pdf(file: UploadFile = File(...)) -> FileResponse:
                 status_code=502,
                 detail=f"LibreOffice-conversie mislukt: {result.stderr.decode('utf-8', 'replace')[:200]}",
             )
-
         out_path = work / "in.pdf"
         if not out_path.exists():
             shutil.rmtree(work, ignore_errors=True)
             raise HTTPException(status_code=502, detail="Conversie leverde geen PDF op.")
-
-        # Suggereer een download-naam op basis van de originele .docx-naam
-        out_name = Path(name).stem + ".pdf"
-
-        # FileResponse leest de file streaming; cleanup via BackgroundTask
-        # (werkmap met PDF + soffice-profile wordt na response verwijderd).
         return FileResponse(
             path=out_path,
             media_type="application/pdf",
-            filename=out_name,
+            filename=Path(name).stem + ".pdf",
             background=_cleanup_task(work),
         )
     except subprocess.TimeoutExpired:
@@ -190,6 +184,18 @@ async def convert_docx_to_pdf(file: UploadFile = File(...)) -> FileResponse:
             status_code=503,
             detail="LibreOffice (soffice) is niet beschikbaar op deze server.",
         )
+
+
+@app.post("/api/convert/docx-to-pdf")
+async def convert_docx_to_pdf(file: UploadFile = File(...)) -> FileResponse:
+    """Converteert .docx → PDF via LibreOffice headless. v0.6.0-Paxton."""
+    return await _office_to_pdf(file, ext="docx", mime=DOCX_MIME, max_bytes=MAX_DOCX_BYTES)
+
+
+@app.post("/api/convert/xlsx-to-pdf")
+async def convert_xlsx_to_pdf(file: UploadFile = File(...)) -> FileResponse:
+    """Converteert .xlsx → PDF via LibreOffice headless. v0.7.0-Knuth."""
+    return await _office_to_pdf(file, ext="xlsx", mime=XLSX_MIME, max_bytes=MAX_XLSX_BYTES)
 
 
 def _cleanup_task(work_dir: Path):

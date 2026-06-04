@@ -11,18 +11,22 @@
 const MAX_FILE_BYTES    = 50  * 1024 * 1024;
 const MAX_SESSION_BYTES = 100 * 1024 * 1024;
 const MAX_DOCX_BYTES    = 20  * 1024 * 1024;
+const MAX_XLSX_BYTES    = 20  * 1024 * 1024;
+const MAX_IMAGE_BYTES   = 50  * 1024 * 1024;
 
 const DOCX_MIME = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+const XLSX_MIME = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
 
 function pdfHorseApp() {
   return {
     active: 'merge',
     tabs: [
-      { id: 'merge', label: 'Merge' },
-      { id: 'split', label: 'Split' },
-      { id: 'fill',  label: 'Invullen' },
-      { id: 'sign',  label: 'Ondertekenen' },
-      { id: 'ocr',   label: 'OCR' },
+      { id: 'merge',   label: 'Merge' },
+      { id: 'split',   label: 'Split' },
+      { id: 'fill',    label: 'Invullen' },
+      { id: 'sign',    label: 'Ondertekenen' },
+      { id: 'convert', label: 'Converteren' },
+      { id: 'ocr',     label: 'OCR' },
     ],
     health: { status: '…', version: '…', codename: '…' },
     limits: {},
@@ -94,6 +98,17 @@ function pdfHorseApp() {
       mailBusy: false,
       mailStatus: '',
       error: '',
+    },
+
+    convert: {
+      files: [],
+      combine: false,
+      dragOver: false,
+      busy: false,
+      progress: '',
+      error: '',
+      notice: '',
+      seq: 0,
     },
 
     init() {
@@ -639,6 +654,164 @@ function pdfHorseApp() {
       this.fill.fields = [];
       this.fill.error = '';
       this.fill.notice = '';
+    },
+
+    // ---------- Convert ----------
+
+    onConvertFileInput(ev) {
+      this._convertAddFiles(ev.target.files);
+      ev.target.value = '';
+    },
+
+    onConvertDrop(ev) {
+      const dt = ev.dataTransfer;
+      if (dt && dt.files) this._convertAddFiles(dt.files);
+    },
+
+    _convertDetectKind(f) {
+      const n = f.name.toLowerCase();
+      if (f.type === DOCX_MIME || n.endsWith('.docx')) return 'docx';
+      if (f.type === XLSX_MIME || n.endsWith('.xlsx')) return 'xlsx';
+      if (f.type === 'image/png' || n.endsWith('.png')) return 'png';
+      if (f.type === 'image/jpeg' || /\.jpe?g$/i.test(n)) return 'jpg';
+      return null;
+    },
+
+    _convertAddFiles(fileList) {
+      this.convert.error = '';
+      this.convert.notice = '';
+      const incoming = Array.from(fileList || []);
+      const accepted = [];
+      for (const f of incoming) {
+        const kind = this._convertDetectKind(f);
+        if (!kind) { this.convert.error = `"${f.name}" niet ondersteund.`; continue; }
+        const limit = (kind === 'docx' || kind === 'xlsx') ? MAX_DOCX_BYTES : MAX_IMAGE_BYTES;
+        if (f.size > limit) {
+          this.convert.error = `"${f.name}" overschrijdt ${limit / (1024*1024)} MB.`;
+          continue;
+        }
+        accepted.push({
+          id: ++this.convert.seq,
+          name: f.name,
+          size: f.size,
+          blob: f,
+          kind,
+        });
+      }
+      this.convert.files.push(...accepted);
+    },
+
+    convertMove(i, delta) {
+      const j = i + delta;
+      if (j < 0 || j >= this.convert.files.length) return;
+      const a = this.convert.files;
+      [a[i], a[j]] = [a[j], a[i]];
+    },
+
+    convertRemove(i) {
+      this.convert.files.splice(i, 1);
+    },
+
+    convertReset() {
+      this.convert.files = [];
+      this.convert.error = '';
+      this.convert.notice = '';
+    },
+
+    async _imageToPdf(file, kind) {
+      // Client-side: maak A4-PDF met image fit-to-page (margin 36pt).
+      const { PDFDocument } = window.PDFLib;
+      const bytes = new Uint8Array(await file.arrayBuffer());
+      const pdfDoc = await PDFDocument.create();
+      const img = kind === 'png'
+        ? await pdfDoc.embedPng(bytes)
+        : await pdfDoc.embedJpg(bytes);
+      const A4_W = 595, A4_H = 842, MARGIN = 36;
+      const availW = A4_W - 2 * MARGIN;
+      const availH = A4_H - 2 * MARGIN;
+      const scale = Math.min(availW / img.width, availH / img.height, 1);
+      const w = img.width * scale;
+      const h = img.height * scale;
+      const page = pdfDoc.addPage([A4_W, A4_H]);
+      page.drawImage(img, {
+        x: (A4_W - w) / 2,
+        y: (A4_H - h) / 2,
+        width: w, height: h,
+      });
+      return await pdfDoc.save();
+    },
+
+    async _officeToPdf(file, kind) {
+      // Server-side via LibreOffice
+      const fd = new FormData();
+      fd.append('file', file, file.name);
+      const route = kind === 'docx' ? '/api/convert/docx-to-pdf' : '/api/convert/xlsx-to-pdf';
+      const r = await fetch(this._apiUrl(route), { method: 'POST', body: fd });
+      if (!r.ok) {
+        let detail = '';
+        try { detail = (await r.json()).detail || ''; } catch {}
+        throw new Error(`Conversie mislukt voor "${file.name}" (${r.status}). ${detail}`);
+      }
+      return new Uint8Array(await r.arrayBuffer());
+    },
+
+    async runConvert() {
+      if (this.convert.busy || !this.convert.files.length) return;
+      if (!window.PDFLib) { this.convert.error = 'pdf-lib niet geladen.'; return; }
+      this.convert.busy = true;
+      this.convert.progress = '';
+      this.convert.error = '';
+      this.convert.notice = '';
+
+      try {
+        const { PDFDocument } = window.PDFLib;
+        const combined = this.convert.combine ? await PDFDocument.create() : null;
+        const total = this.convert.files.length;
+        let lastBytes = null;
+        let lastFilename = '';
+
+        for (let i = 0; i < total; i++) {
+          const f = this.convert.files[i];
+          this.convert.progress = `Converteert ${i + 1}/${total}: ${f.name}`;
+          await this._sleep(20);  // UI yield
+
+          let pdfBytes;
+          if (f.kind === 'docx' || f.kind === 'xlsx') {
+            pdfBytes = await this._officeToPdf(f.blob, f.kind);
+          } else {
+            pdfBytes = await this._imageToPdf(f.blob, f.kind);
+          }
+
+          if (combined) {
+            const src = await PDFDocument.load(pdfBytes, { ignoreEncryption: false });
+            const pages = await combined.copyPages(src, src.getPageIndices());
+            pages.forEach(p => combined.addPage(p));
+            lastFilename = 'converted.pdf';
+          } else {
+            const base = f.name.replace(/\.(docx|xlsx|png|jpe?g)$/i, '');
+            const fn = `${base}.pdf`;
+            this._downloadBlob(pdfBytes, fn, 'application/pdf');
+            lastBytes = pdfBytes;
+            lastFilename = fn;
+            if (i < total - 1) await this._sleep(200);  // popup-blocker mitigation
+          }
+        }
+
+        if (combined) {
+          const out = await combined.save();
+          this._downloadBlob(out, 'converted.pdf', 'application/pdf');
+          this._setOutput(out, 'converted.pdf', `convert (${total} bestanden gecombineerd)`);
+          this.convert.notice = `Gecombineerd: ${total} bestanden → converted.pdf gedownload.`;
+        } else {
+          this._setOutput(lastBytes, lastFilename, `convert (${total} bestanden, laatste getoond)`);
+          this.convert.notice = `Geconverteerd: ${total} PDF${total === 1 ? '' : '\'s'} gedownload.`;
+        }
+      } catch (e) {
+        this.convert.error = e.message || String(e);
+      } finally {
+        this.convert.busy = false;
+        this.convert.progress = '';
+      }
     },
 
     // ---------- Sign ----------

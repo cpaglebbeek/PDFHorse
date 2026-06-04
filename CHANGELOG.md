@@ -3,6 +3,34 @@
 > Versie-historie. Formaat: [Keep a Changelog](https://keepachangelog.com/) op hoofdlijnen, met PDFHorse-eigen codenamen (thema: PDF-pioniers).
 > Bijgewerkt bij elke release. Datums = release naar `main`.
 
+## [v0.7.0-Knuth] — 2026-06-05
+
+### Added
+- **Convert-tab** — batch-conversie van `.docx` / `.xlsx` / `.png` / `.jpg` naar PDF
+- **Toggle "Combineer alle tot 1 PDF"** — als aan: alle conversies samengevoegd in opgegeven volgorde tot één PDF
+- **Backend endpoint `POST /api/convert/xlsx-to-pdf`** (analoog aan docx) via gedeelde helper `_office_to_pdf(file, ext, mime, max_bytes)` (DRY-refactor)
+- **Client-side image → PDF** via pdf-lib `embedPng`/`embedJpg` op A4-page met 36pt margin en fit-to-page aspect-ratio (geen server-call, max 50MB)
+- Kleur-badges in file-list: DOCX (blauw), XLSX (emerald), PNG/JPG (amber)
+- Progress-tekst per file ("Converteert 2/5: factuur.xlsx")
+- Multi-output mode: N losse downloads met 200ms delay (popup-blocker mitigation, zoals split)
+
+### Changed
+- `backend/main.py`: `convert_docx_to_pdf` body verplaatst naar `_office_to_pdf` helper; docx-route blijft API-compatibel, nieuwe xlsx-route hergebruikt helper
+- `MAX_XLSX_BYTES = 20MB` + `XLSX_MIME` constante
+- frontend tab-nav krijgt "Converteren" tussen Ondertekenen en OCR
+- header → v0.7.0 — Knuth
+
+### Tests
+- pytest 9/9 groen — 2 nieuwe tests xlsx-endpoint (415 op niet-xlsx, 503 zonder soffice)
+
+### HC55 dep
+- `apt install libreoffice-calc` (~80MB extra naast `-core` + `-writer` van v0.6.0)
+
+### Codename
+**Donald Knuth** — wiskundige + TeX-pionier (1978); typografie-fundament voor digitale documenten. Past bij Convert-fase (typografisch correct overzetten naar PDF). Brotz blijft gereserveerd voor v1.0.0.
+
+---
+
 ## [v0.6.0-Paxton] — 2026-06-05
 
 ### Added

@@ -28,7 +28,7 @@
 | python-multipart | latest | file-upload parsing | actief (stub) |
 | ocrmypdf | latest | OCR-wrapper (Tesseract) | gepland — wacht op Tesseract install |
 | Tesseract 5 (system) | OS-level | OCR-engine + `nld+eng` taalpacks | gepland (HC55) |
-| **LibreOffice (`libreoffice-core` + `libreoffice-writer`)** | **OS-level** | **`soffice --headless` voor `.docx` → PDF (v0.6.0-Paxton)** | **actief op HC55** |
+| **LibreOffice (`libreoffice-core` + `libreoffice-writer` + `libreoffice-calc`)** | **OS-level** | **`soffice --headless` voor `.docx` (v0.6.0) en `.xlsx` (v0.7.0) → PDF** | **actief op HC55** |
 | smtplib (stdlib) | — | SMTP via Hostinger | gepland v0.0.3 |
 | slowapi | latest | Rate-limiting `/api/ocr` + `/api/mail` | gepland |
 | pytest | latest | Tests | actief (4/4 groen) |
@@ -64,3 +64,4 @@
 | v0.4.0-Taft | **+ signature_pad 5.0.4** (CDN unpkg) voor live-tekenen modus C; Fabric.js *geschrapt* (overbodig) |
 | v0.5.0-Crocker | Geen nieuwe deps — output-bar is pure JS + bestaande fetch |
 | v0.6.0-Paxton | **+ LibreOffice (`libreoffice-core` + `libreoffice-writer`)** als OS-level backend-dep voor docx→PDF conversie via `soffice --headless` |
+| v0.7.0-Knuth | **+ `libreoffice-calc`** voor xlsx→PDF. Geen nieuwe frontend-deps — image→PDF gebruikt bestaande pdf-lib `embedPng`/`embedJpg` |

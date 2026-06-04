@@ -1,8 +1,8 @@
 ---
 date: 2026-06-05
 repo: PDFHorse
-status: open
-resume: "verder met pdfhorse — OCR backend (Tesseract install + ocrmypdf endpoint) na v0.6.0-Paxton docx-merge"
+status: done
+resume: ""
 ---
 
 # Sessie 2026-06-05 — v0.6.0-Paxton: server-side docx → PDF + Merge accepteert docx

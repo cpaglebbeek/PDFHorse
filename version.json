@@ -1,8 +1,8 @@
 {
-  "version": "0.3.0",
-  "codename": "Putman",
+  "version": "0.4.0",
+  "codename": "Taft",
   "released": "2026-06-04",
-  "status": "third-feature",
+  "status": "fourth-feature",
   "theme": "PDF-pioniers",
-  "notes": "v0.3.0-Putman (oranje bump): derde werkende feature — client-side fill (vrije tekstvelden) via PDF.js preview + klik-overlay + pdf-lib drawText. Plus P2-docs: docs/PRINCIPLES.md (8 principes) + docs/PRIVACY.md + docs/BUGLIST.md skelet + CHANGELOG.md. Backend ongewijzigd. Codename Brotz blijft gereserveerd voor v1.0.0."
+  "notes": "v0.4.0-Taft (oranje bump): vierde werkende feature — client-side sign met 3 modi (A bitmap upload PNG/JPG, B SVG upload, C live tekenen via signature_pad) + klik-plaatsing op PDF-page via PDF.js preview + grootte-slider + pdf-lib embedPng + drawImage. Backend ongewijzigd. Codename Brotz blijft gereserveerd voor v1.0.0."
 }

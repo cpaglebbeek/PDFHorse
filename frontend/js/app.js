@@ -1,7 +1,9 @@
-// PDFHorse frontend root (Alpine.js root component). v0.3.0-Putman.
-// Merge, Split en Fill zijn volledig client-side:
+// PDFHorse frontend root (Alpine.js root component). v0.4.0-Taft.
+// Merge, Split, Fill en Sign zijn volledig client-side:
 //   - Merge + Split: pdf-lib (window.PDFLib)
 //   - Fill: PDF.js render preview (window.pdfjsLib) + pdf-lib drawText
+//   - Sign: 3 modi (A bitmap upload / B SVG upload / C live signature_pad)
+//           + PDF.js preview + pdf-lib embedPng + drawImage
 
 const MAX_FILE_BYTES    = 50  * 1024 * 1024;
 const MAX_SESSION_BYTES = 100 * 1024 * 1024;
@@ -53,6 +55,25 @@ function pdfHorseApp() {
       error: '',
       notice: '',
       seq: 0,
+    },
+
+    sign: {
+      file: null,
+      pdfBytes: null,
+      pageCount: 0,
+      pages: [],
+      mode: 'C',                 // A bitmap / B SVG / C live
+      dataUrl: '',               // PNG dataURL van handtekening
+      sigError: '',
+      placements: [],
+      width: 180,                // preview-px breedte van handtekening
+      dragOver: false,
+      loading: false,
+      busy: false,
+      error: '',
+      notice: '',
+      seq: 0,
+      _pad: null,                // signature_pad instance
     },
 
     init() {
@@ -458,6 +479,278 @@ function pdfHorseApp() {
       this.fill.fields = [];
       this.fill.error = '';
       this.fill.notice = '';
+    },
+
+    // ---------- Sign ----------
+
+    onSignFileInput(ev) {
+      this._signLoad(ev.target.files && ev.target.files[0]);
+      ev.target.value = '';
+    },
+
+    onSignDrop(ev) {
+      const dt = ev.dataTransfer;
+      if (dt && dt.files && dt.files[0]) this._signLoad(dt.files[0]);
+    },
+
+    async _signLoad(f) {
+      this.sign.error = '';
+      this.sign.notice = '';
+      this.sign.placements = [];
+      this.sign.pages = [];
+      if (!f) return;
+      const isPdf = f.type === 'application/pdf' || /\.pdf$/i.test(f.name);
+      if (!isPdf) { this.sign.error = `"${f.name}" is geen PDF.`; return; }
+      if (f.size > MAX_FILE_BYTES) { this.sign.error = `"${f.name}" overschrijdt 50 MB.`; return; }
+      if (!window.PDFLib) { this.sign.error = 'pdf-lib is niet geladen.'; return; }
+      this.sign.loading = true;
+      this.sign.file = f;
+      try {
+        this.sign.pdfBytes = new Uint8Array(await f.arrayBuffer());
+        const srcCheck = await window.PDFLib.PDFDocument.load(this.sign.pdfBytes, { ignoreEncryption: false });
+        this.sign.pageCount = srcCheck.getPageCount();
+        this.sign.pages = Array.from({ length: this.sign.pageCount }, (_, i) => ({ index: i }));
+
+        await this._waitForPdfJs();
+        if (!window.pdfjsLib) {
+          this.sign.error = 'PDF.js is niet geladen — preview niet mogelijk.';
+          this.sign.loading = false;
+          return;
+        }
+        await this.$nextTick();
+        const loadingTask = window.pdfjsLib.getDocument({ data: this.sign.pdfBytes.slice() });
+        const pdf = await loadingTask.promise;
+        for (let i = 1; i <= pdf.numPages; i++) {
+          const page = await pdf.getPage(i);
+          const viewport = page.getViewport({ scale: 1.0 });
+          const canvas = document.getElementById('sign-canvas-' + (i - 1));
+          if (!canvas) continue;
+          canvas.width = viewport.width;
+          canvas.height = viewport.height;
+          await page.render({ canvasContext: canvas.getContext('2d'), viewport }).promise;
+          this.sign.pages[i - 1].width = viewport.width;
+          this.sign.pages[i - 1].height = viewport.height;
+        }
+      } catch (e) {
+        if (String(e).toLowerCase().includes('encrypt')) {
+          this.sign.error = `"${f.name}" is versleuteld en kan niet worden ondertekend.`;
+        } else {
+          this.sign.error = e.message || String(e);
+        }
+        this.sign.file = null;
+      } finally {
+        this.sign.loading = false;
+      }
+    },
+
+    setSignMode(m) {
+      this.sign.mode = m;
+      if (m === 'C') {
+        // Init signature_pad zodra DOM klaar is
+        this.$nextTick(() => this._signPadInit());
+      }
+    },
+
+    _signPadInit() {
+      const canvas = document.getElementById('sign-pad');
+      if (!canvas || !window.SignaturePad) return;
+      if (this.sign._pad) return;          // al actief
+      this.sign._pad = new window.SignaturePad(canvas, {
+        backgroundColor: 'rgba(255,255,255,1)',
+        penColor: 'rgb(0,0,0)',
+      });
+    },
+
+    signPadClear() {
+      if (this.sign._pad) this.sign._pad.clear();
+    },
+
+    signPadCommit() {
+      this.sign.sigError = '';
+      if (!this.sign._pad || this.sign._pad.isEmpty()) {
+        this.sign.sigError = 'Teken eerst een handtekening.';
+        return;
+      }
+      // toDataURL geeft PNG met witte achtergrond — converteer naar transparant
+      const canvas = document.getElementById('sign-pad');
+      this._whiteToTransparentDataUrl(canvas)
+        .then(url => { this.sign.dataUrl = url; })
+        .catch(() => { this.sign.dataUrl = canvas.toDataURL('image/png'); });
+    },
+
+    async _whiteToTransparentDataUrl(srcCanvas) {
+      // Maak werkkopie + zet bijna-witte pixels op alpha=0
+      const w = srcCanvas.width, h = srcCanvas.height;
+      const work = document.createElement('canvas');
+      work.width = w; work.height = h;
+      const ctx = work.getContext('2d');
+      ctx.drawImage(srcCanvas, 0, 0);
+      const img = ctx.getImageData(0, 0, w, h);
+      const d = img.data;
+      for (let i = 0; i < d.length; i += 4) {
+        // Als pixel bijna wit is → transparant
+        if (d[i] > 240 && d[i+1] > 240 && d[i+2] > 240) {
+          d[i+3] = 0;
+        }
+      }
+      ctx.putImageData(img, 0, 0);
+      return work.toDataURL('image/png');
+    },
+
+    async onSignBitmap(ev) {
+      this.sign.sigError = '';
+      const f = ev.target.files && ev.target.files[0];
+      ev.target.value = '';
+      if (!f) return;
+      if (!/^image\/(png|jpeg)$/.test(f.type) && !/\.(png|jpe?g)$/i.test(f.name)) {
+        this.sign.sigError = 'Alleen PNG of JPG.';
+        return;
+      }
+      if (f.size > 10 * 1024 * 1024) {
+        this.sign.sigError = 'Bitmap mag max 10 MB zijn.';
+        return;
+      }
+      try {
+        this.sign.dataUrl = await this._fileToDataUrl(f);
+      } catch (e) {
+        this.sign.sigError = 'Kon bitmap niet lezen.';
+      }
+    },
+
+    async onSignSvg(ev) {
+      this.sign.sigError = '';
+      const f = ev.target.files && ev.target.files[0];
+      ev.target.value = '';
+      if (!f) return;
+      if (!/svg/i.test(f.type) && !/\.svg$/i.test(f.name)) {
+        this.sign.sigError = 'Alleen SVG.';
+        return;
+      }
+      if (f.size > 2 * 1024 * 1024) {
+        this.sign.sigError = 'SVG mag max 2 MB zijn.';
+        return;
+      }
+      try {
+        const svgText = await f.text();
+        // Strip <script>-tags voor de zekerheid (XSS-defense bij in-DOM gebruik)
+        const safe = svgText.replace(/<script[\s\S]*?<\/script>/gi, '');
+        const blob = new Blob([safe], { type: 'image/svg+xml' });
+        const url = URL.createObjectURL(blob);
+        const img = new Image();
+        await new Promise((res, rej) => {
+          img.onload = res;
+          img.onerror = () => rej(new Error('SVG laden mislukt'));
+          img.src = url;
+        });
+        // Rasterize naar canvas (PNG met transparantie)
+        const w = img.naturalWidth || 400;
+        const h = img.naturalHeight || 120;
+        const c = document.createElement('canvas');
+        c.width = w; c.height = h;
+        c.getContext('2d').drawImage(img, 0, 0, w, h);
+        this.sign.dataUrl = c.toDataURL('image/png');
+        URL.revokeObjectURL(url);
+      } catch (e) {
+        this.sign.sigError = e.message || 'SVG-fout';
+      }
+    },
+
+    _fileToDataUrl(f) {
+      return new Promise((resolve, reject) => {
+        const r = new FileReader();
+        r.onload = () => resolve(r.result);
+        r.onerror = () => reject(r.error);
+        r.readAsDataURL(f);
+      });
+    },
+
+    addSignPlacement(ev, pageIdx) {
+      if (!this.sign.dataUrl) {
+        this.sign.error = 'Kies eerst een handtekening (A/B/C).';
+        return;
+      }
+      if (ev.target && ev.target.tagName !== 'CANVAS') return;
+      const canvas = ev.currentTarget;
+      const rect = canvas.getBoundingClientRect();
+      const x = ev.clientX - rect.left;
+      const y = ev.clientY - rect.top;
+      this.sign.placements.push({
+        id: ++this.sign.seq,
+        page: pageIdx,
+        x, y,
+        width: this.sign.width,
+      });
+    },
+
+    removeSignPlacement(id) {
+      this.sign.placements = this.sign.placements.filter(p => p.id !== id);
+    },
+
+    signReset() {
+      this.sign.file = null;
+      this.sign.pdfBytes = null;
+      this.sign.pageCount = 0;
+      this.sign.pages = [];
+      this.sign.placements = [];
+      this.sign.dataUrl = '';
+      this.sign.error = '';
+      this.sign.notice = '';
+      this.sign.sigError = '';
+    },
+
+    async runSign() {
+      if (this.sign.busy || !this.sign.placements.length || !this.sign.pdfBytes || !this.sign.dataUrl) return;
+      this.sign.busy = true;
+      this.sign.error = '';
+      this.sign.notice = '';
+      try {
+        const { PDFDocument } = window.PDFLib;
+        const pdfDoc = await PDFDocument.load(this.sign.pdfBytes.slice(), { ignoreEncryption: false });
+
+        // dataUrl → bytes
+        const head = this.sign.dataUrl.split(',', 2);
+        const isPng = /image\/png/i.test(head[0]);
+        const isJpg = /image\/jpe?g/i.test(head[0]);
+        const sigBytes = this._base64ToUint8(head[1]);
+        const sigImg = isPng
+          ? await pdfDoc.embedPng(sigBytes)
+          : isJpg
+            ? await pdfDoc.embedJpg(sigBytes)
+            : await pdfDoc.embedPng(sigBytes);  // default
+        const sigAspect = sigImg.height / sigImg.width;
+
+        const pages = pdfDoc.getPages();
+        for (const p of this.sign.placements) {
+          const pdfPage = pages[p.page];
+          const previewPage = this.sign.pages[p.page];
+          if (!pdfPage || !previewPage) continue;
+          const { width: pdfWidth, height: pdfHeight } = pdfPage.getSize();
+          const scaleX = pdfWidth / previewPage.width;
+          const scaleY = pdfHeight / previewPage.height;
+          const pdfW = p.width * scaleX;
+          const pdfH = (p.width * sigAspect) * scaleY;
+          const pdfX = p.x * scaleX;
+          const pdfY = pdfHeight - (p.y * scaleY) - pdfH;
+          pdfPage.drawImage(sigImg, { x: pdfX, y: pdfY, width: pdfW, height: pdfH });
+        }
+
+        const out = await pdfDoc.save();
+        const baseName = this.sign.file.name.replace(/\.pdf$/i, '');
+        this._downloadBlob(out, `${baseName}_signed.pdf`, 'application/pdf');
+        this.sign.notice = `Ondertekend: ${this.sign.placements.length} handtekening(en) → ${baseName}_signed.pdf gedownload.`;
+      } catch (e) {
+        this.sign.error = e.message || String(e);
+      } finally {
+        this.sign.busy = false;
+      }
+    },
+
+    _base64ToUint8(b64) {
+      const bin = atob(b64);
+      const len = bin.length;
+      const arr = new Uint8Array(len);
+      for (let i = 0; i < len; i++) arr[i] = bin.charCodeAt(i);
+      return arr;
     },
 
     async runFill() {

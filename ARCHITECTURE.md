@@ -107,13 +107,44 @@ Browser → download searchable PDF
 ```
 Server houdt **niets** vast.
 
-### Sign (client-only, 3 modi)
+### Sign (client-only, 3 modi) — geïmplementeerd in v0.4.0-Taft
 ```
-Modus A: bitmap-upload → PIL-achtige client-resize → Fabric.js layer → pdf-lib embed
-Modus B: SVG-upload → SVG → PNG via canvas → embed
-Modus C: live-tekenen → signature_pad → dataURL → embed
+Browser ← user-upload 1 PDF
+    │
+    ▼ pdf-lib load + pageCount + PDF.js per-page render in <canvas>
+    │
+    ▼ User kiest modus A/B/C:
+
+Modus A — bitmap upload:
+  PNG/JPG file → FileReader.readAsDataURL → sign.dataUrl
+
+Modus B — SVG upload:
+  SVG file → text() → strip <script> (XSS-defense)
+           → Blob(svg) → Image.src → drawImage op canvas → toDataURL('image/png')
+
+Modus C — live tekenen:
+  signature_pad init op #sign-pad canvas → user tekent
+  → Commit-knop → _whiteToTransparentDataUrl()
+     (per pixel: r,g,b >240 → alpha=0)
+  → sign.dataUrl
+
+    │
+    ▼ User klikt op pagina-canvas → addSignPlacement()
+    │  { id, page, x, y, width (preview-px) }
+    │  Slider voor breedte; hoogte automatisch via image-aspect-ratio
+    ▼
+runSign():
+    pdf-lib PDFDocument.load
+    base64 → Uint8Array → embedPng of embedJpg op type
+    per placement:
+      canvas(x,y, top-left) → PDF(x, height - y - imgHeight, bottom-left)
+      scaleX = pdfWidth / canvasWidth, scaleY idem
+      pdfW = width * scaleX
+      pdfH = (width * sigAspect) * scaleY
+      page.drawImage(sigImg, { x, y, width, height })
+    pdfDoc.save → "<basename>_signed.pdf" download
 ```
-Geen netwerk-call (tot output-stap).
+Geen netwerk-call. Libs: pdf-lib + PDF.js + signature_pad 5.0.4.
 
 ### Fill (client-only) — geïmplementeerd in v0.3.0-Putman
 ```

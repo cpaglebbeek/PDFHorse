@@ -3,6 +3,29 @@
 > Versie-historie. Formaat: [Keep a Changelog](https://keepachangelog.com/) op hoofdlijnen, met PDFHorse-eigen codenamen (thema: PDF-pioniers).
 > Bijgewerkt bij elke release. Datums = release naar `main`.
 
+## [v0.4.0-Taft] — 2026-06-04
+
+### Added
+- **Sign-feature** — drie modi:
+  - **Modus A**: bitmap upload (PNG/JPG, max 10 MB)
+  - **Modus B**: SVG upload (max 2 MB, `<script>` gestript voor XSS-defense, rasterized naar PNG via canvas)
+  - **Modus C**: live tekenen via signature_pad 5.0.4 + automatische wit→transparant conversie van de stroke-achtergrond
+- Klik-plaatsing op PDF-page via PDF.js preview (hergebruikt van fill)
+- Breedte-slider voor handtekening-grootte; hoogte volgt automatisch image-aspect-ratio
+- Multiple placements per PDF mogelijk; ✕ verwijdert individuele plaatsing
+- `pdf-lib` `embedPng` / `embedJpg` + `drawImage` met canvas→PDF coords-transform
+
+### Changed
+- `frontend/index.html` header → v0.4.0 — Taft
+- `version.json` → 0.4.0 / Taft / fourth-feature
+- `docs/DEPENDENCIES.md`: signature_pad 5.0.4 actief, Fabric.js geschrapt (overbodig)
+- `ARCHITECTURE.md` sign-flow geactualiseerd met 3 modi + transform-formules
+
+### Codename
+**Bill Taft** — Adobe engineer, mede-ontwerper PostScript Level 2 (1991) en PDF-architectuur-evolutie.
+
+---
+
 ## [v0.3.0-Putman] — 2026-06-04
 
 ### Added

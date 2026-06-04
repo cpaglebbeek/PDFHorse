@@ -14,9 +14,9 @@
 - [ ] **HC55 deploy:** install per `deploy/README.md` — wacht op mailbox-creds
 - [ ] **nginx-config op HC55:** snippet inhaken in main server-block + reload (gebruikersactie of na deploy)
 
-## Volgende (v0.0.2 → v0.1.0-Geschke)
+## Volgende (v0.1.0-Geschke → v0.2.0)
 
-- [ ] Merge-functie werkend (pdf-lib)
+- [x] **Merge-functie werkend** (pdf-lib via CDN, client-only, drag-to-reorder, size-limits, encrypted-PDF detect) (04-06, v0.1.0-Geschke)
 - [ ] Split-functie werkend
 - [ ] Sign-modus C (live-canvas) — signature_pad
 - [ ] Sign-modus A (bitmap upload) + B (SVG upload)

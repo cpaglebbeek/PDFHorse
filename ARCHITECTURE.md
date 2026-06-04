@@ -49,17 +49,24 @@
 
 ## Data-flow per functie
 
-### Merge (client-only)
+### Merge (client-only) — geïmplementeerd in v0.1.0-Geschke
 ```
-Browser ← user-upload PDFs (drag-drop)
+Browser ← user-upload PDFs (drag-drop of file-input)
+    │
+    ▼ client-side validatie: type=PDF, size ≤ 50MB, totaal ≤ 100MB
+    │  drag-to-reorder met ↑/↓-knoppen
+    ▼
+pdf-lib.PDFDocument.load() per file (ignoreEncryption: false)
+    │  → bij encrypted PDF: foutmelding, geen merge
+    ▼
+mergedPdf.copyPages() + addPage() per page-index
     │
     ▼
-pdf-lib.PDFDocument.load() per file → mergedPdf.copyPages()
+Download Blob (mergedPdf.save()) → merged.pdf
     │
-    ▼
-Download Blob (mergedPdf.save()) → user
+    ▼ URL.revokeObjectURL() na 1s (geheugen vrij)
 ```
-Geen netwerk-call.
+Geen netwerk-call. Library `pdf-lib@1.17.1` via CDN (`unpkg.com`).
 
 ### Split (client-only)
 ```

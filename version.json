@@ -1,8 +1,8 @@
 {
-  "version": "0.0.2",
-  "codename": "Warnock",
+  "version": "0.1.0",
+  "codename": "Geschke",
   "released": "2026-06-04",
-  "status": "skeleton-runnable",
+  "status": "first-feature",
   "theme": "PDF-pioniers",
-  "notes": "v0.0.2: frontend skelet (Alpine+Tailwind, 5 tabs) + backend (FastAPI /api/health + /api/limits + stub /api/ocr + /api/mail) + nginx-snippet + systemd-unit + 4/4 pytest groen + live smoke-test op alt-port. Codenaam blijft Warnock (groene bump). v0.1.0-Geschke bij eerste werkende feature."
+  "notes": "v0.1.0-Geschke (oranje bump): eerste werkende feature — client-side merge via pdf-lib (CDN). Frontend-only, geen backend-wijziging, geen nieuwe deploy. Drag-to-reorder, client-side size-limits (50MB/file, 100MB/sessie), encrypted-PDF detection, download merged.pdf. Backend ongewijzigd t.o.v. v0.0.2-Warnock."
 }

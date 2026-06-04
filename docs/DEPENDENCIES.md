@@ -26,8 +26,9 @@
 | FastAPI | latest (pip) | HTTP framework | actief |
 | uvicorn | latest | ASGI server | actief |
 | python-multipart | latest | file-upload parsing | actief (stub) |
-| ocrmypdf | latest | OCR-wrapper (Tesseract) | gepland v0.0.3 |
+| ocrmypdf | latest | OCR-wrapper (Tesseract) | gepland — wacht op Tesseract install |
 | Tesseract 5 (system) | OS-level | OCR-engine + `nld+eng` taalpacks | gepland (HC55) |
+| **LibreOffice (`libreoffice-core` + `libreoffice-writer`)** | **OS-level** | **`soffice --headless` voor `.docx` → PDF (v0.6.0-Paxton)** | **actief op HC55** |
 | smtplib (stdlib) | — | SMTP via Hostinger | gepland v0.0.3 |
 | slowapi | latest | Rate-limiting `/api/ocr` + `/api/mail` | gepland |
 | pytest | latest | Tests | actief (4/4 groen) |
@@ -61,3 +62,5 @@
 | v0.2.0-Wozencraft | Geen nieuwe deps — split hergebruikt pdf-lib 1.17.1 |
 | v0.3.0-Putman | **+ PDF.js 4.0.379** (CDN cdnjs) voor fill-preview canvas-render |
 | v0.4.0-Taft | **+ signature_pad 5.0.4** (CDN unpkg) voor live-tekenen modus C; Fabric.js *geschrapt* (overbodig) |
+| v0.5.0-Crocker | Geen nieuwe deps — output-bar is pure JS + bestaande fetch |
+| v0.6.0-Paxton | **+ LibreOffice (`libreoffice-core` + `libreoffice-writer`)** als OS-level backend-dep voor docx→PDF conversie via `soffice --headless` |

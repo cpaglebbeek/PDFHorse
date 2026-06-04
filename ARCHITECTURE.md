@@ -22,10 +22,11 @@
 
 | Endpoint | Doel | Verwerking |
 |---|---|---|
-| `GET /api/health` | Healthcheck | Statisch |
-| `POST /api/ocr` | OCR uitvoeren op upload | Multipart in → tijdelijke `/tmp/pdfhorse/<uuid>/in.pdf` → `ocrmypdf` (Tesseract `nld+eng`) → `/tmp/.../out.pdf` → return → unlink dir |
-| `POST /api/mail` | Mail uitgaande PDF | Multipart in (PDF + recipient + subject) → SMTP via `pdfservice@icthorse.nl` → return status → unlink upload |
+| `GET /api/health` | Healthcheck | Statisch (version/codename dynamisch uit `version.json`) |
 | `GET /api/limits` | Limieten terug | Statisch JSON |
+| `POST /api/convert/docx-to-pdf` | DOCX → PDF (v0.6.0-Paxton) | Multipart in → `/tmp/pdfhorse/<uuid>/in.docx` → `soffice --headless --convert-to pdf` → `in.pdf` → FileResponse + BackgroundTask `shutil.rmtree` |
+| `POST /api/ocr` | OCR uitvoeren op upload | Multipart in → tijdelijke `/tmp/pdfhorse/<uuid>/in.pdf` → `ocrmypdf` (Tesseract `nld+eng`) → return → unlink (501-stub tot Tesseract install) |
+| `POST /api/mail` | Mail uitgaande PDF | Multipart in (PDF + recipient + subject) → SMTP via `pdfservice@icthorse.nl` → return status → unlink (501-stub tot mailbox actief) |
 
 ### Externe systemen
 
@@ -49,24 +50,46 @@
 
 ## Data-flow per functie
 
-### Merge (client-only) — geïmplementeerd in v0.1.0-Geschke
+### Merge (PDF client-only + .docx via server) — uitgebreid in v0.6.0-Paxton
 ```
-Browser ← user-upload PDFs (drag-drop of file-input)
+Browser ← user-upload PDFs of .docx (drag-drop of file-input)
     │
-    ▼ client-side validatie: type=PDF, size ≤ 50MB, totaal ≤ 100MB
-    │  drag-to-reorder met ↑/↓-knoppen
+    ▼ client-side validatie: type=PDF of .docx
+    │  - PDF: size ≤ 50 MB
+    │  - DOCX: size ≤ 20 MB (server-conversie limiet)
+    │  - sessie-totaal ≤ 100 MB
+    │  drag-to-reorder met ↑/↓-knoppen, kind-badge [PDF]/[DOCX]
     ▼
-pdf-lib.PDFDocument.load() per file (ignoreEncryption: false)
+runMerge() per file:
+    if kind === 'docx':
+        progress = "Converteert docx X/N…"
+        POST /api/convert/docx-to-pdf (multipart)
+        → /tmp/pdfhorse/<uuid>/in.docx
+        → soffice --headless --convert-to pdf
+        → /tmp/pdfhorse/<uuid>/in.pdf → response stream
+        → BackgroundTask: shutil.rmtree(<uuid>)
+        ← response.arrayBuffer() → pdfBytes
+    else:
+        progress = "Verwerkt PDF X…"
+        pdfBytes = f.blob.arrayBuffer()
+    │
+    ▼ pdf-lib.PDFDocument.load(pdfBytes, { ignoreEncryption: false })
     │  → bij encrypted PDF: foutmelding, geen merge
+    │  → bij ongeldige conversie-output: foutmelding
     ▼
 mergedPdf.copyPages() + addPage() per page-index
     │
     ▼
 Download Blob (mergedPdf.save()) → merged.pdf
     │
-    ▼ URL.revokeObjectURL() na 1s (geheugen vrij)
+    ▼ _setOutput() → output-bar zichtbaar
+    ▼ URL.revokeObjectURL() na 1s
 ```
-Geen netwerk-call. Library `pdf-lib@1.17.1` via CDN (`unpkg.com`).
+Libraries:
+- Client: `pdf-lib@1.17.1` (unpkg CDN)
+- Server: LibreOffice headless (`libreoffice-core` + `libreoffice-writer`), `soffice` binary
+
+Privacy: docx-bytes blijven max enkele seconden in `/tmp/pdfhorse/<uuid>/`, geen content-log.
 
 ### Split (client-only) — geïmplementeerd in v0.2.0-Wozencraft
 ```

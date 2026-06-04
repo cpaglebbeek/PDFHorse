@@ -18,7 +18,8 @@ Domein: `icthorse.nl/PDFHorse/`
 - **PDF-inhoud bij merge, split, invullen, ondertekenen** — blijft volledig in het werkgeheugen van je browser. Wij zien dit nooit.
 - **Sessie-state** (welke files, welke ranges, welke handtekening) — alleen in browser-RAM, verdwijnt zodra je het tabblad sluit. Geen `localStorage`, geen `IndexedDB` met inhoud.
 
-### Server-side (alleen bij OCR en mail-verzending)
+### Server-side (alleen bij DOCX-conversie, OCR en mail-verzending)
+- **DOCX → PDF conversie (sinds v0.6.0-Paxton)**: als je een `.docx`-bestand uploadt in de Merge-tab, wordt dit naar `/tmp/pdfhorse/<uuid>/in.docx` geschreven, geconverteerd via LibreOffice headless (`soffice --headless --convert-to pdf`) en het resultaat teruggestuurd. Daarna verwijdert een `BackgroundTask` de hele map (`shutil.rmtree`) — typisch binnen seconden na response. Een cleanup-job verwijdert sowieso elke map ouder dan 30 minuten. Geen inhouds-log; alleen aggregate metrics (bestandsgrootte, conversietijd) worden geteld.
 - **OCR**: de geüploade PDF wordt opgeslagen in `/tmp/pdfhorse/<uuid>/in.pdf`, verwerkt door Tesseract (`ocrmypdf`), het resultaat wordt teruggestuurd en de hele tijdelijke map wordt **onmiddellijk in dezelfde request** verwijderd via `shutil.rmtree()`. Maximale opslagduur in praktijk: enkele seconden. Een cleanup-job verwijdert sowieso elke map ouder dan 30 minuten.
 - **Mail**: het bestand wordt naar het door jou opgegeven recipient-adres gestuurd via `pdfservice@icthorse.nl`. Geen BCC, geen archief, geen kopie naar onszelf. De PDF wordt na verzending direct lokaal gewist.
 
@@ -40,12 +41,14 @@ Voor zover er überhaupt persoonsgegevens kunnen worden afgeleid uit het gebruik
 | Verwerking | Bewaartermijn |
 |---|---|
 | Client-side (browser) | Tot je het tabblad sluit |
+| DOCX-conversie op server | Enkele seconden (BackgroundTask `shutil.rmtree` direct na response), absolute max 30 minuten via cleanup |
 | OCR-upload op server | Enkele seconden (single-request lifecycle), absolute max 30 minuten via cleanup |
 | Mail-verzending | Geen retentie aan onze kant — alleen bij ontvangende mailserver |
 | Logs | Geen content-logs. Aggregate request-metrics (aantal/grootte) maximaal 30 dagen voor abuse-detectie |
 
 ## Doorgifte
 
+- **LibreOffice (DOCX → PDF)** draait lokaal op HorseCloud55 (Hetzner, EU/Duitsland). Geen externe API-call.
 - **Tesseract OCR** draait lokaal op HorseCloud55 (Hetzner, EU/Duitsland). Geen externe API-call.
 - **SMTP-mail** gaat via Hostinger SMTP (`smtp.hostinger.com`). Hostinger is verantwoordelijke voor mail-verzending; verwerkingsovereenkomst via hun standaard-voorwaarden.
 - Geen doorgifte buiten de EU.

@@ -14,9 +14,10 @@
 - [ ] **HC55 deploy:** install per `deploy/README.md` — wacht op mailbox-creds
 - [ ] **nginx-config op HC55:** snippet inhaken in main server-block + reload (gebruikersactie of na deploy)
 
-## Volgende (v0.5.0-Crocker → v0.6.0)
+## Volgende (v0.6.0-Paxton → v0.7.0)
 
 - [x] **Merge-functie werkend** (04-06, v0.1.0-Geschke)
+- [x] **Merge accepteert .docx** — server-side conversie via LibreOffice headless, /api/convert/docx-to-pdf endpoint, max 20MB per docx (05-06, v0.6.0-Paxton)
 - [x] **Split-functie werkend** (04-06, v0.2.0-Wozencraft)
 - [x] **Fill-functie werkend** (04-06, v0.3.0-Putman)
 - [x] **Sign-functie werkend** 3 modi A/B/C (04-06, v0.4.0-Taft)

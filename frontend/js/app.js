@@ -1,6 +1,7 @@
-// PDFHorse frontend root (Alpine.js root component). v0.5.0-Crocker.
-// Merge, Split, Fill en Sign zijn volledig client-side. Output-bar onderaan
-// houdt de laatste uitvoer vast voor re-download, print en mail.
+// PDFHorse frontend root (Alpine.js root component). v0.6.0-Paxton.
+// Merge, Split, Fill en Sign zijn client-side; Merge accepteert ook .docx
+// die server-side via LibreOffice naar PDF geconverteerd wordt. Output-bar
+// onderaan houdt de laatste uitvoer vast voor re-download, print en mail.
 //   - Merge + Split: pdf-lib (window.PDFLib)
 //   - Fill: PDF.js render preview (window.pdfjsLib) + pdf-lib drawText
 //   - Sign: 3 modi (A bitmap upload / B SVG upload / C live signature_pad)
@@ -9,6 +10,9 @@
 
 const MAX_FILE_BYTES    = 50  * 1024 * 1024;
 const MAX_SESSION_BYTES = 100 * 1024 * 1024;
+const MAX_DOCX_BYTES    = 20  * 1024 * 1024;
+
+const DOCX_MIME = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
 
 function pdfHorseApp() {
   return {
@@ -27,6 +31,7 @@ function pdfHorseApp() {
       files: [],
       dragOver: false,
       busy: false,
+      progress: '',           // bv. "Converteert docx 1/2…"
       error: '',
       notice: '',
       seq: 0,
@@ -138,9 +143,13 @@ function pdfHorseApp() {
       let total = this.mergeTotal();
 
       for (const f of incoming) {
-        const isPdf = f.type === 'application/pdf' || /\.pdf$/i.test(f.name);
-        if (!isPdf) {
-          this.merge.error = `"${f.name}" is geen PDF.`;
+        const kind = this._detectKind(f);
+        if (!kind) {
+          this.merge.error = `"${f.name}" is geen PDF of .docx.`;
+          continue;
+        }
+        if (kind === 'docx' && f.size > MAX_DOCX_BYTES) {
+          this.merge.error = `"${f.name}" overschrijdt 20 MB (limiet voor docx-conversie).`;
           continue;
         }
         if (f.size > MAX_FILE_BYTES) {
@@ -156,10 +165,34 @@ function pdfHorseApp() {
           name: f.name,
           size: f.size,
           blob: f,
+          kind,                 // 'pdf' | 'docx'
         });
         total += f.size;
       }
       this.merge.files.push(...accepted);
+    },
+
+    _detectKind(f) {
+      if (f.type === 'application/pdf' || /\.pdf$/i.test(f.name)) return 'pdf';
+      if (f.type === DOCX_MIME || /\.docx$/i.test(f.name)) return 'docx';
+      return null;
+    },
+
+    async _convertDocxToPdf(f) {
+      // POST naar /api/convert/docx-to-pdf, response = PDF-bytes
+      const fd = new FormData();
+      fd.append('file', f, f.name);
+      const r = await fetch(this._apiUrl('/api/convert/docx-to-pdf'), {
+        method: 'POST',
+        body: fd,
+      });
+      if (!r.ok) {
+        let detail = '';
+        try { detail = (await r.json()).detail || ''; } catch {}
+        throw new Error(`docx-conversie mislukt voor "${f.name}" (${r.status}). ${detail}`);
+      }
+      const buf = await r.arrayBuffer();
+      return new Uint8Array(buf);
     },
 
     mergeMove(i, delta) {
@@ -186,7 +219,7 @@ function pdfHorseApp() {
     async runMerge() {
       if (this.merge.busy) return;
       if (this.merge.files.length < 2) {
-        this.merge.error = 'Minstens 2 PDF\'s nodig om samen te voegen.';
+        this.merge.error = 'Minstens 2 bestanden nodig om samen te voegen.';
         return;
       }
       if (!window.PDFLib) {
@@ -195,6 +228,7 @@ function pdfHorseApp() {
       }
 
       this.merge.busy = true;
+      this.merge.progress = '';
       this.merge.error = '';
       this.merge.notice = '';
 
@@ -202,29 +236,52 @@ function pdfHorseApp() {
         const { PDFDocument } = window.PDFLib;
         const merged = await PDFDocument.create();
 
-        for (const f of this.merge.files) {
-          const buf = await f.blob.arrayBuffer();
+        const docxCount = this.merge.files.filter(f => f.kind === 'docx').length;
+        let docxDone = 0;
+        let pdfCount = 0;
+
+        for (let i = 0; i < this.merge.files.length; i++) {
+          const f = this.merge.files[i];
+          let pdfBytes;
+
+          if (f.kind === 'docx') {
+            docxDone += 1;
+            this.merge.progress = `Converteert docx ${docxDone}/${docxCount}…`;
+            // Yield aan UI zodat progress-tekst rendert vóór de POST.
+            await this._sleep(20);
+            pdfBytes = await this._convertDocxToPdf(f.blob);
+          } else {
+            pdfCount += 1;
+            this.merge.progress = `Verwerkt PDF ${pdfCount}…`;
+            pdfBytes = new Uint8Array(await f.blob.arrayBuffer());
+          }
+
           let src;
           try {
-            src = await PDFDocument.load(buf, { ignoreEncryption: false });
+            src = await PDFDocument.load(pdfBytes, { ignoreEncryption: false });
           } catch (e) {
             if (String(e).toLowerCase().includes('encrypt')) {
               throw new Error(`"${f.name}" is versleuteld en kan niet worden samengevoegd.`);
             }
-            throw new Error(`"${f.name}" is geen geldige PDF.`);
+            throw new Error(`"${f.name}" leverde geen geldige PDF op.`);
           }
           const pages = await merged.copyPages(src, src.getPageIndices());
           pages.forEach(p => merged.addPage(p));
         }
 
+        this.merge.progress = 'Samenvoegen…';
         const bytes = await merged.save();
         this._downloadBlob(bytes, 'merged.pdf', 'application/pdf');
-        this._setOutput(bytes, 'merged.pdf', `merge (${this.merge.files.length} PDF's)`);
-        this.merge.notice = `Samengevoegd: ${this.merge.files.length} PDF's → merged.pdf gedownload.`;
+        const feature = docxCount > 0
+          ? `merge (${this.merge.files.length} bestanden, ${docxCount}× docx geconverteerd)`
+          : `merge (${this.merge.files.length} PDF's)`;
+        this._setOutput(bytes, 'merged.pdf', feature);
+        this.merge.notice = `Samengevoegd: ${this.merge.files.length} bestanden → merged.pdf gedownload.`;
       } catch (e) {
         this.merge.error = e.message || String(e);
       } finally {
         this.merge.busy = false;
+        this.merge.progress = '';
       }
     },
 

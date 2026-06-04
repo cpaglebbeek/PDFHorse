@@ -1,8 +1,8 @@
 ---
 date: 2026-06-04
 repo: PDFHorse
-status: open
-resume: "verder met pdfhorse — OCR backend (Tesseract install + ocrmypdf endpoint) na v0.5.0-Crocker output-bar"
+status: done
+resume: ""
 ---
 
 # Sessie 2026-06-04 — v0.5.0-Crocker: output-bar (Download / Print / Mail)

@@ -3,6 +3,39 @@
 > Versie-historie. Formaat: [Keep a Changelog](https://keepachangelog.com/) op hoofdlijnen, met PDFHorse-eigen codenamen (thema: PDF-pioniers).
 > Bijgewerkt bij elke release. Datums = release naar `main`.
 
+## [v0.6.0-Paxton] — 2026-06-05
+
+### Added
+- **DOCX-support in Merge-tab** — sleep nu ook Word-documenten (`.docx`) naast PDF's; ze worden server-zijde naar PDF geconverteerd en daarna mee-gemerged
+- **Backend endpoint `POST /api/convert/docx-to-pdf`** — accepteert multipart upload, draait `soffice --headless --convert-to pdf` op een uniek `/tmp/pdfhorse/<uuid>/` werkpad, retourneert PDF, en ruimt het werkpad op via `BackgroundTask` (`shutil.rmtree`)
+- File-list in Merge toont kleur-badge `[PDF]` / `[DOCX]` per bestand
+- Progress-tekst tijdens `runMerge`: "Converteert docx 1/N…" → "Verwerkt PDF…" → "Samenvoegen…"
+- Telt aan onderkant van de Merge-knop hoeveel docx-files server-conversie vereisen
+
+### Changed
+- `frontend/index.html` header → v0.6.0 — Paxton
+- `version.json` → 0.6.0 / Paxton / docx-merge
+- `frontend/js/app.js`: `merge.progress` state + `_detectKind()` + `_convertDocxToPdf()` + uitgebreide `runMerge()`
+- `backend/main.py`: `convert_docx_to_pdf` + `MAX_DOCX_BYTES` (20MB) + `SOFFICE_TIMEOUT_S` (60s) + `SOFFICE_BIN` env override
+- `ARCHITECTURE.md` Merge-flow geactualiseerd; nieuwe endpoint in tabel
+- `docs/DEPENDENCIES.md`: LibreOffice als backend OS-dep + v0.5.0/v0.6.0 historie-rijen
+- `docs/PRIVACY.md`: docx-conversie-flow expliciet vermeld (server-zijde, direct gewist, geen content-log)
+
+### Tests
+- pytest 7/7 groen — 3 nieuwe tests voor het convert-endpoint:
+  - 415 op niet-docx upload
+  - 400 op lege upload
+  - 503 als `soffice` ontbreekt (FileNotFoundError → nette melding)
+
+### Limieten
+- Max **20 MB** per docx (lager dan PDF 50 MB; conversie is RAM-intensiever)
+- LibreOffice timeout: 60s
+
+### Codename
+**Bill Paxton** — Adobe engineer, mede-architect Adobe Type Manager + PostScript Type 1 font-tooling. Past in PDF-pioniers-thema; Brotz blijft gereserveerd voor v1.0.0.
+
+---
+
 ## [v0.5.0-Crocker] — 2026-06-04
 
 ### Added

@@ -39,3 +39,34 @@ def test_ocr_stub_returns_501():
 def test_mail_stub_returns_501():
     r = client.post("/api/mail")
     assert r.status_code == 501
+
+
+def test_convert_rejects_non_docx_extension():
+    r = client.post(
+        "/api/convert/docx-to-pdf",
+        files={"file": ("notdocx.pdf", b"%PDF-1.4", "application/pdf")},
+    )
+    assert r.status_code == 415
+
+
+def test_convert_rejects_empty_upload():
+    r = client.post(
+        "/api/convert/docx-to-pdf",
+        files={"file": ("empty.docx", b"", "application/vnd.openxmlformats-officedocument.wordprocessingml.document")},
+    )
+    assert r.status_code == 400
+
+
+def test_convert_returns_503_when_soffice_absent(monkeypatch):
+    # Forceer FileNotFoundError door SOFFICE_BIN op een niet-bestaand commando te zetten.
+    monkeypatch.setenv("SOFFICE_BIN", "/usr/bin/definitely-not-soffice-xyz")
+    # Reload niet nodig — env wordt elke request opnieuw gelezen door subprocess.run
+    # (we lezen de env-var direct in convert_docx_to_pdf via module-level constante).
+    # Voor deze test patchen we de constante via app-state:
+    from backend import main as backend_main
+    monkeypatch.setattr(backend_main, "SOFFICE_BIN", "/usr/bin/definitely-not-soffice-xyz")
+    r = client.post(
+        "/api/convert/docx-to-pdf",
+        files={"file": ("x.docx", b"PK\x03\x04minimal", "application/vnd.openxmlformats-officedocument.wordprocessingml.document")},
+    )
+    assert r.status_code == 503

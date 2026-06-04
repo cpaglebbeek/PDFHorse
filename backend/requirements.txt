@@ -3,6 +3,7 @@ uvicorn[standard]==0.32.0
 python-multipart==0.0.12
 slowapi==0.1.9
 ocrmypdf==16.5.0
+pikepdf<9   # ocrmypdf 16.5.0 verwacht oudere pikepdf API (Pdf.check); pikepdf >=9 verwijderde dit
 # Tesseract + ghostscript zijn systeem-deps:
 #   apt install tesseract-ocr tesseract-ocr-nld tesseract-ocr-eng ghostscript unpaper qpdf
 

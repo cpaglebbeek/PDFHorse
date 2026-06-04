@@ -68,17 +68,27 @@ Download Blob (mergedPdf.save()) → merged.pdf
 ```
 Geen netwerk-call. Library `pdf-lib@1.17.1` via CDN (`unpkg.com`).
 
-### Split (client-only)
+### Split (client-only) — geïmplementeerd in v0.2.0-Wozencraft
 ```
-Browser ← user-upload PDF + page-ranges
+Browser ← user-upload 1 PDF (drag-drop of file-input)
     │
+    ▼ client-side validatie: type=PDF, size ≤ 50MB
+    │  pdf-lib load + getPageCount() → toon "<naam> — <bytes> — <N> pagina's"
     ▼
-pdf-lib slice per range → meerdere PDFDocument
+User-input range-string "1-3, 5, 8-10"
     │
+    ▼ parseSplitRanges(): regex /^[\d,\s-]+$/ + per part /^(\d+)(?:-(\d+))?$/
+    │  bounds-check 1..pageCount, geen achteruit-bereiken
+    │  live-feedback: per range "pagina X-Y (N pagina's)"
     ▼
-ZIP via JSZip (optioneel) → download
+runSplit(): per range nieuw PDFDocument + copyPages(src, [pages-1])
+    │
+    ▼ download Blob → "<basename>_pages_X-Y.pdf" of "<basename>_page_N.pdf"
+    │  200ms delay tussen downloads (popup-blocker mitigation)
+    ▼
+URL.revokeObjectURL() na 1s per download
 ```
-Geen netwerk-call.
+Geen netwerk-call. Geen ZIP (vermijdt JSZip-dep; mogelijk in v0.2.x).
 
 ### OCR (client → server → client)
 ```

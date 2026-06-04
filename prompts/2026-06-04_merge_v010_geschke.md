@@ -1,8 +1,8 @@
 ---
 date: 2026-06-04
 repo: PDFHorse
-status: open
-resume: "verder met pdfhorse — split-feature na v0.1.0-Geschke merge"
+status: done
+resume: ""
 ---
 
 # Sessie 2026-06-04 — v0.1.0-Geschke: client-side merge

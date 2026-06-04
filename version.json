@@ -1,8 +1,8 @@
 {
-  "version": "0.1.0",
-  "codename": "Geschke",
+  "version": "0.2.0",
+  "codename": "Wozencraft",
   "released": "2026-06-04",
-  "status": "first-feature",
+  "status": "second-feature",
   "theme": "PDF-pioniers",
-  "notes": "v0.1.0-Geschke (oranje bump): eerste werkende feature — client-side merge via pdf-lib (CDN). Frontend-only, geen backend-wijziging, geen nieuwe deploy. Drag-to-reorder, client-side size-limits (50MB/file, 100MB/sessie), encrypted-PDF detection, download merged.pdf. Backend ongewijzigd t.o.v. v0.0.2-Warnock."
+  "notes": "v0.2.0-Wozencraft (oranje bump): tweede werkende feature — client-side split via pdf-lib (CDN). Page-range syntax '1-3, 5, 8-10' → N output-PDFs. Validatie binnen 1..pageCount. Sequentiële downloads met 200ms delay (popup-blocker mitigation). Geen ZIP. Backend ongewijzigd t.o.v. v0.0.2-Warnock. Codename Brotz blijft gereserveerd voor v1.0.0."
 }

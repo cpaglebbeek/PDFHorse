@@ -35,7 +35,7 @@
     <div class="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between">
       <a href="./" class="flex items-center gap-2">
         <span class="text-xl font-bold">PDFHorse</span>
-        <span class="text-xs text-slate-400">v0.4.0 — Taft</span>
+        <span class="text-xs text-slate-400">v0.5.0 — Crocker</span>
       </a>
       <a href="https://icthorse.nl/" class="text-sm text-slate-300 hover:text-white">iCt Horse →</a>
     </div>
@@ -419,14 +419,55 @@
 
     <hr class="my-6 border-slate-200" />
 
-    <section aria-label="Uitvoer">
-      <h2 class="text-base font-semibold mb-3">Uitvoer</h2>
-      <div class="flex flex-wrap gap-2">
-        <button class="px-4 py-2 rounded bg-slate-900 text-white text-sm disabled:opacity-40" disabled>Download</button>
-        <button class="px-4 py-2 rounded bg-white border border-slate-300 text-sm disabled:opacity-40" disabled>Print</button>
-        <button class="px-4 py-2 rounded bg-white border border-slate-300 text-sm disabled:opacity-40" disabled>Mail (via pdfservice@icthorse.nl)</button>
+    <section aria-label="Uitvoer" class="bg-slate-100 rounded-lg p-4 border border-slate-200">
+      <h2 class="text-base font-semibold mb-1">Laatste uitvoer</h2>
+      <p x-show="!output.filename" class="text-sm text-slate-500 italic">Nog geen uitvoer. Gebruik een van de tabs hierboven.</p>
+
+      <div x-show="output.filename" class="space-y-3">
+        <div class="text-sm">
+          <span class="font-medium" x-text="output.filename"></span>
+          <span class="text-slate-500"> — <span x-text="output.feature"></span></span>
+          <span class="text-xs text-slate-500"> (<span x-text="output.bytes ? formatBytes(output.bytes) : ''"></span>)</span>
+        </div>
+
+        <div class="flex flex-wrap gap-2">
+          <button type="button" class="px-4 py-2 rounded bg-slate-900 text-white text-sm" @click="downloadLast()">Download</button>
+          <button type="button" class="px-4 py-2 rounded bg-white border border-slate-300 text-sm" @click="printLast()">Print</button>
+          <button type="button" class="px-4 py-2 rounded bg-white border border-slate-300 text-sm" @click="output.mailOpen = !output.mailOpen">
+            <span x-show="!output.mailOpen">Mail…</span>
+            <span x-show="output.mailOpen">Verberg mail-form</span>
+          </button>
+        </div>
+
+        <!-- Mail-form -->
+        <div x-show="output.mailOpen" class="mt-2 p-3 border border-slate-200 rounded bg-white space-y-2">
+          <label class="block text-sm">
+            <span class="text-slate-700">Ontvanger</span>
+            <input type="email" x-model="output.mailTo" placeholder="bv. naam@voorbeeld.nl"
+              class="mt-1 w-full px-3 py-2 border border-slate-300 rounded text-sm focus:outline-none focus:border-slate-900" />
+          </label>
+          <label class="block text-sm">
+            <span class="text-slate-700">Onderwerp</span>
+            <input type="text" x-model="output.mailSubject" placeholder="PDFHorse-uitvoer"
+              class="mt-1 w-full px-3 py-2 border border-slate-300 rounded text-sm focus:outline-none focus:border-slate-900" />
+          </label>
+          <p class="text-xs text-slate-500">
+            De PDF wordt verzonden vanaf <code>pdfservice@icthorse.nl</code>. Geen archief, geen kopie naar ons.
+          </p>
+          <div class="flex flex-wrap items-center gap-2">
+            <button type="button"
+              class="px-3 py-1.5 rounded bg-slate-900 text-white text-sm disabled:opacity-40"
+              :disabled="!output.mailTo || output.mailBusy"
+              @click="mailLast()">
+              <span x-show="!output.mailBusy">Verstuur</span>
+              <span x-show="output.mailBusy">Bezig…</span>
+            </button>
+            <span class="text-xs text-slate-500" x-text="output.mailStatus"></span>
+          </div>
+        </div>
+
+        <p x-show="output.error" x-text="output.error" class="text-sm text-red-700"></p>
       </div>
-      <p class="mt-2 text-xs text-slate-500">Uitvoer-acties worden in v0.0.3 actief.</p>
     </section>
 
     <section class="mt-10 text-xs text-slate-500 border-t border-slate-200 pt-4" aria-label="Status">

@@ -167,12 +167,12 @@ runFill():
 ```
 Geen netwerk-call. Libs: pdf-lib 1.17.1 + PDF.js 4.0.379 (cdnjs).
 
-### Mail-output (client → server)
+### Mail-output (client → server) — frontend gebouwd in v0.5.0-Crocker, backend 501-stub
 ```
-Browser ← edited PDF + recipient + subject
+Browser ← edited PDF + recipient + subject (uit output-bar mail-form)
     │
-    ▼ POST /api/mail (multipart)
-HC55:3963 → smtplib.SMTP_SSL('smtp.hostinger.com')
+    ▼ POST /api/mail (multipart: to, subject, pdf)
+HC55:3963 → smtplib.SMTP_SSL('smtp.hostinger.com')  ← TBD bij mailbox
     │
     ▼
 recipient@... ← mail van pdfservice@icthorse.nl + PDF attached
@@ -180,6 +180,21 @@ recipient@... ← mail van pdfservice@icthorse.nl + PDF attached
     ▼
 (server) unlink tijdelijke PDF
 ```
+Frontend toont 501-status netjes als "Mail-endpoint nog niet actief op deze deploy".
+
+### Output-bar (client-only) — geïmplementeerd in v0.5.0-Crocker
+```
+Alle 4 features (merge/split/fill/sign) roepen `_setOutput(bytes, filename, feature)`
+    │  → Alpine output-state: { bytes, filename, feature, mime }
+    │
+    ▼ Onderaan in elke tab persistent zichtbaar:
+       - Download = _downloadBlob(bytes, filename, mime) — re-trigger zelfde Blob
+       - Print = hidden iframe.src = blob-URL → onload → iframe.contentWindow.print()
+                 → revokeObjectURL na 60s
+       - Mail = mail-form (to, subject) → POST /api/mail multipart
+                → 200: succes-melding / 501: "nog niet actief" / overige: error met detail
+```
+Bij split (N outputs): laatste range wordt de "primaire" output voor de bar.
 
 ## Sessie-state
 

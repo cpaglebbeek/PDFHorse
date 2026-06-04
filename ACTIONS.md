@@ -14,16 +14,18 @@
 - [ ] **HC55 deploy:** install per `deploy/README.md` — wacht op mailbox-creds
 - [ ] **nginx-config op HC55:** snippet inhaken in main server-block + reload (gebruikersactie of na deploy)
 
-## Volgende (v0.4.0-Taft → v0.5.0)
+## Volgende (v0.5.0-Crocker → v0.6.0)
 
-- [x] **Merge-functie werkend** (pdf-lib via CDN, client-only, drag-to-reorder, size-limits, encrypted-PDF detect) (04-06, v0.1.0-Geschke)
-- [x] **Split-functie werkend** (pdf-lib via CDN, client-only, range-syntax "1-3, 5, 8-10", N losse downloads met 200ms delay, encrypted-PDF detect) (04-06, v0.2.0-Wozencraft)
-- [x] **Fill-functie werkend** (PDF.js preview + klik-overlay + tekstvelden + pdf-lib drawText + canvas→PDF coords-transform + download) (04-06, v0.3.0-Putman)
-- [x] **Sign-functie werkend** — 3 modi: A bitmap upload (PNG/JPG) + B SVG upload (rasterize naar PNG) + C live tekenen (signature_pad + wit→transparant) + klik-plaatsing + breedte-slider + pdf-lib embedPng/embedJpg + drawImage (04-06, v0.4.0-Taft)
+- [x] **Merge-functie werkend** (04-06, v0.1.0-Geschke)
+- [x] **Split-functie werkend** (04-06, v0.2.0-Wozencraft)
+- [x] **Fill-functie werkend** (04-06, v0.3.0-Putman)
+- [x] **Sign-functie werkend** 3 modi A/B/C (04-06, v0.4.0-Taft)
+- [x] **Output-bar werkend** — lastOutput-state + Download (re-trigger) + Print (hidden iframe + browser-print) + Mail-form (POST /api/mail; 501-stub nette melding tot Hostinger mailbox actief) (04-06, v0.5.0-Crocker)
 - [x] **docs/PRINCIPLES.md** met 8 principes P1-P8 (04-06, v0.3.0-Putman)
 - [x] **docs/PRIVACY.md** privacyverklaring (04-06, v0.3.0-Putman)
 - [x] **docs/BUGLIST.md** skelet (04-06, v0.3.0-Putman)
-- [x] **CHANGELOG.md** 5 entries v0.0.1 → v0.3.0 (04-06, v0.3.0-Putman) + v0.4.0 entry (04-06)
+- [x] **CHANGELOG.md** 5 entries v0.0.1 → v0.3.0 + v0.4.0 + v0.5.0 (04-06)
+- [x] **HC55 MVP-deploy LIVE** op https://horsecloud55.ddns.net/PDFHorse/ (04-06)
 - [ ] OCR-endpoint (ocrmypdf + Tesseract nld+eng) op HC55
 - [ ] Mail-endpoint (SMTP Hostinger)
 - [ ] Cleanup-job `/tmp/pdfhorse/` (30 min)

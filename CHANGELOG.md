@@ -3,6 +3,29 @@
 > Versie-historie. Formaat: [Keep a Changelog](https://keepachangelog.com/) op hoofdlijnen, met PDFHorse-eigen codenamen (thema: PDF-pioniers).
 > Bijgewerkt bij elke release. Datums = release naar `main`.
 
+## [v0.5.0-Crocker] — 2026-06-04
+
+### Added
+- **Output-bar** onderaan elke tab — persistente "laatste uitvoer"-state met filename + bron-feature + grootte
+- **Download-knop** — re-trigger van laatste output (geen nieuwe verwerking nodig)
+- **Print-knop** — hidden iframe met blob-URL + `contentWindow.print()` (cross-browser werkend, blob-URL automatisch opgeruimd na 60s)
+- **Mail-knop + form** — recipient + subject inputs, POST naar `/api/mail` multipart met PDF-blob, 501-stub nette UX-melding tot Hostinger mailbox actief is
+- Alle 4 features (merge/split/fill/sign) schrijven nu naar `_setOutput(bytes, filename, feature)` naast hun auto-download
+- Split-N-outputs: laatste range wordt de "primaire" voor de output-bar
+
+### Changed
+- `frontend/index.html` header → v0.5.0 — Crocker
+- `version.json` → 0.5.0 / Crocker / fifth-feature
+- `ARCHITECTURE.md` mail-flow geactualiseerd + nieuwe Output-bar data-flow
+
+### Notes
+- **OCR + Mail backend blijven 501-stubs** op deze versie. Mail-form werkt eind-tot-eind in de frontend; backend-implementatie wacht op Hostinger mailbox `pdfservice@icthorse.nl` (gebruikersactie).
+
+### Codename
+**Steve Crocker** — niet de PDF-uitvinder, maar internet-pionier (RFC 1, ARPANET). PDFHorse-traditie was om Adobe-genen aan te houden; hier wijken we af om de output-fase te markeren als "het naar buiten brengen van data" — Crocker maakte dat in 1969 mogelijk.
+
+---
+
 ## [v0.4.0-Taft] — 2026-06-04
 
 ### Added

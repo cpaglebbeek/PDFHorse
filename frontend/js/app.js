@@ -1,9 +1,11 @@
-// PDFHorse frontend root (Alpine.js root component). v0.4.0-Taft.
-// Merge, Split, Fill en Sign zijn volledig client-side:
+// PDFHorse frontend root (Alpine.js root component). v0.5.0-Crocker.
+// Merge, Split, Fill en Sign zijn volledig client-side. Output-bar onderaan
+// houdt de laatste uitvoer vast voor re-download, print en mail.
 //   - Merge + Split: pdf-lib (window.PDFLib)
 //   - Fill: PDF.js render preview (window.pdfjsLib) + pdf-lib drawText
 //   - Sign: 3 modi (A bitmap upload / B SVG upload / C live signature_pad)
 //           + PDF.js preview + pdf-lib embedPng + drawImage
+//   - Output: lastOutput state + Download / Print / Mail (POST /api/mail)
 
 const MAX_FILE_BYTES    = 50  * 1024 * 1024;
 const MAX_SESSION_BYTES = 100 * 1024 * 1024;
@@ -74,6 +76,19 @@ function pdfHorseApp() {
       notice: '',
       seq: 0,
       _pad: null,                // signature_pad instance
+    },
+
+    output: {
+      bytes: null,               // Uint8Array
+      filename: '',
+      feature: '',
+      mime: 'application/pdf',
+      mailOpen: false,
+      mailTo: '',
+      mailSubject: 'PDFHorse-uitvoer',
+      mailBusy: false,
+      mailStatus: '',
+      error: '',
     },
 
     init() {
@@ -204,6 +219,7 @@ function pdfHorseApp() {
 
         const bytes = await merged.save();
         this._downloadBlob(bytes, 'merged.pdf', 'application/pdf');
+        this._setOutput(bytes, 'merged.pdf', `merge (${this.merge.files.length} PDF's)`);
         this.merge.notice = `Samengevoegd: ${this.merge.files.length} PDF's → merged.pdf gedownload.`;
       } catch (e) {
         this.merge.error = e.message || String(e);
@@ -222,6 +238,88 @@ function pdfHorseApp() {
       a.click();
       a.remove();
       setTimeout(() => URL.revokeObjectURL(url), 1000);
+    },
+
+    _setOutput(bytes, filename, feature, mime = 'application/pdf') {
+      // Bewaar de laatste uitvoer voor re-download, print en mail.
+      // `bytes` is typisch Uint8Array (pdf-lib save) — kloon naar nieuwe
+      // Uint8Array zodat we niet afhankelijk zijn van de bron-buffer.
+      this.output.bytes = new Uint8Array(bytes);
+      this.output.filename = filename;
+      this.output.feature = feature;
+      this.output.mime = mime;
+      this.output.error = '';
+      this.output.mailStatus = '';
+    },
+
+    downloadLast() {
+      if (!this.output.bytes) return;
+      this._downloadBlob(this.output.bytes, this.output.filename, this.output.mime);
+    },
+
+    printLast() {
+      this.output.error = '';
+      if (!this.output.bytes) return;
+      const blob = new Blob([this.output.bytes], { type: this.output.mime });
+      const url = URL.createObjectURL(blob);
+      // Hidden iframe + contentWindow.print() — werkt in Chrome/Firefox/Safari.
+      let iframe = document.getElementById('pdfhorse-print-iframe');
+      if (iframe) iframe.remove();
+      iframe = document.createElement('iframe');
+      iframe.id = 'pdfhorse-print-iframe';
+      iframe.style.position = 'fixed';
+      iframe.style.right = '0';
+      iframe.style.bottom = '0';
+      iframe.style.width = '0';
+      iframe.style.height = '0';
+      iframe.style.border = '0';
+      iframe.src = url;
+      iframe.onload = () => {
+        setTimeout(() => {
+          try {
+            iframe.contentWindow.focus();
+            iframe.contentWindow.print();
+          } catch (e) {
+            this.output.error = 'Printen niet mogelijk in deze browser. Gebruik Download.';
+          }
+        }, 250);
+      };
+      document.body.appendChild(iframe);
+      setTimeout(() => URL.revokeObjectURL(url), 60_000);
+    },
+
+    async mailLast() {
+      this.output.mailStatus = '';
+      this.output.error = '';
+      if (!this.output.bytes || !this.output.mailTo) return;
+      // Eenvoudige e-mail-validatie (browser doet `type=email` ook al)
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(this.output.mailTo)) {
+        this.output.error = 'Geef een geldig e-mailadres op.';
+        return;
+      }
+      this.output.mailBusy = true;
+      try {
+        const fd = new FormData();
+        fd.append('to', this.output.mailTo);
+        fd.append('subject', this.output.mailSubject || 'PDFHorse-uitvoer');
+        const blob = new Blob([this.output.bytes], { type: this.output.mime });
+        fd.append('pdf', blob, this.output.filename);
+        const r = await fetch(this._apiUrl('/api/mail'), { method: 'POST', body: fd });
+        if (r.ok) {
+          this.output.mailStatus = `Verstuurd naar ${this.output.mailTo}.`;
+          this.output.mailOpen = false;
+        } else if (r.status === 501) {
+          this.output.mailStatus = 'Mail-endpoint nog niet actief op deze deploy (wacht op Hostinger mailbox).';
+        } else {
+          let detail = '';
+          try { detail = (await r.json()).detail || ''; } catch {}
+          this.output.error = `Mail-verzending mislukt (${r.status}). ${detail}`;
+        }
+      } catch (e) {
+        this.output.error = e.message || String(e);
+      } finally {
+        this.output.mailBusy = false;
+      }
     },
 
     formatBytes(n) {
@@ -352,7 +450,12 @@ function pdfHorseApp() {
           copied.forEach(p => out.addPage(p));
           const bytes = await out.save();
           const suffix = r.from === r.to ? `page_${r.from}` : `pages_${r.from}-${r.to}`;
-          this._downloadBlob(bytes, `${baseName}_${suffix}.pdf`, 'application/pdf');
+          const fn = `${baseName}_${suffix}.pdf`;
+          this._downloadBlob(bytes, fn, 'application/pdf');
+          // Laatste split-PDF wordt de "output" voor de output-bar.
+          if (i === this.split.parsedRanges.length - 1) {
+            this._setOutput(bytes, fn, `split (${this.split.parsedRanges.length} ranges, laatste getoond)`);
+          }
           if (i < this.split.parsedRanges.length - 1) await this._sleep(200);
         }
         this.split.notice = `Gesplitst: ${this.split.parsedRanges.length} PDF${this.split.parsedRanges.length === 1 ? '' : '\'s'} gedownload.`;
@@ -736,8 +839,10 @@ function pdfHorseApp() {
 
         const out = await pdfDoc.save();
         const baseName = this.sign.file.name.replace(/\.pdf$/i, '');
-        this._downloadBlob(out, `${baseName}_signed.pdf`, 'application/pdf');
-        this.sign.notice = `Ondertekend: ${this.sign.placements.length} handtekening(en) → ${baseName}_signed.pdf gedownload.`;
+        const fn = `${baseName}_signed.pdf`;
+        this._downloadBlob(out, fn, 'application/pdf');
+        this._setOutput(out, fn, `sign (${this.sign.placements.length} handtekening(en), modus ${this.sign.mode})`);
+        this.sign.notice = `Ondertekend: ${this.sign.placements.length} handtekening(en) → ${fn} gedownload.`;
       } catch (e) {
         this.sign.error = e.message || String(e);
       } finally {
@@ -794,8 +899,10 @@ function pdfHorseApp() {
         }
         const out = await pdfDoc.save();
         const baseName = this.fill.file.name.replace(/\.pdf$/i, '');
-        this._downloadBlob(out, `${baseName}_filled.pdf`, 'application/pdf');
-        this.fill.notice = `Ingevuld: ${this.fill.fields.length} veld(en) → ${baseName}_filled.pdf gedownload.`;
+        const fn = `${baseName}_filled.pdf`;
+        this._downloadBlob(out, fn, 'application/pdf');
+        this._setOutput(out, fn, `fill (${this.fill.fields.length} veld(en))`);
+        this.fill.notice = `Ingevuld: ${this.fill.fields.length} veld(en) → ${fn} gedownload.`;
       } catch (e) {
         this.fill.error = e.message || String(e);
       } finally {

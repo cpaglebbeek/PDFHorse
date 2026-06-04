@@ -1,8 +1,8 @@
 {
-  "version": "0.0.1",
+  "version": "0.0.2",
   "codename": "Warnock",
-  "released": "2026-06-03",
-  "status": "skeleton",
+  "released": "2026-06-04",
+  "status": "skeleton-runnable",
   "theme": "PDF-pioniers",
-  "notes": "Initial skeleton — README + CLAUDE.md + ARCHITECTURE.md + LICENSE + AGPL-3.0. Geen runnable code."
+  "notes": "v0.0.2: frontend skelet (Alpine+Tailwind, 5 tabs) + backend (FastAPI /api/health + /api/limits + stub /api/ocr + /api/mail) + nginx-snippet + systemd-unit + 4/4 pytest groen + live smoke-test op alt-port. Codenaam blijft Warnock (groene bump). v0.1.0-Geschke bij eerste werkende feature."
 }

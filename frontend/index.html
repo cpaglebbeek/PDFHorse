@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="nl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Anonieme browser-first PDF-bewerker: merge, split, OCR, invullen en ondertekenen. iCt Horse." />
+  <title>PDFHorse — anonieme PDF-bewerker</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body class="bg-slate-50 text-slate-900 min-h-screen flex flex-col">
+
+  <header class="bg-slate-900 text-white">
+    <div class="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between">
+      <a href="./" class="flex items-center gap-2">
+        <span class="text-xl font-bold">PDFHorse</span>
+        <span class="text-xs text-slate-400">v0.0.2 — Warnock</span>
+      </a>
+      <a href="https://icthorse.nl/" class="text-sm text-slate-300 hover:text-white">iCt Horse →</a>
+    </div>
+  </header>
+
+  <main class="flex-1 max-w-5xl w-full mx-auto px-4 py-6" x-data="pdfHorseApp()">
+
+    <h1 class="text-2xl font-semibold mb-2">Bewerk een PDF — zonder upload, zonder account</h1>
+    <p class="text-sm text-slate-600 mb-6">
+      Merge, split, invullen en ondertekenen draaien volledig in je browser. OCR en mailen gebeuren server-zijde en worden direct na bewerking gewist.
+    </p>
+
+    <nav class="flex flex-wrap gap-2 border-b border-slate-200 mb-6" role="tablist" aria-label="PDFHorse-functies">
+      <template x-for="t in tabs" :key="t.id">
+        <button
+          type="button"
+          role="tab"
+          :aria-selected="active === t.id"
+          :class="active === t.id ? 'border-b-2 border-slate-900 text-slate-900' : 'text-slate-500 hover:text-slate-900'"
+          class="px-4 py-2 -mb-px text-sm font-medium"
+          @click="active = t.id"
+          x-text="t.label"
+        ></button>
+      </template>
+    </nav>
+
+    <section x-show="active === 'merge'" role="tabpanel" aria-labelledby="tab-merge">
+      <h2 class="text-lg font-semibold mb-2">Merge — samenvoegen</h2>
+      <p class="text-sm text-slate-600 mb-4">Sleep meerdere PDF's hierheen. Volgorde aanpasbaar voor merge.</p>
+      <div class="border-2 border-dashed border-slate-300 rounded-lg p-12 text-center text-slate-500 bg-white">
+        Drop-zone — wordt in v0.0.3 functioneel (pdf-lib).
+      </div>
+    </section>
+
+    <section x-show="active === 'split'" role="tabpanel" aria-labelledby="tab-split">
+      <h2 class="text-lg font-semibold mb-2">Split — opdelen</h2>
+      <p class="text-sm text-slate-600 mb-4">Selecteer page-ranges (bv. <code>1-3, 5, 8-10</code>) en download meerdere PDF's.</p>
+      <div class="border-2 border-dashed border-slate-300 rounded-lg p-12 text-center text-slate-500 bg-white">
+        Drop-zone — wordt in v0.0.3 functioneel (pdf-lib).
+      </div>
+    </section>
+
+    <section x-show="active === 'fill'" role="tabpanel" aria-labelledby="tab-fill">
+      <h2 class="text-lg font-semibold mb-2">Invullen — tekst op PDF</h2>
+      <p class="text-sm text-slate-600 mb-4">Klik op de pagina om een tekstveld te plaatsen. Geen AcroForm vereist.</p>
+      <div class="border-2 border-dashed border-slate-300 rounded-lg p-12 text-center text-slate-500 bg-white">
+        Drop-zone + canvas-overlay — wordt in v0.0.3 functioneel.
+      </div>
+    </section>
+
+    <section x-show="active === 'sign'" role="tabpanel" aria-labelledby="tab-sign">
+      <h2 class="text-lg font-semibold mb-2">Ondertekenen — handtekening invoegen</h2>
+      <p class="text-sm text-slate-600 mb-4">Drie manieren om je handtekening aan te leveren:</p>
+      <div class="grid sm:grid-cols-3 gap-3">
+        <div class="border rounded-lg p-4 bg-white text-center">
+          <div class="text-3xl mb-1">A</div>
+          <div class="font-medium">Bitmap upload</div>
+          <div class="text-xs text-slate-500">PNG/JPG met transparantie</div>
+        </div>
+        <div class="border rounded-lg p-4 bg-white text-center">
+          <div class="text-3xl mb-1">B</div>
+          <div class="font-medium">SVG upload</div>
+          <div class="text-xs text-slate-500">Vectorpath</div>
+        </div>
+        <div class="border rounded-lg p-4 bg-white text-center">
+          <div class="text-3xl mb-1">C</div>
+          <div class="font-medium">Live tekenen</div>
+          <div class="text-xs text-slate-500">Muis / touch / pen</div>
+        </div>
+      </div>
+      <p class="mt-4 text-sm text-slate-500">Wordt in v0.0.3 functioneel (signature_pad + Fabric.js).</p>
+    </section>
+
+    <section x-show="active === 'ocr'" role="tabpanel" aria-labelledby="tab-ocr">
+      <h2 class="text-lg font-semibold mb-2">OCR — gescande PDF doorzoekbaar maken</h2>
+      <p class="text-sm text-slate-600 mb-4">Talen: Nederlands + Engels. Server-zijde, upload wordt direct na verwerking gewist.</p>
+      <div class="border-2 border-dashed border-slate-300 rounded-lg p-12 text-center text-slate-500 bg-white">
+        Drop-zone — wordt in v0.0.3 functioneel (POST /api/ocr → ocrmypdf).
+      </div>
+    </section>
+
+    <hr class="my-6 border-slate-200" />
+
+    <section aria-label="Uitvoer">
+      <h2 class="text-base font-semibold mb-3">Uitvoer</h2>
+      <div class="flex flex-wrap gap-2">
+        <button class="px-4 py-2 rounded bg-slate-900 text-white text-sm disabled:opacity-40" disabled>Download</button>
+        <button class="px-4 py-2 rounded bg-white border border-slate-300 text-sm disabled:opacity-40" disabled>Print</button>
+        <button class="px-4 py-2 rounded bg-white border border-slate-300 text-sm disabled:opacity-40" disabled>Mail (via pdfservice@icthorse.nl)</button>
+      </div>
+      <p class="mt-2 text-xs text-slate-500">Uitvoer-acties worden in v0.0.3 actief.</p>
+    </section>
+
+    <section class="mt-10 text-xs text-slate-500 border-t border-slate-200 pt-4" aria-label="Status">
+      <div>Server: <span x-text="health.status" class="font-mono"></span>
+        · versie <span x-text="health.version" class="font-mono"></span>
+        · codenaam <span x-text="health.codename" class="font-mono"></span>
+      </div>
+      <div x-show="limits.max_upload_size_bytes">
+        Limieten: max <span x-text="(limits.max_upload_size_bytes/1024/1024)"></span>MB/bestand,
+        <span x-text="(limits.max_session_total_bytes/1024/1024)"></span>MB/sessie,
+        <span x-text="(limits.session_timeout_s/60)"></span>min sessie-timeout.
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="bg-slate-900 text-slate-400 text-xs">
+    <div class="max-w-5xl mx-auto px-4 py-4 flex flex-wrap justify-between gap-2">
+      <div>PDFHorse — anonieme PDF-bewerker · AGPL-3.0 · <a href="https://github.com/cpaglebbeek/PDFHorse" class="underline hover:text-white">broncode</a></div>
+      <div>Privacy-first: geen account, geen logs van inhoud, OCR-uploads &le; 30 min.</div>
+    </div>
+  </footer>
+
+  <script src="js/app.js"></script>
+</body>
+</html>

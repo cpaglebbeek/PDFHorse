@@ -2,13 +2,17 @@
 
 > Openstaande acties voor PDFHorse. Bovenste blok = werk-in-uitvoering. Onderste = backlog. Afgeronde acties → `ACTIONS_DONE.md` na 30d.
 
-## Nu (v0.0.1 → v0.0.2)
+## Nu (v0.0.2 → v0.0.3)
 
-- [ ] **OPEN-architectuur:** 6 vragen in `ARCHITECTURE.md` beantwoorden (frontend host, OCR-lib, upload-protocol, sig-lib, print-strat, mail-archief) (03-06)
-- [ ] **Hostinger:** mailbox `pdfservice@icthorse.nl` aanmaken + SMTP-creds noteren in `.env.example` template (03-06) — **gebruikersactie**
-- [ ] **DNS/nginx:** SHARED_INFRASTRUCTURE.md uitbreiden met PDFHorse :3963 + nginx-location `/PDFHorse/` (03-06)
-- [ ] **Frontend skelet:** `frontend/index.html` + `frontend/app.js` (Alpine.js + Tailwind CDN) + 5 route-tabs (merge/split/fill/sign/ocr) — v0.0.2 (TBD)
-- [ ] **Backend skelet:** `backend/main.py` (FastAPI) + `/api/health` + stubs voor `/api/ocr` en `/api/mail` (TBD)
+- [x] **OPEN-architectuur:** 6 vragen beantwoord met defaults (HC55-frontend / ocrmypdf / fetch / signature_pad / browser-print / geen BCC) (04-06)
+- [ ] **Hostinger:** mailbox `pdfservice@icthorse.nl` aanmaken + SMTP-creds noteren in `.env` op HC55 — **gebruikersactie**
+- [x] **SHARED_INFRASTRUCTURE.md** uitgebreid met PDFHorse :3963 (04-06)
+- [x] **Frontend skelet:** `frontend/index.html` + Alpine+Tailwind CDN + 5 tabs + health/limits-aanroep + footer (04-06)
+- [x] **Backend skelet:** FastAPI `/api/health` + `/api/limits` + stubs `/api/ocr` + `/api/mail` (501) + CORS + lifespan tmp-dir (04-06)
+- [x] **4/4 pytest tests groen** + live smoke-test op alt-port (04-06)
+- [x] **Deploy artefacten:** `deploy/nginx-pdfhorse.conf` + `deploy/pdfhorse.service` + `deploy/README.md` (04-06)
+- [ ] **HC55 deploy:** install per `deploy/README.md` — wacht op mailbox-creds
+- [ ] **nginx-config op HC55:** snippet inhaken in main server-block + reload (gebruikersactie of na deploy)
 
 ## Volgende (v0.0.2 → v0.1.0-Geschke)
 

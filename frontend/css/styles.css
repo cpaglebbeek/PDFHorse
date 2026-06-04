@@ -1,0 +1,9 @@
+/* PDFHorse — minimale extra styling bovenop Tailwind CDN.
+   Skeleton v0.0.2 — niets functioneel. */
+
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+
+code { background: #e2e8f0; padding: 0.05em 0.3em; border-radius: 0.25em; font-size: 0.9em; }
+
+/* Geen JS hint hidden tabs in plain HTML view (no-script fallback). */
+[x-cloak] { display: none !important; }

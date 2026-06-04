@@ -2,7 +2,7 @@
 date: 2026-06-03
 repo: PDFHorse
 status: open
-resume: "verder met PDFHorse v0.0.2 — Hostinger mailbox pdfservice@icthorse.nl + nginx-config /PDFHorse/ + frontend skelet (Alpine+Tailwind, 5 tabs) + backend skelet (FastAPI /api/health + stubs /api/ocr + /api/mail)"
+resume: "verder met PDFHorse v0.0.3 — Hostinger mailbox pdfservice@icthorse.nl aanmaken (gebruikersactie), HC55 deploy per deploy/README.md, eerste werkende feature kiezen (merge of split = client-only, geen mail/OCR-deps) → v0.1.0-Geschke bij eerste groene feature"
 ---
 
 # Sessie 2026-06-03 — newp PDFHorse v0.0.1-Warnock
@@ -35,6 +35,16 @@ Nieuw project PDFHorse aanmaken: anonieme browser-first PDF-bewerker (merge/spli
 ### Prompt 4 — "A. newp PDFHorse, doel: PDF-merge/split/OCR; en invulmogelijkheid met handtekening. uploaden als bitmap,svg of ter plekken tekenen. resulaat opslaan als pdf, printen of mailen via pdfservic@icthorse.nl"
 **Actie:** Volledige WhatIf voor newp PDFHorse: 4-stap plan + 10 invul-aannames + impactanalyse.
 **Keuze:** Voorstel ecosysteem Meta_iCt_Horse_Diensten + PUBLIC AGPL + v0.0.1-Warnock + HC55:3963 + URL icthorse.nl/PDFHorse/ + mailbox pdfservice@icthorse.nl.
+
+### Prompt 6 — "ga door met v0.0.2"
+**Actie:** v0.0.2-Warnock skelet gebouwd (groene bump, geen codename-wijziging):
+- `backend/main.py` (FastAPI + CORS + lifespan + tmp-dir) + `__init__.py` + `requirements.txt`
+- `backend/tests/test_health.py` — 4 tests health/limits/ocr-501/mail-501, alle groen
+- `frontend/index.html` (Alpine+Tailwind CDN, 5 tabs: merge/split/fill/sign/ocr) + `js/app.js` (health+limits fetch) + `css/styles.css`
+- `deploy/nginx-pdfhorse.conf` (location /PDFHorse/ static + /PDFHorse/api/ proxy met client_max_body_size 55m + access_log off) + `deploy/pdfhorse.service` (systemd hardened) + `deploy/README.md` (HC55 install-stappen)
+- Live smoke-test op alt-poort (3964): health 200 + limits 200 + ocr/mail 501 ✓
+- `version.json` → v0.0.2 + ACTIONS.md afgevinkt
+**Keuze:** Codenaam blijft Warnock (groene mini-bump). v0.1.0-Geschke pas bij eerste werkende feature (merge of split — client-only, geen externe deps).
 
 ### Prompt 5 — "verder"
 **Actie:** Pre-flight (Meta_iCt_Horse_Diensten ✓ / poort 3963 vrij ✓ / gh auth ✓ / MEMORY.md 32KB → kort houden / repo lokaal nog niet aanwezig). 8-stap-cascade gestart:

@@ -1,0 +1,31 @@
+[Unit]
+Description=PDFHorse FastAPI backend (anonieme PDF-bewerker)
+After=network.target
+Documentation=https://github.com/cpaglebbeek/PDFHorse
+
+[Service]
+Type=exec
+User=pdfhorse
+Group=pdfhorse
+WorkingDirectory=/opt/pdfhorse
+EnvironmentFile=/opt/pdfhorse/.env
+ExecStart=/opt/pdfhorse/venv/bin/uvicorn backend.main:app --host 127.0.0.1 --port 3963 --workers 2
+
+# Hardening
+NoNewPrivileges=true
+PrivateTmp=false
+ProtectSystem=full
+ProtectHome=true
+ReadWritePaths=/tmp/pdfhorse /opt/pdfhorse/logs
+
+Restart=on-failure
+RestartSec=5s
+TimeoutStartSec=20s
+
+# Logging
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=pdfhorse
+
+[Install]
+WantedBy=multi-user.target

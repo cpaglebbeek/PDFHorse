@@ -1,5 +1,7 @@
-// PDFHorse frontend root (Alpine.js root component). v0.2.0-Wozencraft.
-// Merge en Split zijn volledig client-side via pdf-lib (window.PDFLib).
+// PDFHorse frontend root (Alpine.js root component). v0.3.0-Putman.
+// Merge, Split en Fill zijn volledig client-side:
+//   - Merge + Split: pdf-lib (window.PDFLib)
+//   - Fill: PDF.js render preview (window.pdfjsLib) + pdf-lib drawText
 
 const MAX_FILE_BYTES    = 50  * 1024 * 1024;
 const MAX_SESSION_BYTES = 100 * 1024 * 1024;
@@ -36,6 +38,21 @@ function pdfHorseApp() {
       busy: false,
       error: '',
       notice: '',
+    },
+
+    fill: {
+      file: null,
+      pdfBytes: null,
+      pageCount: 0,
+      pages: [],
+      fields: [],
+      fontSize: 12,
+      dragOver: false,
+      loading: false,
+      busy: false,
+      error: '',
+      notice: '',
+      seq: 0,
     },
 
     init() {
@@ -327,6 +344,170 @@ function pdfHorseApp() {
 
     _sleep(ms) {
       return new Promise(r => setTimeout(r, ms));
+    },
+
+    // ---------- Fill ----------
+
+    onFillFileInput(ev) {
+      this._fillLoad(ev.target.files && ev.target.files[0]);
+      ev.target.value = '';
+    },
+
+    onFillDrop(ev) {
+      const dt = ev.dataTransfer;
+      if (dt && dt.files && dt.files[0]) this._fillLoad(dt.files[0]);
+    },
+
+    async _fillLoad(f) {
+      this.fill.error = '';
+      this.fill.notice = '';
+      if (!f) return;
+      const isPdf = f.type === 'application/pdf' || /\.pdf$/i.test(f.name);
+      if (!isPdf) {
+        this.fill.error = `"${f.name}" is geen PDF.`;
+        return;
+      }
+      if (f.size > MAX_FILE_BYTES) {
+        this.fill.error = `"${f.name}" overschrijdt 50 MB.`;
+        return;
+      }
+      if (!window.PDFLib) {
+        this.fill.error = 'pdf-lib is niet geladen.';
+        return;
+      }
+      this.fill.loading = true;
+      this.fill.file = f;
+      this.fill.fields = [];
+      this.fill.pages = [];
+      try {
+        this.fill.pdfBytes = new Uint8Array(await f.arrayBuffer());
+        const srcCheck = await window.PDFLib.PDFDocument.load(this.fill.pdfBytes, { ignoreEncryption: false });
+        this.fill.pageCount = srcCheck.getPageCount();
+        this.fill.pages = Array.from({ length: this.fill.pageCount }, (_, i) => ({ index: i }));
+
+        // Wacht op pdfjsLib (kan async geladen worden)
+        await this._waitForPdfJs();
+        if (!window.pdfjsLib) {
+          this.fill.error = 'PDF.js is niet geladen — preview niet mogelijk. Probeer opnieuw of refresh de pagina.';
+          this.fill.loading = false;
+          return;
+        }
+
+        // Render alle pages
+        await this.$nextTick();
+        const loadingTask = window.pdfjsLib.getDocument({ data: this.fill.pdfBytes.slice() });
+        const pdf = await loadingTask.promise;
+        for (let i = 1; i <= pdf.numPages; i++) {
+          const page = await pdf.getPage(i);
+          const viewport = page.getViewport({ scale: 1.0 });
+          const canvas = document.getElementById('fill-canvas-' + (i - 1));
+          if (!canvas) continue;
+          canvas.width = viewport.width;
+          canvas.height = viewport.height;
+          const ctx = canvas.getContext('2d');
+          await page.render({ canvasContext: ctx, viewport }).promise;
+          this.fill.pages[i - 1].width = viewport.width;
+          this.fill.pages[i - 1].height = viewport.height;
+        }
+      } catch (e) {
+        if (String(e).toLowerCase().includes('encrypt')) {
+          this.fill.error = `"${f.name}" is versleuteld en kan niet worden ingevuld.`;
+        } else {
+          this.fill.error = e.message || String(e);
+        }
+        this.fill.file = null;
+      } finally {
+        this.fill.loading = false;
+      }
+    },
+
+    async _waitForPdfJs() {
+      const maxWait = 3000, step = 50;
+      let waited = 0;
+      while (!window.pdfjsLib && waited < maxWait) {
+        await this._sleep(step);
+        waited += step;
+      }
+    },
+
+    addFillField(ev, pageIdx) {
+      // Voorkom dat klik in een bestaand input-veld nieuwe field aanmaakt
+      if (ev.target && ev.target.tagName === 'INPUT') return;
+      const canvas = ev.currentTarget;
+      const rect = canvas.getBoundingClientRect();
+      const x = ev.clientX - rect.left;
+      const y = ev.clientY - rect.top;
+      this.fill.fields.push({
+        id: ++this.fill.seq,
+        page: pageIdx,
+        x, y,
+        text: '',
+        fontSize: this.fill.fontSize,
+      });
+    },
+
+    removeFillField(id) {
+      this.fill.fields = this.fill.fields.filter(f => f.id !== id);
+    },
+
+    fillReset() {
+      this.fill.file = null;
+      this.fill.pdfBytes = null;
+      this.fill.pageCount = 0;
+      this.fill.pages = [];
+      this.fill.fields = [];
+      this.fill.error = '';
+      this.fill.notice = '';
+    },
+
+    async runFill() {
+      if (this.fill.busy || !this.fill.fields.length || !this.fill.pdfBytes) return;
+      this.fill.busy = true;
+      this.fill.error = '';
+      this.fill.notice = '';
+      try {
+        const { PDFDocument, StandardFonts, rgb } = window.PDFLib;
+        const pdfDoc = await PDFDocument.load(this.fill.pdfBytes.slice(), { ignoreEncryption: false });
+        const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
+        const pages = pdfDoc.getPages();
+
+        // Groepeer fields per page
+        const byPage = {};
+        for (const f of this.fill.fields) {
+          if (!f.text) continue;
+          (byPage[f.page] = byPage[f.page] || []).push(f);
+        }
+
+        for (const [pageIdx, fields] of Object.entries(byPage)) {
+          const pIdx = parseInt(pageIdx, 10);
+          const pdfPage = pages[pIdx];
+          const previewPage = this.fill.pages[pIdx];
+          if (!pdfPage || !previewPage) continue;
+          const { width: pdfWidth, height: pdfHeight } = pdfPage.getSize();
+          const scaleX = pdfWidth / previewPage.width;
+          const scaleY = pdfHeight / previewPage.height;
+          for (const f of fields) {
+            // Canvas-coords (top-left origin) → PDF-coords (bottom-left origin)
+            const pdfX = f.x * scaleX;
+            const pdfY = pdfHeight - (f.y * scaleY);
+            pdfPage.drawText(f.text, {
+              x: pdfX,
+              y: pdfY,
+              size: f.fontSize,
+              font,
+              color: rgb(0, 0, 0),
+            });
+          }
+        }
+        const out = await pdfDoc.save();
+        const baseName = this.fill.file.name.replace(/\.pdf$/i, '');
+        this._downloadBlob(out, `${baseName}_filled.pdf`, 'application/pdf');
+        this.fill.notice = `Ingevuld: ${this.fill.fields.length} veld(en) → ${baseName}_filled.pdf gedownload.`;
+      } catch (e) {
+        this.fill.error = e.message || String(e);
+      } finally {
+        this.fill.busy = false;
+      }
     },
   };
 }

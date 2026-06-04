@@ -1,8 +1,8 @@
 {
-  "version": "0.2.0",
-  "codename": "Wozencraft",
+  "version": "0.3.0",
+  "codename": "Putman",
   "released": "2026-06-04",
-  "status": "second-feature",
+  "status": "third-feature",
   "theme": "PDF-pioniers",
-  "notes": "v0.2.0-Wozencraft (oranje bump): tweede werkende feature — client-side split via pdf-lib (CDN). Page-range syntax '1-3, 5, 8-10' → N output-PDFs. Validatie binnen 1..pageCount. Sequentiële downloads met 200ms delay (popup-blocker mitigation). Geen ZIP. Backend ongewijzigd t.o.v. v0.0.2-Warnock. Codename Brotz blijft gereserveerd voor v1.0.0."
+  "notes": "v0.3.0-Putman (oranje bump): derde werkende feature — client-side fill (vrije tekstvelden) via PDF.js preview + klik-overlay + pdf-lib drawText. Plus P2-docs: docs/PRINCIPLES.md (8 principes) + docs/PRIVACY.md + docs/BUGLIST.md skelet + CHANGELOG.md. Backend ongewijzigd. Codename Brotz blijft gereserveerd voor v1.0.0."
 }

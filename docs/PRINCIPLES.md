@@ -1,0 +1,90 @@
+# PRINCIPLES — PDFHorse
+
+> Ontwerpprincipes met **waarom**. Bij elke architectuur-/feature-beslissing: toets aan deze principes; bij conflict eerst hier reconciliëren vóór code.
+
+## P1 — Client-first
+
+**Regel:** Elke PDF-operatie die zonder server kán, gebeurt in de browser.
+
+**Waarom:** PDFs bevatten vaak gevoelige inhoud (contracten, medische data, financiën). Hoe minder de inhoud het apparaat van de gebruiker verlaat, hoe minder exposure. Server-side verwerking is alleen toegestaan waar het technisch onvermijdelijk is (OCR vereist Tesseract; mail vereist SMTP-server).
+
+**Toepassing:** Merge, split, fill, sign, download, print → 100% client. OCR + mail → server, met striktst mogelijke isolatie (tijdelijke `/tmp/`, direct gewist, geen logging van inhoud).
+
+**Conflict-test:** Als je overweegt iets server-side te doen — kan het ook via een browser-lib? Zo ja: client.
+
+## P2 — CDN-only, geen build-pipeline
+
+**Regel:** Frontend-dependencies via CDN (`cdn.tailwindcss.com`, `unpkg.com`). Géén npm, geen webpack/vite, geen `package.json` aan de frontend-kant.
+
+**Waarom:** PDFHorse moet één enkel `index.html` zijn dat overal werkt — lokaal openen (`file://`), Hostinger-static, HC55-nginx. Geen build-pipeline = geen breukvlak tussen ontwikkelaars, geen versie-divergence tussen lokaal en productie, geen `node_modules` te onderhouden.
+
+**Toepassing:** Tailwind utilities runtime, Alpine.js reactive binding, pdf-lib voor PDF read/write — allemaal via `<script src="https://unpkg.com/...">`.
+
+**Conflict-test:** Als je een lib wil toevoegen die geen CDN-bundel heeft of een build-step vereist, moet je P2 overrulen. Verifieer eerst of er een browser-native alternatief is.
+
+## P3 — Stateless server
+
+**Regel:** Backend (FastAPI) heeft géén database, geen sessies, geen persistente state. Elke request is volledig zelfdragend; binnen 1 response volledig verwerkt en alle artefacten verwijderd.
+
+**Waarom:** Geen DB = geen lek-risico, geen GDPR-bewaarverplichting, geen schema-migraties, geen backup-headache. Stateless = horizontaal schaalbaar en herstartbaar zonder dataverlies.
+
+**Toepassing:** OCR-flow: upload → `/tmp/pdfhorse/<uuid>/in.pdf` → ocrmypdf → response → `shutil.rmtree(<uuid>)` in `finally`. Mail-flow: upload + adres → SMTP → response → unlink. Geen logging van inhoud (alleen request-timing + groottes voor metrics).
+
+**Conflict-test:** Als een feature server-state vereist, eerst P1 + P3 reconciliëren: kan de state in de browser blijven?
+
+## P4 — Geen account, geen tracking
+
+**Regel:** Geen registratie, geen login, geen cookies (behalve strikt-noodzakelijke session-cookie als nginx dat per ongeluk zet — verifieer en disable), geen analytics, geen Google Fonts (privacy-tracking-vector).
+
+**Waarom:** Anonimiteit is **het** onderscheidende kenmerk van PDFHorse t.o.v. commerciële tools (Adobe, Smallpdf, iLovePDF). Een gebruiker die snel een PDF wil mergen wil niet eerst inschrijven, niet getrackt worden, niet zijn naam aan een tool koppelen.
+
+**Toepassing:** nginx `access_log off` voor `/PDFHorse/`. Geen 3rd-party scripts behalve de uitdrukkelijk vereiste CDN-libs (Tailwind, Alpine, pdf-lib). Tailwind via CDN serveert geen Google Fonts in default.
+
+**Conflict-test:** Als een feature personalisatie vereist (bv. "onthoud mijn handtekening"): kan het in `localStorage` (lokaal-only), niet in een server-account?
+
+## P5 — Mail-only, geen archief
+
+**Regel:** Als de gebruiker een PDF per mail laat versturen via `pdfservice@icthorse.nl`, gaat hij ALLEEN naar het opgegeven recipient-adres. Geen BCC-self, geen kopie naar systeem-archief, geen log van de inhoud.
+
+**Waarom:** P4 (anonimiteit) impliceert dat het systeem ook niet stiekem mee mag lezen. Een BCC-archief is een sneaky vorm van tracking. De gebruiker moet de tool zonder zorgen kunnen gebruiken voor vertrouwelijke documenten.
+
+**Toepassing:** Backend `mail`-endpoint logt alleen `{from: pdfservice@icthorse.nl, to: <recipient>, subject: <user>, timestamp}` — niet de inhoud, niet de PDF-bytes. SMTP-response gewist na verzending.
+
+**Conflict-test:** Als je een mail-feature toevoegt en zou willen tracken voor delivery-confirmation: kan dat in de SMTP-response zelf (sync) i.p.v. een eigen log?
+
+## P6 — AGPL-3.0 copyleft
+
+**Regel:** Broncode altijd publiek. Wijzigingen die als netwerk-dienst beschikbaar gemaakt worden moeten broncode publiceren. Geen closed-source forks.
+
+**Waarom:** Anonimiteit + privacy zijn alleen geloofwaardig als de code openbaar en auditable is. AGPL beschermt tegen "wij hebben jouw tool overgenomen en er een eigen commerciële spy-versie van gemaakt"-scenario's. Plus: ideologische pas bij iCt Horse public-tooling lijn.
+
+**Toepassing:** `LICENSE` AGPL-3.0 in repo-root. Header in `index.html` linkt naar broncode. `README.md` benoemt copyleft expliciet. Bij contributie: contributors implicit consent op AGPL.
+
+**Conflict-test:** Als iemand wil forken voor commercieel gebruik moet hun fork ook AGPL blijven. Geen MIT/BSD downgrade.
+
+## P7 — Limieten als deel van het ontwerp
+
+**Regel:** Harde limieten staan in de code (`MAX_FILE_BYTES`, `MAX_SESSION_BYTES`, `SESSION_TIMEOUT_S`) én worden client + server consistent toegepast. Limieten kunnen niet door config-flags omzeild worden.
+
+**Waarom:** Zonder limieten is een gratis anonieme PDF-tool een DoS-doelwit. Limieten beschermen de service voor alle gebruikers. Consistent toepassen = geen verschil tussen browser-melding en server-rejection (frustratie-vermijding).
+
+**Toepassing:** Frontend `MAX_FILE_BYTES = 50*1024*1024`, backend `MAX_UPLOAD_SIZE_BYTES = 52428800`, nginx `client_max_body_size 55m`. Alle drie gelinkt aan dezelfde "50 MB"-belofte naar de gebruiker.
+
+**Conflict-test:** Als een gebruiker een groter bestand wil verwerken: stuur ze naar lokale tools (PDFHorse zelf via `file://` open kan ook grotere files aan), niet naar een config-toggle.
+
+## P8 — Documentatie is onderdeel van de feature
+
+**Regel:** Een feature is pas "klaar" als `ARCHITECTURE.md`, `docs/DEPENDENCIES.md`, en (waar van toepassing) `docs/DESIGN_TOKENS.md` + `CHANGELOG.md` mee-bijgewerkt zijn.
+
+**Waarom:** Aansluitend op `Meta_Master/CLAUDE.md` Expliciete Vastlegging Principe. Code zonder vastlegging is een black box voor de volgende sessie of agent. Vastlegging is geen "later"-werk, het is een definitie van done.
+
+**Toepassing:** PR-template / commit-checklist bevat docs-update als verplicht item. Bij sanitycheck-audit telt ontbrekende docs als 🟠/❌.
+
+**Conflict-test:** Als tijd-pressure suggereert docs over te slaan: zet een TODO-comment in de feature + open ACTIONS-entry, niet "ik maak het later af" zonder spoor.
+
+## Versiehistorie
+
+| Versie | Wijziging |
+|---|---|
+| v0.0.1-Warnock | Principes verspreid in CLAUDE.md + ARCHITECTURE.md, niet als eigen doc |
+| v0.3.0-Putman | **`docs/PRINCIPLES.md` aangemaakt** met 8 principes P1-P8 |

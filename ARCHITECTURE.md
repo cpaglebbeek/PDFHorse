@@ -115,10 +115,26 @@ Modus C: live-tekenen → signature_pad → dataURL → embed
 ```
 Geen netwerk-call (tot output-stap).
 
-### Fill (client-only)
+### Fill (client-only) — geïmplementeerd in v0.3.0-Putman
 ```
-User klikt op pagina → tekstveld plaatsen → invoegen via pdf-lib.drawText() op canvas-coords (PDF-coords transform)
+Browser ← user-upload 1 PDF
+    │
+    ▼ pdf-lib PDFDocument.load → pageCount
+    │  PDF.js getDocument → per page render in <canvas>
+    ▼
+User klikt op pagina-canvas → addFillField()
+    │  → tekstveld op (x,y) canvas-coords, met fontSize
+    │  → Alpine.js reactive list, ✕ knop voor verwijder
+    ▼
+runFill():
+    pdf-lib PDFDocument.load
+    embedFont(Helvetica)
+    per veld: canvas (x,y, top-left origin) → PDF (x, height-y, bottom-left origin)
+              scale = pdfSize / canvasSize per page
+              page.drawText(text, { x, y, size, font })
+    pdfDoc.save → Blob → "<basename>_filled.pdf" download
 ```
+Geen netwerk-call. Libs: pdf-lib 1.17.1 + PDF.js 4.0.379 (cdnjs).
 
 ### Mail-output (client → server)
 ```

@@ -1,8 +1,8 @@
 ---
 date: 2026-06-04
 repo: PDFHorse
-status: open
-resume: "verder met pdfhorse — fill-feature (tekstvelden) na v0.2.0-Wozencraft split"
+status: done
+resume: ""
 ---
 
 # Sessie 2026-06-04 — v0.2.0-Wozencraft: client-side split

@@ -8,6 +8,22 @@
 
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.0.379/pdf.min.mjs" type="module"></script>
+  <script type="module">
+    // Configureer PDF.js worker
+    if (window['pdfjs-dist/build/pdf']) {
+      window.pdfjsLib = window['pdfjs-dist/build/pdf'];
+    }
+    // Modern: import van pdf.mjs zet pdfjsLib niet automatisch — fallback via dynamic import
+    try {
+      const mod = await import('https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.0.379/pdf.min.mjs');
+      window.pdfjsLib = mod;
+      window.pdfjsLib.GlobalWorkerOptions.workerSrc =
+        'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.0.379/pdf.worker.min.mjs';
+    } catch (e) {
+      console.warn('PDF.js load failed:', e);
+    }
+  </script>
   <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
   <link rel="stylesheet" href="css/styles.css" />
@@ -18,7 +34,7 @@
     <div class="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between">
       <a href="./" class="flex items-center gap-2">
         <span class="text-xl font-bold">PDFHorse</span>
-        <span class="text-xs text-slate-400">v0.2.0 — Wozencraft</span>
+        <span class="text-xs text-slate-400">v0.3.0 — Putman</span>
       </a>
       <a href="https://icthorse.nl/" class="text-sm text-slate-300 hover:text-white">iCt Horse →</a>
     </div>
@@ -181,9 +197,86 @@
 
     <section x-show="active === 'fill'" role="tabpanel" aria-labelledby="tab-fill">
       <h2 class="text-lg font-semibold mb-2">Invullen — tekst op PDF</h2>
-      <p class="text-sm text-slate-600 mb-4">Klik op de pagina om een tekstveld te plaatsen. Geen AcroForm vereist.</p>
-      <div class="border-2 border-dashed border-slate-300 rounded-lg p-12 text-center text-slate-500 bg-white">
-        Drop-zone + canvas-overlay — wordt in v0.0.3 functioneel.
+      <p class="text-sm text-slate-600 mb-4">
+        Upload een PDF, klik op een pagina om een tekstveld te plaatsen, type je tekst, en download de invulde PDF.
+        Volledig in je browser — geen upload.
+      </p>
+
+      <label x-show="!fill.file"
+        for="fill-file-input"
+        class="block border-2 border-dashed rounded-lg p-8 text-center bg-white cursor-pointer transition"
+        :class="fill.dragOver ? 'border-slate-900 bg-slate-100' : 'border-slate-300 hover:border-slate-500'"
+        @dragover.prevent="fill.dragOver = true"
+        @dragleave.prevent="fill.dragOver = false"
+        @drop.prevent="fill.dragOver = false; onFillDrop($event)"
+      >
+        <div class="text-slate-600 text-sm">
+          <span class="font-medium">Klik of sleep één PDF hierheen</span><br/>
+          <span class="text-xs text-slate-500">max 50 MB</span>
+        </div>
+        <input id="fill-file-input" type="file" accept="application/pdf,.pdf" class="hidden" @change="onFillFileInput($event)" />
+      </label>
+
+      <div x-show="fill.file" class="mt-2">
+        <div class="flex flex-wrap items-center justify-between gap-2 text-sm mb-3">
+          <div>
+            <span class="font-medium" x-text="fill.file ? fill.file.name : ''"></span>
+            <span class="text-slate-500"> — <span x-text="fill.pageCount"></span> pagina<span x-show="fill.pageCount !== 1">'s</span></span>
+          </div>
+          <div class="flex items-center gap-3 text-xs">
+            <label class="flex items-center gap-1">
+              Tekstgrootte
+              <input type="number" min="6" max="48" x-model.number="fill.fontSize" class="w-14 px-1 py-0.5 border rounded font-mono" />
+            </label>
+            <span class="text-slate-500">Klik op een pagina → tekstveld</span>
+          </div>
+        </div>
+
+        <div x-show="fill.loading" class="text-sm text-slate-500 italic">Pagina's renderen…</div>
+
+        <div class="space-y-6">
+          <template x-for="(page, idx) in fill.pages" :key="idx">
+            <div class="relative inline-block border border-slate-300 bg-white shadow-sm" style="line-height:0;">
+              <canvas
+                :id="'fill-canvas-' + idx"
+                class="cursor-crosshair"
+                @click="addFillField($event, idx)"
+              ></canvas>
+              <template x-for="(f, fi) in fill.fields.filter(f => f.page === idx)" :key="f.id">
+                <div
+                  class="absolute"
+                  :style="'left:'+f.x+'px; top:'+f.y+'px; transform:translate(-2px,-' + (f.fontSize * 0.85) + 'px);'"
+                >
+                  <input
+                    type="text"
+                    x-model="f.text"
+                    class="px-1 border border-blue-500 bg-yellow-50 font-mono"
+                    :style="'font-size:' + f.fontSize + 'px; line-height:1;'"
+                    placeholder="…"
+                  />
+                  <button type="button"
+                    class="absolute -top-2 -right-2 w-4 h-4 rounded-full bg-red-600 text-white text-xs leading-none"
+                    @click="removeFillField(f.id)"
+                    title="Verwijder veld">×</button>
+                </div>
+              </template>
+            </div>
+          </template>
+        </div>
+
+        <div class="mt-4 flex flex-wrap items-center gap-3 text-sm">
+          <button type="button"
+            class="px-4 py-2 rounded bg-slate-900 text-white disabled:opacity-40"
+            :disabled="!fill.fields.length || fill.busy"
+            @click="runFill()">
+            <span x-show="!fill.busy">Download invulde PDF (<span x-text="fill.fields.length"></span> veld<span x-show="fill.fields.length !== 1">en</span>)</span>
+            <span x-show="fill.busy">Bezig…</span>
+          </button>
+          <button type="button" class="px-3 py-2 rounded border text-slate-700" @click="fillReset()">Wissen</button>
+        </div>
+
+        <p x-show="fill.error" x-text="fill.error" class="mt-3 text-sm text-red-700"></p>
+        <p x-show="fill.notice" x-text="fill.notice" class="mt-3 text-sm text-emerald-700"></p>
       </div>
     </section>
 

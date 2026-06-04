@@ -14,13 +14,17 @@
 - [ ] **HC55 deploy:** install per `deploy/README.md` — wacht op mailbox-creds
 - [ ] **nginx-config op HC55:** snippet inhaken in main server-block + reload (gebruikersactie of na deploy)
 
-## Volgende (v0.2.0-Wozencraft → v0.3.0)
+## Volgende (v0.3.0-Putman → v0.4.0)
 
 - [x] **Merge-functie werkend** (pdf-lib via CDN, client-only, drag-to-reorder, size-limits, encrypted-PDF detect) (04-06, v0.1.0-Geschke)
 - [x] **Split-functie werkend** (pdf-lib via CDN, client-only, range-syntax "1-3, 5, 8-10", N losse downloads met 200ms delay, encrypted-PDF detect) (04-06, v0.2.0-Wozencraft)
+- [x] **Fill-functie werkend** (PDF.js preview + klik-overlay + tekstvelden + pdf-lib drawText + canvas→PDF coords-transform + download) (04-06, v0.3.0-Putman)
+- [x] **docs/PRINCIPLES.md** met 8 principes P1-P8 (04-06, v0.3.0-Putman)
+- [x] **docs/PRIVACY.md** privacyverklaring (04-06, v0.3.0-Putman)
+- [x] **docs/BUGLIST.md** skelet (04-06, v0.3.0-Putman)
+- [x] **CHANGELOG.md** 5 entries v0.0.1 → v0.3.0 (04-06, v0.3.0-Putman)
 - [ ] Sign-modus C (live-canvas) — signature_pad
 - [ ] Sign-modus A (bitmap upload) + B (SVG upload)
-- [ ] Fill-functie (free-form tekst overlay)
 - [ ] OCR-endpoint (ocrmypdf + Tesseract nld+eng) op HC55
 - [ ] Mail-endpoint (SMTP Hostinger)
 - [ ] Cleanup-job `/tmp/pdfhorse/` (30 min)

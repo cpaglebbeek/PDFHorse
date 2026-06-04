@@ -8,8 +8,8 @@
 |---|---|---|---|---|---|
 | Tailwind CSS | `latest` (CDN runtime) | `cdn.tailwindcss.com` | Utility-CSS | actief | MIT |
 | Alpine.js | `3.x.x` | `unpkg.com/alpinejs@3.x.x` | Reactive UI binding | actief | MIT |
-| **pdf-lib** | **`1.17.1`** | **`unpkg.com/pdf-lib@1.17.1`** | **PDF read/write (merge/split/fill/sign client-side)** | **actief (v0.1.0 merge + v0.2.0 split)** | **MIT** |
-| PDF.js | — | `mozilla.github.io/pdf.js` | Page-thumbnails / preview | gepland (split-preview later) | Apache-2.0 |
+| **pdf-lib** | **`1.17.1`** | **`unpkg.com/pdf-lib@1.17.1`** | **PDF read/write (merge/split/fill/sign client-side)** | **actief (v0.1.0 merge + v0.2.0 split + v0.3.0 fill)** | **MIT** |
+| **PDF.js** | **`4.0.379`** | **`cdnjs.cloudflare.com/ajax/libs/pdf.js/4.0.379/`** | **Page-rendering naar canvas (fill-preview)** | **actief (v0.3.0)** | **Apache-2.0** |
 | signature_pad | — | `unpkg.com/signature_pad` | Live handtekening canvas | gepland (sign-feature) | MIT |
 | Fabric.js | — | `unpkg.com/fabric` | Canvas-overlay (sign-modus A/B) | gepland (sign-feature) | MIT |
 
@@ -59,3 +59,4 @@
 | v0.0.2-Warnock | Tailwind + Alpine CDN, FastAPI + uvicorn |
 | v0.1.0-Geschke | **+ pdf-lib 1.17.1** (CDN) voor client-side merge |
 | v0.2.0-Wozencraft | Geen nieuwe deps — split hergebruikt pdf-lib 1.17.1 |
+| v0.3.0-Putman | **+ PDF.js 4.0.379** (CDN cdnjs) voor fill-preview canvas-render |

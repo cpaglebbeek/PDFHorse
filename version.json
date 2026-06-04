@@ -1,0 +1,8 @@
+{
+  "version": "0.0.1",
+  "codename": "Warnock",
+  "released": "2026-06-03",
+  "status": "skeleton",
+  "theme": "PDF-pioniers",
+  "notes": "Initial skeleton — README + CLAUDE.md + ARCHITECTURE.md + LICENSE + AGPL-3.0. Geen runnable code."
+}

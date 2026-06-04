@@ -14,11 +14,12 @@
 - [ ] **HC55 deploy:** install per `deploy/README.md` — wacht op mailbox-creds
 - [ ] **nginx-config op HC55:** snippet inhaken in main server-block + reload (gebruikersactie of na deploy)
 
-## Volgende (v0.7.0-Knuth → v0.8.0)
+## Volgende (v0.8.0-Reid → v0.9.0)
 
 - [x] **Merge-functie werkend** (04-06, v0.1.0-Geschke)
 - [x] **Merge accepteert .docx** (05-06, v0.6.0-Paxton)
-- [x] **Convert-tab** — batch docx/xlsx/png/jpg → PDF; toggle "Combineer alle"; xlsx-endpoint via gedeelde `_office_to_pdf` helper; image client-side via pdf-lib embedPng/embedJpg fit-to-A4 (05-06, v0.7.0-Knuth)
+- [x] **Convert-tab** (05-06, v0.7.0-Knuth)
+- [x] **OCR-functie werkend** — Tesseract nld+eng via ocrmypdf, idempotent met --skip-text, output-bar geïntegreerd (05-06, v0.8.0-Reid)
 - [x] **Split-functie werkend** (04-06, v0.2.0-Wozencraft)
 - [x] **Fill-functie werkend** (04-06, v0.3.0-Putman)
 - [x] **Sign-functie werkend** 3 modi A/B/C (04-06, v0.4.0-Taft)

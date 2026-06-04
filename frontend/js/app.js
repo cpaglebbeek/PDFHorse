@@ -111,6 +111,14 @@ function pdfHorseApp() {
       seq: 0,
     },
 
+    ocr: {
+      file: null,
+      dragOver: false,
+      busy: false,
+      error: '',
+      notice: '',
+    },
+
     init() {
       this.fetchHealth();
       this.fetchLimits();
@@ -654,6 +662,60 @@ function pdfHorseApp() {
       this.fill.fields = [];
       this.fill.error = '';
       this.fill.notice = '';
+    },
+
+    // ---------- OCR ----------
+
+    onOcrFileInput(ev) {
+      this._ocrSet(ev.target.files && ev.target.files[0]);
+      ev.target.value = '';
+    },
+    onOcrDrop(ev) {
+      const dt = ev.dataTransfer;
+      if (dt && dt.files && dt.files[0]) this._ocrSet(dt.files[0]);
+    },
+    _ocrSet(f) {
+      this.ocr.error = '';
+      this.ocr.notice = '';
+      if (!f) return;
+      const isPdf = f.type === 'application/pdf' || /\.pdf$/i.test(f.name);
+      if (!isPdf) { this.ocr.error = `"${f.name}" is geen PDF.`; return; }
+      if (f.size > MAX_FILE_BYTES) { this.ocr.error = `"${f.name}" overschrijdt 50 MB.`; return; }
+      this.ocr.file = f;
+    },
+    ocrReset() {
+      this.ocr.file = null;
+      this.ocr.error = '';
+      this.ocr.notice = '';
+    },
+    async runOcr() {
+      if (this.ocr.busy || !this.ocr.file) return;
+      this.ocr.busy = true;
+      this.ocr.error = '';
+      this.ocr.notice = '';
+      try {
+        const fd = new FormData();
+        fd.append('file', this.ocr.file, this.ocr.file.name);
+        const r = await fetch(this._apiUrl('/api/ocr'), { method: 'POST', body: fd });
+        if (!r.ok) {
+          let detail = '';
+          try { detail = (await r.json()).detail || ''; } catch {}
+          if (r.status === 501) {
+            throw new Error('OCR-endpoint nog niet actief op deze deploy.');
+          }
+          throw new Error(`OCR mislukt (${r.status}). ${detail}`);
+        }
+        const bytes = new Uint8Array(await r.arrayBuffer());
+        const base = this.ocr.file.name.replace(/\.pdf$/i, '');
+        const fn = `${base}_ocr.pdf`;
+        this._downloadBlob(bytes, fn, 'application/pdf');
+        this._setOutput(bytes, fn, 'ocr (Tesseract nld+eng)');
+        this.ocr.notice = `Doorzoekbaar gemaakt → ${fn} gedownload.`;
+      } catch (e) {
+        this.ocr.error = e.message || String(e);
+      } finally {
+        this.ocr.busy = false;
+      }
     },
 
     // ---------- Convert ----------

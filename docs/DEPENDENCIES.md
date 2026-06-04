@@ -26,8 +26,8 @@
 | FastAPI | latest (pip) | HTTP framework | actief |
 | uvicorn | latest | ASGI server | actief |
 | python-multipart | latest | file-upload parsing | actief (stub) |
-| ocrmypdf | latest | OCR-wrapper (Tesseract) | gepland — wacht op Tesseract install |
-| Tesseract 5 (system) | OS-level | OCR-engine + `nld+eng` taalpacks | gepland (HC55) |
+| **ocrmypdf** | **`16.5.0`** | **OCR-wrapper (Tesseract) — `/api/ocr` endpoint** | **actief (v0.8.0)** |
+| **Tesseract 5 (system)** | **OS-level** | **OCR-engine + `nld+eng` taalpacks + ghostscript + unpaper + qpdf** | **actief op HC55 (v0.8.0)** |
 | **LibreOffice (`libreoffice-core` + `libreoffice-writer` + `libreoffice-calc`)** | **OS-level** | **`soffice --headless` voor `.docx` (v0.6.0) en `.xlsx` (v0.7.0) → PDF** | **actief op HC55** |
 | smtplib (stdlib) | — | SMTP via Hostinger | gepland v0.0.3 |
 | slowapi | latest | Rate-limiting `/api/ocr` + `/api/mail` | gepland |
@@ -65,3 +65,4 @@
 | v0.5.0-Crocker | Geen nieuwe deps — output-bar is pure JS + bestaande fetch |
 | v0.6.0-Paxton | **+ LibreOffice (`libreoffice-core` + `libreoffice-writer`)** als OS-level backend-dep voor docx→PDF conversie via `soffice --headless` |
 | v0.7.0-Knuth | **+ `libreoffice-calc`** voor xlsx→PDF. Geen nieuwe frontend-deps — image→PDF gebruikt bestaande pdf-lib `embedPng`/`embedJpg` |
+| v0.8.0-Reid | **+ `ocrmypdf` 16.5.0 (pip) + Tesseract (apt) + tesseract-ocr-nld/eng + ghostscript + unpaper + qpdf** voor `/api/ocr` endpoint |

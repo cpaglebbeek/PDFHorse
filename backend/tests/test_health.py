@@ -31,9 +31,27 @@ def test_limits_returns_numbers():
     assert "eng" in body["ocr_languages"]
 
 
-def test_ocr_stub_returns_501():
-    r = client.post("/api/ocr")
-    assert r.status_code == 501
+def test_ocr_rejects_non_pdf():
+    r = client.post(
+        "/api/ocr",
+        files={"file": ("foo.docx", b"PK\x03\x04", "application/vnd.openxmlformats-officedocument.wordprocessingml.document")},
+    )
+    assert r.status_code == 415
+
+
+def test_ocr_rejects_empty():
+    r = client.post("/api/ocr", files={"file": ("empty.pdf", b"", "application/pdf")})
+    assert r.status_code == 400
+
+
+def test_ocr_returns_503_when_ocrmypdf_absent(monkeypatch):
+    from backend import main as backend_main
+    monkeypatch.setattr(backend_main, "OCRMYPDF_BIN", "/usr/bin/definitely-not-ocrmypdf-xyz")
+    r = client.post(
+        "/api/ocr",
+        files={"file": ("x.pdf", b"%PDF-1.4 fake", "application/pdf")},
+    )
+    assert r.status_code == 503
 
 
 def test_mail_stub_returns_501():

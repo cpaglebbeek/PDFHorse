@@ -3,6 +3,34 @@
 > Versie-historie. Formaat: [Keep a Changelog](https://keepachangelog.com/) op hoofdlijnen, met PDFHorse-eigen codenamen (thema: PDF-pioniers).
 > Bijgewerkt bij elke release. Datums = release naar `main`.
 
+## [v0.8.0-Reid] — 2026-06-05
+
+### Added
+- **OCR-tab werkend** — gescande PDF → doorzoekbare PDF via `ocrmypdf` + Tesseract (NL + EN)
+- **Backend endpoint `POST /api/ocr`** (was 501-stub) — accepteert multipart PDF, draait `ocrmypdf --language nld+eng --skip-text --output-type pdf --quiet`, retourneert `<basename>_ocr.pdf`, BackgroundTask cleanup
+- `--skip-text` flag: idempotent op pagina's die al tekst hebben
+- Frontend OCR-tab: drop-zone + Verwerken-knop + progress "Bezig… (kan 30s–3min duren)"
+- Output-bar krijgt OCR-resultaat
+- HTTP-codes: 415 (non-PDF), 400 (leeg), 413 (>50MB), 502 (ocrmypdf-fout), 503 (ocrmypdf ontbreekt), 504 (timeout 180s)
+
+### Changed
+- `frontend/index.html` header → v0.8.0 — Reid
+- `version.json` → 0.8.0 / Reid
+- `backend/requirements.txt`: `ocrmypdf==16.5.0` uncomment + actief
+- `backend/main.py`: `MAX_OCR_BYTES=50MB`, `OCRMYPDF_BIN` env, `OCR_LANGUAGES=nld+eng`, `OCR_TIMEOUT_S=180s`
+
+### Tests
+- pytest 11/11 groen — 3 nieuwe OCR-tests (415/400/503)
+
+### HC55 deps
+- `apt install tesseract-ocr tesseract-ocr-nld tesseract-ocr-eng ghostscript unpaper qpdf` (~250MB)
+- `ocrmypdf` via pip in venv
+
+### Codename
+**Brian Reid** — auteur van Scribe markup-systeem (1980), document-typografie-pionier. Past bij OCR-fase (tekst-herkenning + structuur). Brotz blijft v1.0.0 reserve.
+
+---
+
 ## [v0.7.0-Knuth] — 2026-06-05
 
 ### Added

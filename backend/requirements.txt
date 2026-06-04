@@ -2,9 +2,9 @@ fastapi==0.115.0
 uvicorn[standard]==0.32.0
 python-multipart==0.0.12
 slowapi==0.1.9
-# v0.0.3 — OCR + mail:
-# ocrmypdf==16.5.0
-# (Tesseract systeembibliotheek vereist; installeren via apt/brew, niet pip)
+ocrmypdf==16.5.0
+# Tesseract + ghostscript zijn systeem-deps:
+#   apt install tesseract-ocr tesseract-ocr-nld tesseract-ocr-eng ghostscript unpaper qpdf
 
 # dev/test
 pytest==8.3.3

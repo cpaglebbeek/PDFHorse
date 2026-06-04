@@ -1,8 +1,8 @@
 ---
 date: 2026-06-05
 repo: PDFHorse
-status: open
-resume: "verder met pdfhorse — OCR backend (Tesseract install + ocrmypdf endpoint) na v0.7.0-Knuth Convert-tab"
+status: done
+resume: ""
 ---
 
 # Sessie 2026-06-05 — v0.7.0-Knuth: Convert-tab (docx/xlsx/png/jpg → PDF + Combine)

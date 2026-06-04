@@ -45,10 +45,14 @@ MAX_UPLOAD_SIZE_BYTES = int(os.environ.get("MAX_UPLOAD_SIZE_BYTES", str(50 * 102
 MAX_SESSION_TOTAL_BYTES = int(os.environ.get("MAX_SESSION_TOTAL_BYTES", str(100 * 1024 * 1024)))
 MAX_DOCX_BYTES = int(os.environ.get("MAX_DOCX_BYTES", str(20 * 1024 * 1024)))
 MAX_XLSX_BYTES = int(os.environ.get("MAX_XLSX_BYTES", str(20 * 1024 * 1024)))
+MAX_OCR_BYTES = int(os.environ.get("MAX_OCR_BYTES", str(50 * 1024 * 1024)))
 SESSION_TIMEOUT_S = int(os.environ.get("SESSION_TIMEOUT_S", "1800"))
 TMP_DIR = Path(os.environ.get("TMP_DIR", "/tmp/pdfhorse"))
 SOFFICE_BIN = os.environ.get("SOFFICE_BIN", "soffice")
 SOFFICE_TIMEOUT_S = int(os.environ.get("SOFFICE_TIMEOUT_S", "60"))
+OCRMYPDF_BIN = os.environ.get("OCRMYPDF_BIN", "ocrmypdf")
+OCR_LANGUAGES = os.environ.get("OCR_LANGUAGES", "nld+eng")
+OCR_TIMEOUT_S = int(os.environ.get("OCR_TIMEOUT_S", "180"))
 
 DOCX_MIME = "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
 XLSX_MIME = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
@@ -209,11 +213,82 @@ def _cleanup_task(work_dir: Path):
 
 
 @app.post("/api/ocr")
-async def ocr() -> JSONResponse:
-    raise HTTPException(
-        status_code=status.HTTP_501_NOT_IMPLEMENTED,
-        detail="OCR endpoint stub — implementatie volgt zodra Tesseract op de host beschikbaar is.",
-    )
+async def ocr(file: UploadFile = File(...)) -> FileResponse:
+    """Maakt een gescande PDF doorzoekbaar via `ocrmypdf` (Tesseract nld+eng).
+
+    Privacy: input + output in unieke `/tmp/pdfhorse/<uuid>/`-map, opgeruimd
+    via `BackgroundTask shutil.rmtree`. Geen content-logging.
+    v0.8.0-Reid.
+    """
+    name = file.filename or "upload.pdf"
+    if not (name.lower().endswith(".pdf") or file.content_type == "application/pdf"):
+        raise HTTPException(
+            status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
+            detail="Alleen PDF-bestanden worden geaccepteerd.",
+        )
+
+    chunks: list[bytes] = []
+    total = 0
+    while True:
+        chunk = await file.read(64 * 1024)
+        if not chunk:
+            break
+        total += len(chunk)
+        if total > MAX_OCR_BYTES:
+            raise HTTPException(
+                status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+                detail=f"Bestand groter dan {MAX_OCR_BYTES // (1024 * 1024)} MB.",
+            )
+        chunks.append(chunk)
+    data = b"".join(chunks)
+    if not data:
+        raise HTTPException(status_code=400, detail="Lege upload.")
+
+    work = TMP_DIR / uuid.uuid4().hex
+    work.mkdir(parents=True, exist_ok=False)
+    in_path = work / "in.pdf"
+    out_path = work / "out.pdf"
+    in_path.write_bytes(data)
+
+    try:
+        result = subprocess.run(
+            [
+                OCRMYPDF_BIN,
+                "--language", OCR_LANGUAGES,
+                "--skip-text",       # skip pages die al tekst hebben (idempotent)
+                "--output-type", "pdf",
+                "--quiet",
+                str(in_path),
+                str(out_path),
+            ],
+            capture_output=True,
+            timeout=OCR_TIMEOUT_S,
+            check=False,
+        )
+        if result.returncode != 0:
+            shutil.rmtree(work, ignore_errors=True)
+            raise HTTPException(
+                status_code=502,
+                detail=f"OCR mislukt: {result.stderr.decode('utf-8', 'replace')[:200]}",
+            )
+        if not out_path.exists():
+            shutil.rmtree(work, ignore_errors=True)
+            raise HTTPException(status_code=502, detail="OCR leverde geen PDF op.")
+        return FileResponse(
+            path=out_path,
+            media_type="application/pdf",
+            filename=Path(name).stem + "_ocr.pdf",
+            background=_cleanup_task(work),
+        )
+    except subprocess.TimeoutExpired:
+        shutil.rmtree(work, ignore_errors=True)
+        raise HTTPException(status_code=504, detail="OCR verliep timeout.")
+    except FileNotFoundError:
+        shutil.rmtree(work, ignore_errors=True)
+        raise HTTPException(
+            status_code=503,
+            detail="ocrmypdf is niet beschikbaar op deze server.",
+        )
 
 
 @app.post("/api/mail")

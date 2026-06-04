@@ -35,7 +35,7 @@
     <div class="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between">
       <a href="./" class="flex items-center gap-2">
         <span class="text-xl font-bold">PDFHorse</span>
-        <span class="text-xs text-slate-400">v0.7.0 — Knuth</span>
+        <span class="text-xs text-slate-400">v0.8.0 — Reid</span>
       </a>
       <a href="https://icthorse.nl/" class="text-sm text-slate-300 hover:text-white">iCt Horse →</a>
     </div>
@@ -495,10 +495,43 @@
 
     <section x-show="active === 'ocr'" role="tabpanel" aria-labelledby="tab-ocr">
       <h2 class="text-lg font-semibold mb-2">OCR — gescande PDF doorzoekbaar maken</h2>
-      <p class="text-sm text-slate-600 mb-4">Talen: Nederlands + Engels. Server-zijde, upload wordt direct na verwerking gewist.</p>
-      <div class="border-2 border-dashed border-slate-300 rounded-lg p-12 text-center text-slate-500 bg-white">
-        Drop-zone — wordt in v0.0.3 functioneel (POST /api/ocr → ocrmypdf).
+      <p class="text-sm text-slate-600 mb-4">
+        Talen: Nederlands + Engels. Server-zijde via Tesseract (`ocrmypdf --skip-text` voor idempotente runs).
+        Upload wordt direct na verwerking gewist (zie <a href="docs/PRIVACY.md" class="underline">privacy</a>).
+      </p>
+
+      <label
+        for="ocr-file-input"
+        class="block border-2 border-dashed rounded-lg p-8 text-center bg-white cursor-pointer transition"
+        :class="ocr.dragOver ? 'border-slate-900 bg-slate-100' : 'border-slate-300 hover:border-slate-500'"
+        @dragover.prevent="ocr.dragOver = true"
+        @dragleave.prevent="ocr.dragOver = false"
+        @drop.prevent="ocr.dragOver = false; onOcrDrop($event)"
+      >
+        <div x-show="!ocr.file" class="text-slate-600 text-sm">
+          <span class="font-medium">Klik of sleep één PDF hierheen</span><br/>
+          <span class="text-xs text-slate-500">max 50 MB · NL + EN</span>
+        </div>
+        <div x-show="ocr.file" class="text-slate-600 text-sm">
+          <span class="font-medium" x-text="ocr.file ? ocr.file.name : ''"></span>
+          <span class="text-xs text-slate-500"> — <span x-text="ocr.file ? formatBytes(ocr.file.size) : ''"></span></span>
+        </div>
+        <input id="ocr-file-input" type="file" accept="application/pdf,.pdf" class="hidden" @change="onOcrFileInput($event)" />
+      </label>
+
+      <div x-show="ocr.file" class="mt-4 flex flex-wrap items-center gap-3 text-sm">
+        <button type="button"
+          class="px-4 py-2 rounded bg-slate-900 text-white disabled:opacity-40"
+          :disabled="ocr.busy"
+          @click="runOcr()">
+          <span x-show="!ocr.busy">Doorzoekbaar maken</span>
+          <span x-show="ocr.busy">Bezig… (kan 30s–3min duren)</span>
+        </button>
+        <button type="button" class="px-3 py-2 rounded border text-slate-700" @click="ocrReset()">Wissen</button>
       </div>
+
+      <p x-show="ocr.error" x-text="ocr.error" class="mt-3 text-sm text-red-700"></p>
+      <p x-show="ocr.notice" x-text="ocr.notice" class="mt-3 text-sm text-emerald-700"></p>
     </section>
 
     <hr class="my-6 border-slate-200" />

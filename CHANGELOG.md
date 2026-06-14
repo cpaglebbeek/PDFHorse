@@ -7,7 +7,7 @@
 
 ### Added
 - **Mail-endpoint werkend** — `POST /api/mail` vervangt 501-stub door echte SMTP via Hostinger.
-- **Hostinger SMTP hergebruik** (Facturatie-stijl): `SMTP_USER=info@icthorse.nl` (bestaande mailbox), `MAIL_FROM=PDFHorse <pdfservice@icthorse.nl>` alias, `MAIL_REPLY_TO=info@icthorse.nl`. **Geen nieuwe Hostinger-mailbox-actie**.
+- **Hostinger SMTP hergebruik** (Facturatie-stijl): `SMTP_USER=info@icthorse.nl` (bestaande mailbox), `MAIL_FROM=PDFHorse <info@icthorse.nl>` (display-name vrij, adres = auth-mailbox), `MAIL_REPLY_TO=info@icthorse.nl`. **Geen nieuwe Hostinger-mailbox-actie**.
 - **PDF-attachment-validatie**: `.pdf`-extensie + `%PDF-`-header check.
 - **In-process rate-limit** 5/uur/IP (Heeres-conventie); thread-safe deque per IP.
 - `backend/.env.example` — alle `SMTP_*` / `MAIL_*`-vars met inline-uitleg.
@@ -20,15 +20,18 @@
 
 ### Decided (RCA-relevant)
 - **Slowapi-decorator niet gebruikt** ondanks aanwezigheid in `requirements.txt`. Reden: Python 3.14 + FastAPI + `from __future__ import annotations` + slowapi-wrapper geeft `ForwardRef`-fout op `UploadFile` / `Annotated[str, Form()]`-parameters. In-process bucket is voldoende voor low-volume mail-endpoint (state-loss bij restart acceptabel). Slowapi blijft als dep voor evt. toekomstige middleware-mode.
-- **From-alias `pdfservice@icthorse.nl` zonder mailbox** — Hostinger SMTP accepteert from ≠ auth binnen hetzelfde domein (precedent: Facturatie mailt al jaren vanaf `facturen@icthorse.nl` via `info@`-auth). Replies komen aan op `info@icthorse.nl` via Reply-To-header.
+- **From-adres = SMTP_USER** (`info@icthorse.nl`), display-name `PDFHorse`. Aanvankelijk gepoogd met `pdfservice@icthorse.nl` als pure alias, maar e2e-smoke 2026-06-14 leverde `SMTPRecipientsRefused` op een geldig Gmail-adres → Hostinger weigert from ≠ auth zelfs binnen domein. Facturatie's `DEFAULT_FROM_EMAIL="iCt Horse Facturatie <info@icthorse.nl>"` was achteraf het juiste precedent (niet `facturen@icthorse.nl` zoals ik in de services.py-code las — dat is de waarde van `Company.email_from` voor reply-to, niet het envelope-from).
 
 ### Tests
 - pytest 17/17 groen — 7 nieuwe mail-tests (400 bad email, 415 non-pdf + 415 zonder `%PDF-`-header, 400 leeg, 503 zonder SMTP-creds, 429 rate-limit, 200 happy path met monkeypatched `_send_via_smtp`).
 - Nieuwe `conftest.py` autouse-fixture reset rate-limit-bucket per test (TestClient = één IP).
 
-### HC55 deploy
+### HC55 deploy (LIVE 2026-06-14)
 - `apt`/pip: geen extra deps.
-- `/opt/pdfhorse/.env`: `SMTP_PASSWORD` invullen (copy-paste uit `/opt/facturatie/.env`), `systemctl restart pdfhorse`.
+- `/opt/pdfhorse/.env`: SMTP-blok geappend, `SMTP_PASSWORD` gekopieerd uit `EMAIL_HOST_PASSWORD` in `/opt/facturatie/.env`.
+- Frontend gerysynced (`/var/www/pdfhorse/frontend/` → header v0.9.0 — Lamport).
+- `systemctl restart pdfhorse` → active; `curl /api/health` → `0.9.0/Lamport`.
+- E2E smoke: POST `/api/mail` met 559-byte test-PDF naar `cglebbeek@gmail.com` → HTTP 200 in 0.92s → mail aangekomen met From=`PDFHorse <info@icthorse.nl>` + PDF-attachment.
 
 ### Codename
 **Leslie Lamport** — LaTeX-pionier (1984), document-typesetting + distributie. Past bij mail-fase (document-output naar derden). Brotz blijft v1.0.0 reserve.

@@ -86,9 +86,9 @@ Geen `path` / `cdpath` / `status` / `commands` / `history` als var. Gebruik `rep
 
 Uitgaande SMTP via Hostinger (`smtp.hostinger.com:587` STARTTLS, **Facturatie-stijl hergebruik**):
 - `SMTP_USER=info@icthorse.nl` — bestaande iCt Horse-mailbox, geen actie nodig.
-- `MAIL_FROM="PDFHorse <pdfservice@icthorse.nl>"` — alias, **geen mailbox vereist** (Hostinger SMTP accepteert from ≠ auth binnen domein; precedent: Facturatie mailt vanaf `facturen@icthorse.nl` via `info@`-auth).
-- `MAIL_REPLY_TO=info@icthorse.nl` — replies komen aan op de bestaande mailbox.
-- Credentials op HC55 in `/opt/pdfhorse/.env` (mode 600); template `backend/.env.example`. Niet gecommit (`.gitignore`).
+- `MAIL_FROM="PDFHorse <info@icthorse.nl>"` — **adres MOET = SMTP_USER**. Hostinger weigert from ≠ auth (e2e 2026-06-14 bewezen: SMTPRecipientsRefused). Display-name mag vrij.
+- `MAIL_REPLY_TO=info@icthorse.nl` — replies op dezelfde mailbox.
+- Credentials op HC55 in `/opt/pdfhorse/.env` (mode 600, copy `SMTP_PASSWORD` uit `EMAIL_HOST_PASSWORD` in `/opt/facturatie/.env`); template `backend/.env.example`. Niet gecommit (`.gitignore`).
 
 ## "Over en uit" Protocol
 

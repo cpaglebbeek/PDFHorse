@@ -1,8 +1,8 @@
 ---
 date: 2026-06-14
 repo: PDFHorse
-status: open
-resume: "PDFHorse v0.9.0-Lamport: mail-endpoint live op code-niveau; HC55 deploy = rsync + /opt/pdfhorse/.env invullen met SMTP_PASSWORD (copy uit /opt/facturatie/.env) + systemctl restart pdfhorse + smoke-test via output-bar"
+status: done
+resume: ""
 ---
 
 # Sessie 2026-06-14 — v0.9.0-Lamport: mail-endpoint LIVE
@@ -68,24 +68,63 @@ De slowapi-decorator wrapt de coroutine, FastAPI re-evalueert annotations als st
 - `docs/PRIVACY.md` — mail-retentie verduidelijkt, SMTP-route herschreven, rate-limit-bullet, contact-mail → `info@icthorse.nl`.
 - `CLAUDE.md` (PDFHorse) — Mail-infra sectie herschreven (Facturatie-stijl hergebruik, geen mailbox-actie).
 
-## HC55 deploy — OPEN (gebruikersactie)
+## HC55 deploy — DONE (2026-06-14)
 
 ```bash
-ssh hc55
-cd /opt/pdfhorse
-sudo -u www-data git -C /opt/pdfhorse pull   # of rsync vanaf Mac
-sudo cp /opt/facturatie/.env /tmp/x.env && sudo grep SMTP_PASSWORD /tmp/x.env >> /opt/pdfhorse/.env && sudo rm /tmp/x.env
-# of handmatig: nano /opt/pdfhorse/.env  → vul SMTP_PASSWORD in
-sudo systemctl restart pdfhorse
-curl -sf https://horsecloud55.ddns.net/PDFHorse/api/health | jq .   # → 0.9.0/Lamport
-# E2E smoke: open UI → genereer kleine PDF (merge 1 file) → output-bar Mail → adres invoeren → verstuur
+# 1. git pull op HC55 (na lokale push 0be07b6)
+ssh horsecloud55
+git config --global --add safe.directory /opt/pdfhorse
+cd /opt/pdfhorse && git pull --ff-only origin main
+
+# 2. .env append SMTP-blok (SMTP_PASSWORD gekopieerd uit EMAIL_HOST_PASSWORD in /opt/facturatie/.env)
+sudo tee -a /opt/pdfhorse/.env >/dev/null <<EOF
+SMTP_HOST=smtp.hostinger.com
+SMTP_PORT=587
+SMTP_USE_SSL=False
+SMTP_USER=info@icthorse.nl
+SMTP_PASSWORD=<copy>
+MAIL_FROM=PDFHorse <info@icthorse.nl>     # let op: =SMTP_USER, niet alias
+MAIL_REPLY_TO=info@icthorse.nl
+EOF
+
+# 3. frontend rsync (header v0.9.0 — Lamport)
+sudo rsync -a --delete /opt/pdfhorse/frontend/ /var/www/pdfhorse/frontend/
+
+# 4. restart + health
+sudo systemctl restart pdfhorse   # → active
+curl -s http://127.0.0.1:3963/api/health
+# {"status":"ok","service":"pdfhorse","version":"0.9.0","codename":"Lamport"}
 ```
+
+## E2E smoke — GESLAAGD (2026-06-14, 559-byte test-PDF)
+
+Eerste poging met `MAIL_FROM=PDFHorse <pdfservice@icthorse.nl>` → HTTP 400 `SMTPRecipientsRefused`.
+**Bevinding:** Hostinger SMTP weigert from ≠ auth-user, ook binnen hetzelfde domein. Aanname uit pre-flight ontkracht. Facturatie-precedent (`DEFAULT_FROM_EMAIL="iCt Horse Facturatie <info@icthorse.nl>"`) blijkt achteraf het juiste patroon: display-name vrij, adres = SMTP-mailbox. Aparte from-mailbox vereist een echte Hostinger-mailbox.
+
+Patch: `MAIL_FROM=PDFHorse <info@icthorse.nl>` (zelfde adres als SMTP_USER, display-name "PDFHorse").
+
+Retry:
+```
+HTTP 200 in 0.92s — {"status":"sent","to":"cglebbeek@gmail.com","bytes":559}
+```
+
+Aankomst bevestigd via Gmail MCP search:
+- From: `PDFHorse <info@icthorse.nl>` ✓
+- Subject: `PDFHorse v0.9.0-Lamport e2e smoke (retry)` ✓
+- Attachment: `lamport-smoke.pdf` (application/pdf, 1 KB) ✓
+
+## Follow-up commit (na e2e)
+
+- `backend/main.py` default `MAIL_FROM` → `info@icthorse.nl`.
+- `backend/.env.example` waarschuwing toegevoegd over from = auth-user.
+- `backend/tests/test_health.py` happy-path-assert → `info@icthorse.nl`.
+- CHANGELOG/ARCHITECTURE/README/CLAUDE.md/PRIVACY/sessie-MD — pdfservice-vermeldingen weggewerkt + RCA-noot.
+- pytest blijft 17/17 groen.
 
 ## Open na deploy
 
-- E2E smoke door gebruiker (mail aankomst + Reply-To bevestiging op info@-mailbox).
-- Verifiëren of Hostinger SMTP submission de from-alias accepteert (verwacht: ja, precedent Facturatie).
 - v1.0.0-Brotz planning: SRI-hashes, icthorse.nl reverse-proxy, `docs/screens/` vullen.
+- Branding-mailbox-overweging: als `pdfservice@icthorse.nl` toch gewenst is als visible from, dan Hostinger-mailbox aanmaken (gebruikersactie) + tweede SMTP-auth-set.
 
 ## Codename-rationale
 

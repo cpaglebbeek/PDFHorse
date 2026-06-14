@@ -27,7 +27,7 @@
 | `POST /api/convert/docx-to-pdf` | DOCX → PDF (v0.6.0-Paxton) | Multipart in → `/tmp/pdfhorse/<uuid>/in.docx` → `soffice --headless --convert-to pdf` → `in.pdf` → FileResponse + BackgroundTask `shutil.rmtree` |
 | `POST /api/convert/xlsx-to-pdf` | XLSX → PDF (v0.7.0-Knuth) | Multipart in → `/tmp/pdfhorse/<uuid>/in.xlsx` → `soffice --headless --convert-to pdf` → `in.pdf` → FileResponse + BackgroundTask `shutil.rmtree` |
 | `POST /api/ocr` | OCR uitvoeren op upload (v0.8.0-Reid) | Multipart in → tijdelijke `/tmp/pdfhorse/<uuid>/in.pdf` → `ocrmypdf --language nld+eng --skip-text --output-type pdf --quiet` → FileResponse + cleanup |
-| `POST /api/mail` | Mail uitgaande PDF (v0.9.0-Lamport) | Multipart in (`to`, `subject`, `body`, `pdf`) → Hostinger SMTP (`info@icthorse.nl`-auth, From=`pdfservice@icthorse.nl` alias, Reply-To=`info@icthorse.nl`) → JSON `{status, to, bytes}`. Attachment max 5 MB, `%PDF-`-header gevalideerd, rate-limit 5/uur/IP (in-process bucket; slowapi-decorator vermeden wegens Python 3.14 ForwardRef-conflict). |
+| `POST /api/mail` | Mail uitgaande PDF (v0.9.0-Lamport) | Multipart in (`to`, `subject`, `body`, `pdf`) → Hostinger SMTP (`info@icthorse.nl`-auth, From=`PDFHorse <info@icthorse.nl>`, Reply-To=`info@icthorse.nl`) → JSON `{status, to, bytes}`. Attachment max 5 MB, `%PDF-`-header gevalideerd, rate-limit 5/uur/IP (in-process bucket; slowapi-decorator vermeden wegens Python 3.14 ForwardRef-conflict). |
 
 ### Externe systemen
 
@@ -202,12 +202,12 @@ HC55:3963
     ▼
 smtplib.SMTP('smtp.hostinger.com', 587) → STARTTLS → login(info@icthorse.nl, ***)
     │  EmailMessage:
-    │    From:     "PDFHorse <pdfservice@icthorse.nl>"   ← alias, geen mailbox vereist
+    │    From:     "PDFHorse <info@icthorse.nl>"   ← MOET = SMTP_USER (Hostinger weigert from ≠ auth)
     │    To:       recipient
-    │    Reply-To: info@icthorse.nl                       ← replies komen aan
+    │    Reply-To: info@icthorse.nl
     │    + PDF-attachment (application/pdf)
     ▼
-recipient@... ← mail; Hostinger SMTP zet auto Sender: info@icthorse.nl voor SPF.
+recipient@... ← mail aangekomen.
     │
     ▼ asyncio.to_thread voorkomt event-loop-blocking; geen tijdelijke files (in-memory).
 JSON {status: "sent", to, bytes}

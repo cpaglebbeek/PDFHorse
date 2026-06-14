@@ -20,7 +20,7 @@ Eén anonieme webpagina waar je PDF's (en Word- / Excel-documenten / afbeeldinge
 | **Converteren** — .docx / .xlsx / .png / .jpg → PDF | server (LibreOffice voor office) + client (pdf-lib voor images) | ✅ v0.7.0-Knuth | Batch + toggle "Combineer alle tot 1 PDF" |
 | **Output-bar** — Download / Print / Mail laatste output | client (Print via hidden iframe) + server (Mail via SMTP) | ✅ v0.5.0-Crocker + v0.9.0-Lamport | Persistent per tab |
 | **OCR** — gescande PDF → doorzoekbare PDF | server (Tesseract NL+EN via ocrmypdf) | ✅ v0.8.0-Reid | Idempotent (`--skip-text`); 30s–3min |
-| **Mail-verzending** | server (Hostinger SMTP, alias `pdfservice@icthorse.nl`, reply naar `info@icthorse.nl`) | ✅ v0.9.0-Lamport | PDF-attachment max 5 MB, rate-limit 5/uur/IP |
+| **Mail-verzending** | server (Hostinger SMTP, `PDFHorse <info@icthorse.nl>` als from + reply-to) | ✅ v0.9.0-Lamport | PDF-attachment max 5 MB, rate-limit 5/uur/IP |
 
 ## Architectuur (kort)
 
@@ -28,7 +28,7 @@ Eén anonieme webpagina waar je PDF's (en Word- / Excel-documenten / afbeeldinge
 - **Backend:** Python 3.12 + FastAPI op `:3963`
 - **Office-conversie (docx/xlsx → PDF):** LibreOffice 24.2.7 headless (`soffice --headless --convert-to pdf`)
 - **OCR:** Tesseract 5 + ocrmypdf, `nld+eng` traineddata
-- **Mail:** Hostinger SMTP (`smtp.hostinger.com:587` STARTTLS), Facturatie-stijl hergebruik — `info@icthorse.nl` als SMTP-auth, alias `pdfservice@icthorse.nl` als From, `info@icthorse.nl` als Reply-To. Geen aparte Hostinger-mailbox nodig.
+- **Mail:** Hostinger SMTP (`smtp.hostinger.com:587` STARTTLS), Facturatie-stijl hergebruik — `info@icthorse.nl` als SMTP-auth én From-mailbox (display-name "PDFHorse"); Reply-To = `info@icthorse.nl`. Geen aparte Hostinger-mailbox nodig.
 - **Hosting:** HC55 (Hetzner, EU/Duitsland) achter nginx, frontend op `/var/www/pdfhorse/`
 - **State:** geen DB — sessie-state in browser; tijdelijke server-uploads in `/tmp/pdfhorse/<uuid>` direct gewist via `BackgroundTask shutil.rmtree`
 

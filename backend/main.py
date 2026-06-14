@@ -72,7 +72,11 @@ SMTP_USER = os.environ.get("SMTP_USER", "")
 SMTP_PASSWORD = os.environ.get("SMTP_PASSWORD", "")
 SMTP_USE_SSL = os.environ.get("SMTP_USE_SSL", "False").lower() in ("1", "true", "yes")
 SMTP_TIMEOUT_S = int(os.environ.get("SMTP_TIMEOUT_S", "30"))
-MAIL_FROM = os.environ.get("MAIL_FROM", "PDFHorse <pdfservice@icthorse.nl>")
+# From-adres moet de SMTP_USER-mailbox zijn (Hostinger weigert from ≠ auth-user, ook
+# binnen hetzelfde domein — e2e bewezen 2026-06-14 met SMTPRecipientsRefused). Display-name
+# mag vrij zijn. Wil je een aparte branding-from (bv. pdfservice@icthorse.nl), dan moet die
+# als echte Hostinger-mailbox of SMTP-account bestaan.
+MAIL_FROM = os.environ.get("MAIL_FROM", "PDFHorse <info@icthorse.nl>")
 MAIL_REPLY_TO = os.environ.get("MAIL_REPLY_TO", "info@icthorse.nl")
 MAX_MAIL_ATTACHMENT_BYTES = int(os.environ.get("MAX_MAIL_ATTACHMENT_BYTES", str(5 * 1024 * 1024)))
 MAX_MAIL_SUBJECT_LEN = int(os.environ.get("MAX_MAIL_SUBJECT_LEN", "200"))

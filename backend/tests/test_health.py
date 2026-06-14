@@ -133,7 +133,7 @@ def test_mail_happy_path_with_monkeypatched_smtp(monkeypatch):
     body = r.json()
     assert body["status"] == "sent"
     assert body["to"] == "a@b.nl"
-    assert sent["from"] == "PDFHorse <pdfservice@icthorse.nl>"
+    assert sent["from"] == "PDFHorse <info@icthorse.nl>"
     assert sent["to"] == "a@b.nl"
     assert sent["reply_to"] == "info@icthorse.nl"
     assert sent["has_attachment"] is True

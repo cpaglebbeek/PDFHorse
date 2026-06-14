@@ -44,14 +44,14 @@ Voor zover er überhaupt persoonsgegevens kunnen worden afgeleid uit het gebruik
 | Client-side (browser) | Tot je het tabblad sluit |
 | DOCX-conversie op server | Enkele seconden (BackgroundTask `shutil.rmtree` direct na response), absolute max 30 minuten via cleanup |
 | OCR-upload op server | Enkele seconden (single-request lifecycle), absolute max 30 minuten via cleanup |
-| Mail-verzending | Geen retentie aan onze kant — alleen bij ontvangende mailserver |
+| Mail-verzending | Geen retentie aan onze kant — PDF blijft alleen in memory tot SMTP-call slaagt; geen file op disk, geen BCC-self, geen archief. Aan ontvangstzijde geldt de retentie van de mailserver van de geadresseerde. |
 | Logs | Geen content-logs. Aggregate request-metrics (aantal/grootte) maximaal 30 dagen voor abuse-detectie |
 
 ## Doorgifte
 
 - **LibreOffice (DOCX → PDF)** draait lokaal op HorseCloud55 (Hetzner, EU/Duitsland). Geen externe API-call.
 - **Tesseract OCR** draait lokaal op HorseCloud55 (Hetzner, EU/Duitsland). Geen externe API-call.
-- **SMTP-mail** gaat via Hostinger SMTP (`smtp.hostinger.com`). Hostinger is verantwoordelijke voor mail-verzending; verwerkingsovereenkomst via hun standaard-voorwaarden.
+- **SMTP-mail** gaat via Hostinger SMTP (`smtp.hostinger.com:587` STARTTLS) — auth via bestaande iCt Horse-mailbox (`info@icthorse.nl`), From-alias `pdfservice@icthorse.nl`, Reply-To `info@icthorse.nl`. Hostinger is verantwoordelijke voor mail-verzending; verwerkingsovereenkomst via hun standaard-voorwaarden.
 - Geen doorgifte buiten de EU.
 
 ## Beveiliging
@@ -59,7 +59,7 @@ Voor zover er überhaupt persoonsgegevens kunnen worden afgeleid uit het gebruik
 - HTTPS-only (nginx redirect).
 - Tijdelijke uploads in random-uuid mappen, mode `700`, root-only.
 - `.env` met SMTP-credentials mode `600`, root-only, niet in git.
-- Rate-limiting via `slowapi` op OCR + mail endpoints (DoS-mitigatie).
+- Rate-limiting op mail-endpoint (in-process bucket, 5/uur per IP) — DoS-mitigatie + anti-misbruik.
 - CSP-header beperkt scripts tot self + Tailwind/pdf-lib/Alpine CDN.
 - Frontend dependencies via CDN met integriteits-hashes (SRI) — gepland v0.2.x, nog niet actief.
 
@@ -70,7 +70,7 @@ Omdat er geen account is en geen persoonsgegevens persistent worden opgeslagen, 
 - **Recht op overdraagbaarheid**: niet van toepassing — geen profiel of data om over te dragen.
 - **Recht van bezwaar / klacht**: kun je indienen bij de [Autoriteit Persoonsgegevens](https://autoriteitpersoonsgegevens.nl/).
 
-Voor vragen of incidenten: mail `pdfservice@icthorse.nl`.
+Voor vragen of incidenten: mail `info@icthorse.nl` (replies op PDFHorse-mails komen ook daar aan).
 
 ## Open-source = auditable
 

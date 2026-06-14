@@ -1,8 +1,8 @@
 {
-  "version": "0.8.0",
-  "codename": "Reid",
-  "released": "2026-06-05",
-  "status": "convert-tab",
+  "version": "0.9.0",
+  "codename": "Lamport",
+  "released": "2026-06-14",
+  "status": "mail-live",
   "theme": "PDF-pioniers",
-  "notes": "v0.7.0-Knuth (oranje bump): nieuwe Convert-tab — batch-conversie van docx/xlsx/png/jpg naar PDF, met toggle 'Combineer alle tot 1 PDF'. docx + xlsx via backend LibreOffice (xlsx nieuw endpoint /api/convert/xlsx-to-pdf, gedeelde helper met docx). png + jpg client-side via pdf-lib embedPng/embedJpg met fit-to-A4. Codename Donald Knuth, TeX-pionier voor document-typografie. Brotz blijft gereserveerd voor v1.0.0."
+  "notes": "v0.9.0-Lamport (oranje bump): mail-endpoint live — /api/mail vervangt 501-stub door echte SMTP via Hostinger (smtp.hostinger.com:587 STARTTLS), Facturatie-stijl hergebruik van info@icthorse.nl als SMTP-auth, From=pdfservice@icthorse.nl alias, Reply-To=info@icthorse.nl. Slowapi rate-limit 5/uur/IP (Heeres-conventie). PDF-attachment max 5MB, %PDF-header gevalideerd. Geen Hostinger-mailbox-actie nodig. Codename Leslie Lamport, LaTeX-pionier voor document-distributie. Brotz blijft v1.0.0 reserve."
 }

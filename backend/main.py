@@ -4,20 +4,29 @@ Endpoints:
   GET  /api/health                 — liveness/readiness
   GET  /api/limits                 — server-zijde geadverteerde limieten
   POST /api/convert/docx-to-pdf    — docx → PDF via LibreOffice headless (v0.6.0)
-  POST /api/ocr                    — STUB (501) — wacht op Tesseract install
-  POST /api/mail                   — STUB (501) — wacht op Hostinger mailbox
+  POST /api/convert/xlsx-to-pdf    — xlsx → PDF via LibreOffice headless (v0.7.0)
+  POST /api/ocr                    — gescande PDF doorzoekbaar (v0.8.0)
+  POST /api/mail                   — mail PDF via Hostinger SMTP (v0.9.0)
 """
 from __future__ import annotations
 
+import asyncio
 import json
 import os
+import re
 import shutil
+import smtplib
 import subprocess
+import threading
+import time
 import uuid
+from collections import defaultdict, deque
 from contextlib import asynccontextmanager
+from email.message import EmailMessage
+from email.utils import formataddr, make_msgid
 from pathlib import Path
 
-from fastapi import FastAPI, File, HTTPException, UploadFile, status
+from fastapi import FastAPI, File, Form, HTTPException, Request, UploadFile, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, JSONResponse
 
@@ -53,6 +62,45 @@ SOFFICE_TIMEOUT_S = int(os.environ.get("SOFFICE_TIMEOUT_S", "60"))
 OCRMYPDF_BIN = os.environ.get("OCRMYPDF_BIN", "ocrmypdf")
 OCR_LANGUAGES = os.environ.get("OCR_LANGUAGES", "nld+eng")
 OCR_TIMEOUT_S = int(os.environ.get("OCR_TIMEOUT_S", "180"))
+
+# Mail (v0.9.0-Lamport) — hergebruikt Hostinger SMTP-conventie van iCt_Horse_Facturatie:
+# SMTP_USER is een bestaande Hostinger-mailbox (info@icthorse.nl), MAIL_FROM mag een
+# alias binnen hetzelfde domein zijn (pdfservice@icthorse.nl) zonder dat die mailbox bestaat.
+SMTP_HOST = os.environ.get("SMTP_HOST", "smtp.hostinger.com")
+SMTP_PORT = int(os.environ.get("SMTP_PORT", "587"))
+SMTP_USER = os.environ.get("SMTP_USER", "")
+SMTP_PASSWORD = os.environ.get("SMTP_PASSWORD", "")
+SMTP_USE_SSL = os.environ.get("SMTP_USE_SSL", "False").lower() in ("1", "true", "yes")
+SMTP_TIMEOUT_S = int(os.environ.get("SMTP_TIMEOUT_S", "30"))
+MAIL_FROM = os.environ.get("MAIL_FROM", "PDFHorse <pdfservice@icthorse.nl>")
+MAIL_REPLY_TO = os.environ.get("MAIL_REPLY_TO", "info@icthorse.nl")
+MAX_MAIL_ATTACHMENT_BYTES = int(os.environ.get("MAX_MAIL_ATTACHMENT_BYTES", str(5 * 1024 * 1024)))
+MAX_MAIL_SUBJECT_LEN = int(os.environ.get("MAX_MAIL_SUBJECT_LEN", "200"))
+MAX_MAIL_BODY_LEN = int(os.environ.get("MAX_MAIL_BODY_LEN", "100000"))
+MAIL_RATE_PER_HOUR = int(os.environ.get("MAIL_RATE_PER_HOUR", "5"))
+MAIL_RATE_WINDOW_S = int(os.environ.get("MAIL_RATE_WINDOW_S", "3600"))
+
+# In-process rate-limiter (per remote IP). State-loss bij restart is acceptabel:
+# low-volume endpoint, restarts zijn zeldzaam, geen privacy-impact.
+_mail_rate_lock = threading.Lock()
+_mail_rate_buckets: dict[str, deque[float]] = defaultdict(deque)
+
+
+def _rate_limit_check(ip: str) -> tuple[bool, int]:
+    """Return (allowed, used_in_window). Houdt timestamps bij in deque per IP."""
+    now = time.time()
+    cutoff = now - MAIL_RATE_WINDOW_S
+    with _mail_rate_lock:
+        bucket = _mail_rate_buckets[ip]
+        while bucket and bucket[0] < cutoff:
+            bucket.popleft()
+        if len(bucket) >= MAIL_RATE_PER_HOUR:
+            return False, len(bucket)
+        bucket.append(now)
+        return True, len(bucket)
+
+# Conservatieve e-mail-regex (server-side validatie naast browser type=email).
+_EMAIL_RE = re.compile(r"^[^\s@]+@[^\s@]+\.[^\s@]+$")
 
 DOCX_MIME = "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
 XLSX_MIME = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
@@ -291,11 +339,144 @@ async def ocr(file: UploadFile = File(...)) -> FileResponse:
         )
 
 
-@app.post("/api/mail")
-async def mail() -> JSONResponse:
-    raise HTTPException(
-        status_code=status.HTTP_501_NOT_IMPLEMENTED,
-        detail="Mail endpoint stub — implementatie in v0.0.3 (SMTP via pdfservice@icthorse.nl).",
+def _default_mail_body(filename: str) -> str:
+    return (
+        "Hallo,\n\n"
+        "Hierbij je PDFHorse-uitvoer in de bijlage"
+        f" ({filename}).\n\n"
+        "Deze mail is verstuurd via https://horsecloud55.ddns.net/PDFHorse/ —\n"
+        "een anonieme, browser-first PDF-bewerker. Geen account, geen archief.\n\n"
+        "Vragen? Reply op deze mail (komt aan op info@icthorse.nl).\n\n"
+        "— PDFHorse"
+    )
+
+
+def _build_mail_message(
+    *,
+    to_addr: str,
+    subject: str,
+    body: str,
+    pdf_bytes: bytes,
+    pdf_filename: str,
+) -> EmailMessage:
+    msg = EmailMessage()
+    msg["From"] = MAIL_FROM
+    msg["To"] = formataddr((None, to_addr))
+    msg["Subject"] = subject
+    msg["Reply-To"] = MAIL_REPLY_TO
+    msg["Message-ID"] = make_msgid(domain="icthorse.nl")
+    msg["X-Mailer"] = f"PDFHorse/{VERSION}"
+    msg.set_content(body)
+    msg.add_attachment(
+        pdf_bytes,
+        maintype="application",
+        subtype="pdf",
+        filename=pdf_filename,
+    )
+    return msg
+
+
+def _send_via_smtp(msg: EmailMessage) -> None:
+    """Synchronous SMTP-call — wordt vanuit async handler via asyncio.to_thread aangeroepen."""
+    if not SMTP_USER or not SMTP_PASSWORD:
+        raise RuntimeError("SMTP_USER/SMTP_PASSWORD niet geconfigureerd")
+    if SMTP_USE_SSL:
+        with smtplib.SMTP_SSL(SMTP_HOST, SMTP_PORT, timeout=SMTP_TIMEOUT_S) as s:
+            s.login(SMTP_USER, SMTP_PASSWORD)
+            s.send_message(msg)
+    else:
+        with smtplib.SMTP(SMTP_HOST, SMTP_PORT, timeout=SMTP_TIMEOUT_S) as s:
+            s.starttls()
+            s.login(SMTP_USER, SMTP_PASSWORD)
+            s.send_message(msg)
+
+
+@app.post("/api/mail", response_model=None)
+async def mail(
+    request: Request,
+    to: str = Form(...),
+    subject: str = Form("PDFHorse-uitvoer"),
+    body: str = Form(""),
+    pdf: UploadFile = File(...),
+) -> JSONResponse:
+    """Mailt een PDF-attachment via Hostinger SMTP. v0.9.0-Lamport.
+
+    Privacy: geen logging van adres/onderwerp/body, geen BCC-self, geen archief.
+    De PDF blijft alleen in memory tot de SMTP-call slaagt.
+    Rate-limit: `MAIL_RATE_PER_HOUR` (default 5/uur per IP, in-process bucket).
+    """
+    client_ip = (request.client.host if request.client else "unknown") or "unknown"
+    allowed, used = _rate_limit_check(client_ip)
+    if not allowed:
+        raise HTTPException(
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+            detail=f"Mail-limiet bereikt ({used}/{MAIL_RATE_PER_HOUR} per uur per IP).",
+        )
+
+    to_addr = to.strip()
+    if not _EMAIL_RE.match(to_addr) or len(to_addr) > 254:
+        raise HTTPException(status_code=400, detail="Ongeldig e-mailadres.")
+
+    subject = (subject or "PDFHorse-uitvoer").strip()[:MAX_MAIL_SUBJECT_LEN]
+    body = (body or "").strip()[:MAX_MAIL_BODY_LEN]
+
+    pdf_name = (pdf.filename or "pdfhorse_output.pdf").strip()
+    if not pdf_name.lower().endswith(".pdf") or pdf.content_type not in (
+        "application/pdf",
+        "application/octet-stream",
+        None,
+        "",
+    ):
+        raise HTTPException(
+            status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
+            detail="Alleen een PDF-attachment wordt geaccepteerd.",
+        )
+
+    chunks: list[bytes] = []
+    total = 0
+    while True:
+        chunk = await pdf.read(64 * 1024)
+        if not chunk:
+            break
+        total += len(chunk)
+        if total > MAX_MAIL_ATTACHMENT_BYTES:
+            raise HTTPException(
+                status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+                detail=f"Bijlage groter dan {MAX_MAIL_ATTACHMENT_BYTES // (1024 * 1024)} MB.",
+            )
+        chunks.append(chunk)
+    pdf_bytes = b"".join(chunks)
+    if not pdf_bytes:
+        raise HTTPException(status_code=400, detail="Lege PDF-attachment.")
+    if not pdf_bytes.startswith(b"%PDF-"):
+        raise HTTPException(
+            status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
+            detail="Bijlage is geen geldige PDF (ontbrekende %PDF-header).",
+        )
+
+    msg = _build_mail_message(
+        to_addr=to_addr,
+        subject=subject,
+        body=body or _default_mail_body(Path(pdf_name).name),
+        pdf_bytes=pdf_bytes,
+        pdf_filename=Path(pdf_name).name,
+    )
+
+    try:
+        await asyncio.to_thread(_send_via_smtp, msg)
+    except RuntimeError as e:
+        # ontbrekende SMTP-creds — server-misconfig, niet de client zijn schuld
+        raise HTTPException(status_code=503, detail=str(e))
+    except (smtplib.SMTPAuthenticationError, smtplib.SMTPSenderRefused) as e:
+        raise HTTPException(status_code=502, detail=f"SMTP-authenticatie geweigerd: {e}")
+    except smtplib.SMTPRecipientsRefused:
+        raise HTTPException(status_code=400, detail="Ontvangstadres geweigerd door SMTP-server.")
+    except (smtplib.SMTPException, OSError) as e:
+        raise HTTPException(status_code=502, detail=f"SMTP-fout: {e}")
+
+    return JSONResponse(
+        status_code=200,
+        content={"status": "sent", "to": to_addr, "bytes": total},
     )
 
 

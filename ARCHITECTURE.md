@@ -25,8 +25,9 @@
 | `GET /api/health` | Healthcheck | Statisch (version/codename dynamisch uit `version.json`) |
 | `GET /api/limits` | Limieten terug | Statisch JSON |
 | `POST /api/convert/docx-to-pdf` | DOCX → PDF (v0.6.0-Paxton) | Multipart in → `/tmp/pdfhorse/<uuid>/in.docx` → `soffice --headless --convert-to pdf` → `in.pdf` → FileResponse + BackgroundTask `shutil.rmtree` |
-| `POST /api/ocr` | OCR uitvoeren op upload | Multipart in → tijdelijke `/tmp/pdfhorse/<uuid>/in.pdf` → `ocrmypdf` (Tesseract `nld+eng`) → return → unlink (501-stub tot Tesseract install) |
-| `POST /api/mail` | Mail uitgaande PDF | Multipart in (PDF + recipient + subject) → SMTP via `pdfservice@icthorse.nl` → return status → unlink (501-stub tot mailbox actief) |
+| `POST /api/convert/xlsx-to-pdf` | XLSX → PDF (v0.7.0-Knuth) | Multipart in → `/tmp/pdfhorse/<uuid>/in.xlsx` → `soffice --headless --convert-to pdf` → `in.pdf` → FileResponse + BackgroundTask `shutil.rmtree` |
+| `POST /api/ocr` | OCR uitvoeren op upload (v0.8.0-Reid) | Multipart in → tijdelijke `/tmp/pdfhorse/<uuid>/in.pdf` → `ocrmypdf --language nld+eng --skip-text --output-type pdf --quiet` → FileResponse + cleanup |
+| `POST /api/mail` | Mail uitgaande PDF (v0.9.0-Lamport) | Multipart in (`to`, `subject`, `body`, `pdf`) → Hostinger SMTP (`info@icthorse.nl`-auth, From=`pdfservice@icthorse.nl` alias, Reply-To=`info@icthorse.nl`) → JSON `{status, to, bytes}`. Attachment max 5 MB, `%PDF-`-header gevalideerd, rate-limit 5/uur/IP (in-process bucket; slowapi-decorator vermeden wegens Python 3.14 ForwardRef-conflict). |
 
 ### Externe systemen
 
@@ -190,20 +191,28 @@ runFill():
 ```
 Geen netwerk-call. Libs: pdf-lib 1.17.1 + PDF.js 4.0.379 (cdnjs).
 
-### Mail-output (client → server) — frontend gebouwd in v0.5.0-Crocker, backend 501-stub
+### Mail-output (client → server) — frontend v0.5.0-Crocker, backend v0.9.0-Lamport LIVE
 ```
-Browser ← edited PDF + recipient + subject (uit output-bar mail-form)
+Browser ← edited PDF + recipient + subject + (optionele body) uit output-bar mail-form
     │
-    ▼ POST /api/mail (multipart: to, subject, pdf)
-HC55:3963 → smtplib.SMTP_SSL('smtp.hostinger.com')  ← TBD bij mailbox
-    │
+    ▼ POST /api/mail (multipart: to, subject, body, pdf)
+HC55:3963
+    │  validatie: e-mail-regex, subject ≤200, body ≤100k, attachment ≤5MB, %PDF-header
+    │  rate-limit: in-process bucket 5/uur/IP
     ▼
-recipient@... ← mail van pdfservice@icthorse.nl + PDF attached
-    │
+smtplib.SMTP('smtp.hostinger.com', 587) → STARTTLS → login(info@icthorse.nl, ***)
+    │  EmailMessage:
+    │    From:     "PDFHorse <pdfservice@icthorse.nl>"   ← alias, geen mailbox vereist
+    │    To:       recipient
+    │    Reply-To: info@icthorse.nl                       ← replies komen aan
+    │    + PDF-attachment (application/pdf)
     ▼
-(server) unlink tijdelijke PDF
+recipient@... ← mail; Hostinger SMTP zet auto Sender: info@icthorse.nl voor SPF.
+    │
+    ▼ asyncio.to_thread voorkomt event-loop-blocking; geen tijdelijke files (in-memory).
+JSON {status: "sent", to, bytes}
 ```
-Frontend toont 501-status netjes als "Mail-endpoint nog niet actief op deze deploy".
+HTTP-codes: 200 (ok) / 400 (bad email/empty) / 415 (non-PDF / geen %PDF-header) / 413 (>5MB) / 429 (rate-limit) / 502 (SMTP-fout) / 503 (SMTP-creds ontbreken).
 
 ### Output-bar (client-only) — geïmplementeerd in v0.5.0-Crocker
 ```
@@ -215,7 +224,7 @@ Alle 4 features (merge/split/fill/sign) roepen `_setOutput(bytes, filename, feat
        - Print = hidden iframe.src = blob-URL → onload → iframe.contentWindow.print()
                  → revokeObjectURL na 60s
        - Mail = mail-form (to, subject) → POST /api/mail multipart
-                → 200: succes-melding / 501: "nog niet actief" / overige: error met detail
+                → 200: succes-melding / 429: rate-limit / overige: error met detail
 ```
 Bij split (N outputs): laatste range wordt de "primaire" output voor de bar.
 
@@ -236,8 +245,8 @@ Bij split (N outputs): laatste range wordt de "primaire" output voor de bar.
 ## Beveiliging
 
 - HTTPS-only (nginx redirect).
-- Rate-limiting op `/api/ocr` en `/api/mail` (slowapi).
-- `/api/mail` voorkomt open-relay: subject + body server-controlled, recipient gevalideerd via regex + DNS-MX-check optioneel.
+- Rate-limiting op `/api/mail` (in-process bucket 5/uur/IP); slowapi-decorator vermeden wegens Python 3.14 + FastAPI ForwardRef-conflict op `Annotated[UploadFile, File()]`. `/api/ocr` nog onbegrensd (lange runtime is natuurlijke throttle).
+- `/api/mail` voorkomt open-relay: From-header server-controlled (alias `pdfservice@icthorse.nl`), recipient gevalideerd via regex (max 254 chars), `%PDF-`-header op attachment, geen BCC-self.
 - CORS strict op `icthorse.nl`.
 - Geen file-execution; PDF-input wordt door pdf-lib / ocrmypdf gevalideerd.
 - CSP-header beperkt scripts tot self + Tailwind/pdf-lib CDN.
@@ -247,7 +256,7 @@ Bij split (N outputs): laatste range wordt de "primaire" output voor de bar.
 - Python venv op HC55, `uvicorn` achter `systemd` unit `pdfhorse.service`.
 - nginx `location /PDFHorse/api/` → `proxy_pass http://127.0.0.1:3963/api/`.
 - nginx `location /PDFHorse/` → static root naar `/var/www/pdfhorse/` (frontend bundle gerysynced bij deploy).
-- `.env` op HC55 met SMTP-creds (mode 600, root-only).
+- `.env` op HC55 in `/opt/pdfhorse/.env` (mode 600, root-only) met `SMTP_USER`/`SMTP_PASSWORD` (= Hostinger-creds hergebruikt uit `/opt/facturatie/.env`). Template: `backend/.env.example`.
 
 ## Open architectuur-vragen
 

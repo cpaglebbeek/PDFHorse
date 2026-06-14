@@ -1,8 +1,8 @@
 # PDFHorse
 
-> **iCt Horse tooling SaaS — browser-first PDF-bewerker met merge, split, invullen, ondertekenen, converteren (docx/xlsx/png/jpg) en (gepland) OCR + mail.**
+> **iCt Horse tooling SaaS — browser-first PDF-bewerker met merge, split, invullen, ondertekenen, converteren (docx/xlsx/png/jpg), OCR (NL+EN) en mail.**
 >
-> Versie: **v0.7.0-Knuth** · Licentie: **AGPL-3.0** · Status: **7 features LIVE**
+> Versie: **v0.9.0-Lamport** · Licentie: **AGPL-3.0** · Status: **alle 8 features LIVE**
 
 🚀 **LIVE op https://horsecloud55.ddns.net/PDFHorse/** (sinds 2026-06-04)
 Gepland (Hostinger reverse-proxy): https://icthorse.nl/PDFHorse/
@@ -18,17 +18,17 @@ Eén anonieme webpagina waar je PDF's (en Word- / Excel-documenten / afbeeldinge
 | **Invullen** — tekstvelden vrij plaatsen op PDF | client (pdf-lib + PDF.js) | ✅ v0.3.0-Putman | Klik op pagina → tekst → coords-transform |
 | **Ondertekenen** — bitmap upload / SVG upload / live tekenen | client (signature_pad + pdf-lib) | ✅ v0.4.0-Taft | 3 modi (A bitmap / B SVG / C live-canvas wit→transparant) |
 | **Converteren** — .docx / .xlsx / .png / .jpg → PDF | server (LibreOffice voor office) + client (pdf-lib voor images) | ✅ v0.7.0-Knuth | Batch + toggle "Combineer alle tot 1 PDF" |
-| **Output-bar** — Download / Print / Mail laatste output | client (Print via hidden iframe) + server (Mail-form 501-stub) | ✅ v0.5.0-Crocker | Persistent per tab |
-| **OCR** — gescande PDF → doorzoekbare PDF | server (Tesseract NL+EN) | 🚧 wacht op Tesseract install | Endpoint stub levert 501 |
-| **Mail-verzending** | server (SMTP via Hostinger) | 🚧 wacht op `pdfservice@icthorse.nl` mailbox | Endpoint stub levert 501 |
+| **Output-bar** — Download / Print / Mail laatste output | client (Print via hidden iframe) + server (Mail via SMTP) | ✅ v0.5.0-Crocker + v0.9.0-Lamport | Persistent per tab |
+| **OCR** — gescande PDF → doorzoekbare PDF | server (Tesseract NL+EN via ocrmypdf) | ✅ v0.8.0-Reid | Idempotent (`--skip-text`); 30s–3min |
+| **Mail-verzending** | server (Hostinger SMTP, alias `pdfservice@icthorse.nl`, reply naar `info@icthorse.nl`) | ✅ v0.9.0-Lamport | PDF-attachment max 5 MB, rate-limit 5/uur/IP |
 
 ## Architectuur (kort)
 
 - **Frontend:** Alpine.js + Tailwind + pdf-lib 1.17.1 + PDF.js 4.0.379 + signature_pad 5.0.4 (CDN-only, geen build)
 - **Backend:** Python 3.12 + FastAPI op `:3963`
 - **Office-conversie (docx/xlsx → PDF):** LibreOffice 24.2.7 headless (`soffice --headless --convert-to pdf`)
-- **OCR (gepland):** Tesseract 5 + ocrmypdf, `nld+eng` traineddata
-- **Mail (gepland):** SMTP via Hostinger mailbox `pdfservice@icthorse.nl`
+- **OCR:** Tesseract 5 + ocrmypdf, `nld+eng` traineddata
+- **Mail:** Hostinger SMTP (`smtp.hostinger.com:587` STARTTLS), Facturatie-stijl hergebruik — `info@icthorse.nl` als SMTP-auth, alias `pdfservice@icthorse.nl` als From, `info@icthorse.nl` als Reply-To. Geen aparte Hostinger-mailbox nodig.
 - **Hosting:** HC55 (Hetzner, EU/Duitsland) achter nginx, frontend op `/var/www/pdfhorse/`
 - **State:** geen DB — sessie-state in browser; tijdelijke server-uploads in `/tmp/pdfhorse/<uuid>` direct gewist via `BackgroundTask shutil.rmtree`
 
@@ -43,7 +43,7 @@ PDF's en documenten kunnen gevoelig zijn. PDFHorse minimaliseert exposure:
 4. OCR (gepland) volgt hetzelfde patroon als docx/xlsx-conversie.
 5. Geen account, geen logs van bestandsinhoud (alleen aggregate request-metrics).
 6. HTTPS-only (Let's Encrypt cert op horsecloud55.ddns.net).
-7. Mail-functie (gepland) verstuurt alleen naar opgegeven adres — geen BCC, geen archief.
+7. Mail-functie verstuurt alleen naar opgegeven adres — geen BCC, geen archief (rate-limit 5/uur/IP, attachment max 5 MB).
 
 Volledige verklaring: [`docs/PRIVACY.md`](docs/PRIVACY.md).
 
@@ -57,7 +57,10 @@ Volledige verklaring: [`docs/PRIVACY.md`](docs/PRIVACY.md).
 | Max upload per sessie | 100 MB | DoS-bescherming |
 | Sessie-timeout (server-cleanup) | 30 min | Auto-cleanup `/tmp/pdfhorse/<uuid>/` |
 | LibreOffice timeout per conversie | 60 s | Veiligheidsnet |
-| OCR-talen (gepland) | NL + EN | Uitbreidbaar via Tesseract traineddata |
+| OCR-talen | NL + EN | Uitbreidbaar via Tesseract traineddata |
+| OCR-timeout | 180 s | Tesseract per-page-budget |
+| Mail PDF-attachment | 5 MB | Hostinger SMTP-limiet |
+| Mail rate-limit | 5/uur/IP | DoS-mitigatie (in-process bucket) |
 
 ## Codenamen — thema "PDF-pioniers"
 
@@ -71,13 +74,15 @@ Volledige verklaring: [`docs/PRIVACY.md`](docs/PRIVACY.md).
 | v0.5.0 | **Crocker** | Steve Crocker, ARPANET RFC 1-auteur — output-bar (Download/Print/Mail "naar buiten") — afwijking van Adobe-traditie |
 | v0.6.0 | **Paxton** | Bill Paxton, Adobe Type Manager / PostScript Type 1 architect — docx-merge via LibreOffice |
 | v0.7.0 | **Knuth** | Donald Knuth, TeX-pionier (1978) — document-typografie voor Convert-tab |
+| v0.8.0 | **Reid** | Brian Reid, Scribe markup (1980) — OCR / tekst-herkenning |
+| v0.9.0 | **Lamport** | Leslie Lamport, LaTeX (1984) — document-distributie (mail) |
 | v1.0.0 (gepland) | **Brotz** | Doug Brotz, mede-architect PostScript/PDF — major-release reserve |
 
 ## Status
 
-**v0.7.0-Knuth (2026-06-05):** 7 features LIVE op HC55. Merge/Split/Fill/Sign/Output-bar volledig client-side; Convert-tab routeert per type (office → server LibreOffice, image → client pdf-lib); docx-support sinds v0.6.0-Paxton ook in Merge. Backend FastAPI met `/api/health` + `/api/limits` + `/api/convert/docx-to-pdf` + `/api/convert/xlsx-to-pdf` live; `/api/ocr` + `/api/mail` zijn 501-stubs.
+**v0.9.0-Lamport (2026-06-14):** alle 8 features LIVE op HC55. Merge/Split/Fill/Sign/Output-bar volledig client-side; Convert-tab routeert per type (office → server LibreOffice, image → client pdf-lib); docx-support sinds v0.6.0-Paxton ook in Merge; OCR (v0.8.0-Reid) via Tesseract+ocrmypdf; **Mail (v0.9.0-Lamport) via Hostinger SMTP** met alias `pdfservice@icthorse.nl` zonder mailbox-aanmaak — hergebruik `info@icthorse.nl`-creds van Facturatie. Backend FastAPI met `/api/health` + `/api/limits` + `/api/convert/docx-to-pdf` + `/api/convert/xlsx-to-pdf` + `/api/ocr` + `/api/mail` allemaal LIVE.
 
-**Tests:** pytest 9/9 groen + 6 Node smokes (merge/split/fill/sign/docx/xlsx) + 2 e2e curl-smokes (docx + xlsx LIVE).
+**Tests:** pytest 17/17 groen + 6 Node smokes (merge/split/fill/sign/docx/xlsx).
 
 Volledige changelog: [`CHANGELOG.md`](CHANGELOG.md) — backlog: [`ACTIONS.md`](ACTIONS.md) — bekende bugs: [`docs/BUGLIST.md`](docs/BUGLIST.md).
 

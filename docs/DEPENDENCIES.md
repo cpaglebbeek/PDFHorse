@@ -29,9 +29,10 @@
 | **ocrmypdf** | **`16.5.0`** | **OCR-wrapper (Tesseract) — `/api/ocr` endpoint** | **actief (v0.8.0)** |
 | **Tesseract 5 (system)** | **OS-level** | **OCR-engine + `nld+eng` taalpacks + ghostscript + unpaper + qpdf** | **actief op HC55 (v0.8.0)** |
 | **LibreOffice (`libreoffice-core` + `libreoffice-writer` + `libreoffice-calc`)** | **OS-level** | **`soffice --headless` voor `.docx` (v0.6.0) en `.xlsx` (v0.7.0) → PDF** | **actief op HC55** |
-| smtplib (stdlib) | — | SMTP via Hostinger | gepland v0.0.3 |
-| slowapi | latest | Rate-limiting `/api/ocr` + `/api/mail` | gepland |
-| pytest | latest | Tests | actief (4/4 groen) |
+| **smtplib (stdlib)** | **3.12+** | **Hostinger SMTP (`smtp.hostinger.com:587` STARTTLS) — `/api/mail`** | **actief (v0.9.0)** |
+| **email.message (stdlib)** | **3.12+** | **MIME-multipart message-building voor mail-attachment** | **actief (v0.9.0)** |
+| slowapi | 0.1.9 | Geïnstalleerd; **niet gebruikt op `/api/mail`** wegens ForwardRef-conflict Python 3.14+FastAPI+`Annotated`. Vervangen door in-process `collections.deque`-bucket per IP (zie `_rate_limit_check` in `backend/main.py`). Blijft als dep voor toekomstige middleware-mode of OCR-throttling. | partial |
+| pytest | 8.3.3 | Tests | actief (17/17 groen) |
 
 ## Externe systemen
 
@@ -39,7 +40,7 @@
 |---|---|---|
 | HC55 (Hetzner) | Backend host poort 3963 + frontend static | klaar voor deploy |
 | HC55 nginx | Reverse-proxy `/PDFHorse/api/` → `:3963` + static `/PDFHorse/` | snippet klaar in `deploy/nginx-pdfhorse.conf` |
-| Hostinger SMTP (`pdfservice@icthorse.nl`) | Uitgaande mail | mailbox nog aan te maken (gebruikersactie) |
+| Hostinger SMTP | Uitgaande mail — auth via bestaande `info@icthorse.nl`-mailbox (hergebruik van Facturatie); from=`pdfservice@icthorse.nl` alias zonder eigen mailbox | **actief sinds v0.9.0-Lamport** |
 | icthorse.nl frontend-shell | Branding + footer-link `/PDFHorse/` | cross-repo actie `iCt_Horse` |
 
 ## Impact-matrix (welke component breekt als dep wegvalt?)

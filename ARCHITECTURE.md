@@ -26,6 +26,8 @@
 | `GET /api/limits` | Limieten terug | Statisch JSON |
 | `POST /api/convert/docx-to-pdf` | DOCX → PDF (v0.6.0-Paxton) | Multipart in → `/tmp/pdfhorse/<uuid>/in.docx` → `soffice --headless --convert-to pdf` → `in.pdf` → FileResponse + BackgroundTask `shutil.rmtree` |
 | `POST /api/convert/xlsx-to-pdf` | XLSX → PDF (v0.7.0-Knuth) | Multipart in → `/tmp/pdfhorse/<uuid>/in.xlsx` → `soffice --headless --convert-to pdf` → `in.pdf` → FileResponse + BackgroundTask `shutil.rmtree` |
+| `POST /api/convert/odt-to-pdf` | ODT → PDF (v0.9.1-Mittelbach) | Idem via `_office_to_pdf` helper, MIME `application/vnd.oasis.opendocument.text` |
+| `POST /api/convert/rtf-to-pdf` | RTF → PDF (v0.9.1-Mittelbach) | Idem via `_office_to_pdf` helper, MIME `application/rtf` (text/rtf ook geaccepteerd) |
 | `POST /api/ocr` | OCR uitvoeren op upload (v0.8.0-Reid) | Multipart in → tijdelijke `/tmp/pdfhorse/<uuid>/in.pdf` → `ocrmypdf --language nld+eng --skip-text --output-type pdf --quiet` → FileResponse + cleanup |
 | `POST /api/mail` | Mail uitgaande PDF (v0.9.0-Lamport) | Multipart in (`to`, `subject`, `body`, `pdf`) → Hostinger SMTP (`info@icthorse.nl`-auth, From=`PDFHorse <info@icthorse.nl>`, Reply-To=`info@icthorse.nl`) → JSON `{status, to, bytes}`. Attachment max 5 MB, `%PDF-`-header gevalideerd, rate-limit 5/uur/IP (in-process bucket; slowapi-decorator vermeden wegens Python 3.14 ForwardRef-conflict). |
 

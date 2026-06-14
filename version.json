@@ -1,8 +1,8 @@
 {
-  "version": "0.9.0",
-  "codename": "Lamport",
+  "version": "0.9.1",
+  "codename": "Mittelbach",
   "released": "2026-06-14",
-  "status": "mail-live",
+  "status": "sri+odt+rtf",
   "theme": "PDF-pioniers",
-  "notes": "v0.9.0-Lamport (oranje bump): mail-endpoint live — /api/mail vervangt 501-stub door echte SMTP via Hostinger (smtp.hostinger.com:587 STARTTLS), Facturatie-stijl hergebruik van info@icthorse.nl als SMTP-auth, From=pdfservice@icthorse.nl alias, Reply-To=info@icthorse.nl. Slowapi rate-limit 5/uur/IP (Heeres-conventie). PDF-attachment max 5MB, %PDF-header gevalideerd. Geen Hostinger-mailbox-actie nodig. Codename Leslie Lamport, LaTeX-pionier voor document-distributie. Brotz blijft v1.0.0 reserve."
+  "notes": "v0.9.1-Mittelbach (groen bump): (1) SRI-integriteit op 4 CDN-scripts (pdf-lib, PDF.js, signature_pad, Alpine — Alpine gepind op 3.14.1) — Tailwind Play CDN uitgezonderd want dynamic per-request build. (2) Convert-tab uitgebreid met .odt (OpenDocument Text) en .rtf via bestaande _office_to_pdf-helper — 2 nieuwe endpoints /api/convert/odt-to-pdf en /api/convert/rtf-to-pdf, kleur-badges indigo/rose, 20 MB-limiet. pytest 20/20. Codename Frank Mittelbach, LaTeX3-team-lead — document-format quality + kwaliteits-borging, na Knuth→Reid→Lamport. Brotz blijft v1.0.0 reserve."
 }

@@ -163,6 +163,32 @@ def test_xlsx_rejects_non_xlsx_extension():
     assert r.status_code == 415
 
 
+def test_odt_rejects_non_odt_extension():
+    r = client.post(
+        "/api/convert/odt-to-pdf",
+        files={"file": ("notodt.pdf", b"%PDF-1.4", "application/pdf")},
+    )
+    assert r.status_code == 415
+
+
+def test_rtf_rejects_non_rtf_extension():
+    r = client.post(
+        "/api/convert/rtf-to-pdf",
+        files={"file": ("notrtf.pdf", b"%PDF-1.4", "application/pdf")},
+    )
+    assert r.status_code == 415
+
+
+def test_odt_returns_503_when_soffice_absent(monkeypatch):
+    from backend import main as backend_main
+    monkeypatch.setattr(backend_main, "SOFFICE_BIN", "/usr/bin/definitely-not-soffice-xyz")
+    r = client.post(
+        "/api/convert/odt-to-pdf",
+        files={"file": ("x.odt", b"PK\x03\x04minimal", "application/vnd.oasis.opendocument.text")},
+    )
+    assert r.status_code == 503
+
+
 def test_xlsx_returns_503_when_soffice_absent(monkeypatch):
     from backend import main as backend_main
     monkeypatch.setattr(backend_main, "SOFFICE_BIN", "/usr/bin/definitely-not-soffice-xyz")

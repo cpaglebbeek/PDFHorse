@@ -388,8 +388,8 @@ function pdfHorseApp() {
         if (r.ok) {
           this.output.mailStatus = `Verstuurd naar ${this.output.mailTo}.`;
           this.output.mailOpen = false;
-        } else if (r.status === 501) {
-          this.output.mailStatus = 'Mail-endpoint nog niet actief op deze deploy (wacht op Hostinger mailbox).';
+        } else if (r.status === 429) {
+          this.output.error = 'Mail-limiet bereikt (max 5/uur per IP). Probeer later opnieuw.';
         } else {
           let detail = '';
           try { detail = (await r.json()).detail || ''; } catch {}

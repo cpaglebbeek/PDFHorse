@@ -3,6 +3,38 @@
 > Versie-historie. Formaat: [Keep a Changelog](https://keepachangelog.com/) op hoofdlijnen, met PDFHorse-eigen codenamen (thema: PDF-pioniers).
 > Bijgewerkt bij elke release. Datums = release naar `main`.
 
+## [v0.9.0-Lamport] — 2026-06-14
+
+### Added
+- **Mail-endpoint werkend** — `POST /api/mail` vervangt 501-stub door echte SMTP via Hostinger.
+- **Hostinger SMTP hergebruik** (Facturatie-stijl): `SMTP_USER=info@icthorse.nl` (bestaande mailbox), `MAIL_FROM=PDFHorse <pdfservice@icthorse.nl>` alias, `MAIL_REPLY_TO=info@icthorse.nl`. **Geen nieuwe Hostinger-mailbox-actie**.
+- **PDF-attachment-validatie**: `.pdf`-extensie + `%PDF-`-header check.
+- **In-process rate-limit** 5/uur/IP (Heeres-conventie); thread-safe deque per IP.
+- `backend/.env.example` — alle `SMTP_*` / `MAIL_*`-vars met inline-uitleg.
+- Frontend: 429-pad in `mailLast()` ("Mail-limiet bereikt").
+
+### Changed
+- `frontend/index.html` header → v0.9.0 — Lamport.
+- `version.json` → 0.9.0 / Lamport / 2026-06-14.
+- Stale stub-bericht in `mailLast()` ("wacht op Hostinger mailbox") verwijderd.
+
+### Decided (RCA-relevant)
+- **Slowapi-decorator niet gebruikt** ondanks aanwezigheid in `requirements.txt`. Reden: Python 3.14 + FastAPI + `from __future__ import annotations` + slowapi-wrapper geeft `ForwardRef`-fout op `UploadFile` / `Annotated[str, Form()]`-parameters. In-process bucket is voldoende voor low-volume mail-endpoint (state-loss bij restart acceptabel). Slowapi blijft als dep voor evt. toekomstige middleware-mode.
+- **From-alias `pdfservice@icthorse.nl` zonder mailbox** — Hostinger SMTP accepteert from ≠ auth binnen hetzelfde domein (precedent: Facturatie mailt al jaren vanaf `facturen@icthorse.nl` via `info@`-auth). Replies komen aan op `info@icthorse.nl` via Reply-To-header.
+
+### Tests
+- pytest 17/17 groen — 7 nieuwe mail-tests (400 bad email, 415 non-pdf + 415 zonder `%PDF-`-header, 400 leeg, 503 zonder SMTP-creds, 429 rate-limit, 200 happy path met monkeypatched `_send_via_smtp`).
+- Nieuwe `conftest.py` autouse-fixture reset rate-limit-bucket per test (TestClient = één IP).
+
+### HC55 deploy
+- `apt`/pip: geen extra deps.
+- `/opt/pdfhorse/.env`: `SMTP_PASSWORD` invullen (copy-paste uit `/opt/facturatie/.env`), `systemctl restart pdfhorse`.
+
+### Codename
+**Leslie Lamport** — LaTeX-pionier (1984), document-typesetting + distributie. Past bij mail-fase (document-output naar derden). Brotz blijft v1.0.0 reserve.
+
+---
+
 ## [v0.8.0-Reid] — 2026-06-05
 
 ### Added

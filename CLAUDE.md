@@ -84,7 +84,11 @@ Geen `path` / `cdpath` / `status` / `commands` / `history` als var. Gebruik `rep
 
 ## Mail-infra
 
-Uitgaande SMTP vanaf `pdfservice@icthorse.nl` via Hostinger. Credentials in `.env` (NIET gecommit, zie `.gitignore`). Mailbox aanmaken bij Hostinger is gebruikersactie.
+Uitgaande SMTP via Hostinger (`smtp.hostinger.com:587` STARTTLS, **Facturatie-stijl hergebruik**):
+- `SMTP_USER=info@icthorse.nl` — bestaande iCt Horse-mailbox, geen actie nodig.
+- `MAIL_FROM="PDFHorse <pdfservice@icthorse.nl>"` — alias, **geen mailbox vereist** (Hostinger SMTP accepteert from ≠ auth binnen domein; precedent: Facturatie mailt vanaf `facturen@icthorse.nl` via `info@`-auth).
+- `MAIL_REPLY_TO=info@icthorse.nl` — replies komen aan op de bestaande mailbox.
+- Credentials op HC55 in `/opt/pdfhorse/.env` (mode 600); template `backend/.env.example`. Niet gecommit (`.gitignore`).
 
 ## "Over en uit" Protocol
 

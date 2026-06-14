@@ -61,7 +61,7 @@ Voor zover er überhaupt persoonsgegevens kunnen worden afgeleid uit het gebruik
 - `.env` met SMTP-credentials mode `600`, root-only, niet in git.
 - Rate-limiting op mail-endpoint (in-process bucket, 5/uur per IP) — DoS-mitigatie + anti-misbruik.
 - CSP-header beperkt scripts tot self + Tailwind/pdf-lib/Alpine CDN.
-- Frontend dependencies via CDN met integriteits-hashes (SRI) — gepland v0.2.x, nog niet actief.
+- Frontend dependencies via CDN met **Subresource Integrity** (SHA-384) en `crossorigin="anonymous"` op pdf-lib, PDF.js, signature_pad en Alpine — actief sinds v0.9.1-Mittelbach. Tailwind Play CDN uitgezonderd (dynamic per-request build, payload-hash niet stabiel); CSP en HTTPS fungeren daar als guard.
 
 ## Jouw rechten
 

@@ -16,6 +16,8 @@ const MAX_IMAGE_BYTES   = 50  * 1024 * 1024;
 
 const DOCX_MIME = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
 const XLSX_MIME = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+const ODT_MIME  = 'application/vnd.oasis.opendocument.text';
+const RTF_MIME  = 'application/rtf';
 
 function pdfHorseApp() {
   return {
@@ -734,6 +736,8 @@ function pdfHorseApp() {
       const n = f.name.toLowerCase();
       if (f.type === DOCX_MIME || n.endsWith('.docx')) return 'docx';
       if (f.type === XLSX_MIME || n.endsWith('.xlsx')) return 'xlsx';
+      if (f.type === ODT_MIME || n.endsWith('.odt')) return 'odt';
+      if (f.type === RTF_MIME || f.type === 'text/rtf' || n.endsWith('.rtf')) return 'rtf';
       if (f.type === 'image/png' || n.endsWith('.png')) return 'png';
       if (f.type === 'image/jpeg' || /\.jpe?g$/i.test(n)) return 'jpg';
       return null;
@@ -747,7 +751,7 @@ function pdfHorseApp() {
       for (const f of incoming) {
         const kind = this._convertDetectKind(f);
         if (!kind) { this.convert.error = `"${f.name}" niet ondersteund.`; continue; }
-        const limit = (kind === 'docx' || kind === 'xlsx') ? MAX_DOCX_BYTES : MAX_IMAGE_BYTES;
+        const limit = ['docx', 'xlsx', 'odt', 'rtf'].includes(kind) ? MAX_DOCX_BYTES : MAX_IMAGE_BYTES;
         if (f.size > limit) {
           this.convert.error = `"${f.name}" overschrijdt ${limit / (1024*1024)} MB.`;
           continue;
@@ -807,7 +811,7 @@ function pdfHorseApp() {
       // Server-side via LibreOffice
       const fd = new FormData();
       fd.append('file', file, file.name);
-      const route = kind === 'docx' ? '/api/convert/docx-to-pdf' : '/api/convert/xlsx-to-pdf';
+      const route = `/api/convert/${kind}-to-pdf`;
       const r = await fetch(this._apiUrl(route), { method: 'POST', body: fd });
       if (!r.ok) {
         let detail = '';
@@ -838,7 +842,7 @@ function pdfHorseApp() {
           await this._sleep(20);  // UI yield
 
           let pdfBytes;
-          if (f.kind === 'docx' || f.kind === 'xlsx') {
+          if (['docx', 'xlsx', 'odt', 'rtf'].includes(f.kind)) {
             pdfBytes = await this._officeToPdf(f.blob, f.kind);
           } else {
             pdfBytes = await this._imageToPdf(f.blob, f.kind);
@@ -850,7 +854,7 @@ function pdfHorseApp() {
             pages.forEach(p => combined.addPage(p));
             lastFilename = 'converted.pdf';
           } else {
-            const base = f.name.replace(/\.(docx|xlsx|png|jpe?g)$/i, '');
+            const base = f.name.replace(/\.(docx|xlsx|odt|rtf|png|jpe?g)$/i, '');
             const fn = `${base}.pdf`;
             this._downloadBlob(pdfBytes, fn, 'application/pdf');
             lastBytes = pdfBytes;

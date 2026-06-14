@@ -1,8 +1,8 @@
 # PDFHorse
 
-> **iCt Horse tooling SaaS — browser-first PDF-bewerker met merge, split, invullen, ondertekenen, converteren (docx/xlsx/png/jpg), OCR (NL+EN) en mail.**
+> **iCt Horse tooling SaaS — browser-first PDF-bewerker met merge, split, invullen, ondertekenen, converteren (docx/xlsx/odt/rtf/png/jpg), OCR (NL+EN) en mail.**
 >
-> Versie: **v0.9.0-Lamport** · Licentie: **AGPL-3.0** · Status: **alle 8 features LIVE**
+> Versie: **v0.9.1-Mittelbach** · Licentie: **AGPL-3.0** · Status: **alle 8 features LIVE + SRI-gehard**
 
 🚀 **LIVE op https://horsecloud55.ddns.net/PDFHorse/** (sinds 2026-06-04)
 Gepland (Hostinger reverse-proxy): https://icthorse.nl/PDFHorse/
@@ -17,7 +17,7 @@ Eén anonieme webpagina waar je PDF's (en Word- / Excel-documenten / afbeeldinge
 | **Split** — één PDF opdelen op page-ranges | client (pdf-lib) | ✅ v0.2.0-Wozencraft | Range-syntax `1-3, 5, 8-10` → N losse PDFs |
 | **Invullen** — tekstvelden vrij plaatsen op PDF | client (pdf-lib + PDF.js) | ✅ v0.3.0-Putman | Klik op pagina → tekst → coords-transform |
 | **Ondertekenen** — bitmap upload / SVG upload / live tekenen | client (signature_pad + pdf-lib) | ✅ v0.4.0-Taft | 3 modi (A bitmap / B SVG / C live-canvas wit→transparant) |
-| **Converteren** — .docx / .xlsx / .png / .jpg → PDF | server (LibreOffice voor office) + client (pdf-lib voor images) | ✅ v0.7.0-Knuth | Batch + toggle "Combineer alle tot 1 PDF" |
+| **Converteren** — .docx / .xlsx / .odt / .rtf / .png / .jpg → PDF | server (LibreOffice voor office) + client (pdf-lib voor images) | ✅ v0.7.0-Knuth + v0.9.1-Mittelbach (odt/rtf) | Batch + toggle "Combineer alle tot 1 PDF" |
 | **Output-bar** — Download / Print / Mail laatste output | client (Print via hidden iframe) + server (Mail via SMTP) | ✅ v0.5.0-Crocker + v0.9.0-Lamport | Persistent per tab |
 | **OCR** — gescande PDF → doorzoekbare PDF | server (Tesseract NL+EN via ocrmypdf) | ✅ v0.8.0-Reid | Idempotent (`--skip-text`); 30s–3min |
 | **Mail-verzending** | server (Hostinger SMTP, `PDFHorse <info@icthorse.nl>` als from + reply-to) | ✅ v0.9.0-Lamport | PDF-attachment max 5 MB, rate-limit 5/uur/IP |
@@ -76,6 +76,7 @@ Volledige verklaring: [`docs/PRIVACY.md`](docs/PRIVACY.md).
 | v0.7.0 | **Knuth** | Donald Knuth, TeX-pionier (1978) — document-typografie voor Convert-tab |
 | v0.8.0 | **Reid** | Brian Reid, Scribe markup (1980) — OCR / tekst-herkenning |
 | v0.9.0 | **Lamport** | Leslie Lamport, LaTeX (1984) — document-distributie (mail) |
+| v0.9.1 | **Mittelbach** | Frank Mittelbach, LaTeX3-team-lead (1990–) — kwaliteits-borging + format-uitbreiding (SRI + odt/rtf) |
 | v1.0.0 (gepland) | **Brotz** | Doug Brotz, mede-architect PostScript/PDF — major-release reserve |
 
 ## Status

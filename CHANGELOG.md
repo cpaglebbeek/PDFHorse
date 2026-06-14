@@ -3,6 +3,37 @@
 > Versie-historie. Formaat: [Keep a Changelog](https://keepachangelog.com/) op hoofdlijnen, met PDFHorse-eigen codenamen (thema: PDF-pioniers).
 > Bijgewerkt bij elke release. Datums = release naar `main`.
 
+## [v0.9.1-Mittelbach] — 2026-06-14
+
+### Added — Security-hardening (SRI)
+- **Subresource Integrity** op 4 CDN-scripts via SHA-384 + `crossorigin="anonymous"` + `referrerpolicy="no-referrer"`:
+  - `pdf-lib@1.17.1`
+  - `pdf.js@4.0.379` (hoofdmodule)
+  - `signature_pad@5.0.4`
+  - `alpinejs@3.14.1` (gepind, was floating `3.x.x` — SRI vereist exacte versie)
+- Tailwind Play CDN (`cdn.tailwindcss.com`) uitgezonderd: dynamic per-request build, payload-hash niet stabiel. CSP en Hostinger-HTTPS fungeren als guard. Gedocumenteerd in `index.html`-comment + `PRIVACY.md`.
+- PDF.js worker (`pdf.worker.min.mjs`) ook ongehard (kan niet via `GlobalWorkerOptions`); minimaal risico want zelfde origin als hoofdmodule.
+
+### Added — Format-uitbreiding Convert-tab
+- **`POST /api/convert/odt-to-pdf`** — `.odt` (OpenDocument Text) → PDF via bestaande `_office_to_pdf` helper (LibreOffice Writer kan dit native).
+- **`POST /api/convert/rtf-to-pdf`** — `.rtf` → PDF via dezelfde helper (LibreOffice import-filter).
+- Frontend Convert-tab accepteert `.odt` + `.rtf`; kleur-badges indigo (ODT) en rose (RTF); 20 MB-limiet zoals docx/xlsx.
+- `_officeToPdf` route nu generiek: `/api/convert/${kind}-to-pdf` voor 4 office-types.
+
+### Changed
+- `version.json` → 0.9.1 / Mittelbach / 2026-06-14.
+- `frontend/index.html` header → v0.9.1 — Mittelbach.
+- `app.js`: `ODT_MIME` + `RTF_MIME` constants; `_convertDetectKind`, limit-check en filename-regex uitgebreid.
+- Convert-tab intro-tekst en accept-attribuut bijgewerkt.
+
+### Tests
+- pytest 20/20 groen — 3 nieuwe (415 odt, 415 rtf, 503 odt-zonder-soffice).
+
+### Codename
+**Frank Mittelbach** — LaTeX3-team-lead sinds 1990, document-typesetting kwaliteit + format-engineering. Past bij security-hardening (kwaliteits-borging) + format-uitbreiding. Brotz blijft v1.0.0 reserve.
+
+---
+
 ## [v0.9.0-Lamport] — 2026-06-14
 
 ### Added

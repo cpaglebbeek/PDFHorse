@@ -6,6 +6,17 @@
   <meta name="description" content="Anonieme browser-first PDF-bewerker: merge, split, OCR, invullen en ondertekenen. iCt Horse." />
   <title>PDFHorse — anonieme PDF-bewerker</title>
 
+  <script>
+    // Detecteer API-base uit huidige path zodat fetch('/api/...') landt op
+    // /PDFHorse/api/... bij deploy onder een sub-path (nginx-route op HC55) maar
+    // gewoon /api/... bij lokale dev op root. Voorkomt dat absolute fetches
+    // naar de wrong host-root gaan (bug t/m v0.9.1).
+    (function () {
+      var m = window.location.pathname.match(/^(\/[^/]+)\/(?:|index\.html)?$/);
+      window.PDFHORSE_API_BASE = m ? m[1] : '';
+    })();
+  </script>
+
   <!-- Tailwind Play CDN: dynamic per-request build → SRI niet mogelijk. CSP fungeert als guard. -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script

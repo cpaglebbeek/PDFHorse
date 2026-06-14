@@ -54,6 +54,8 @@ MAX_UPLOAD_SIZE_BYTES = int(os.environ.get("MAX_UPLOAD_SIZE_BYTES", str(50 * 102
 MAX_SESSION_TOTAL_BYTES = int(os.environ.get("MAX_SESSION_TOTAL_BYTES", str(100 * 1024 * 1024)))
 MAX_DOCX_BYTES = int(os.environ.get("MAX_DOCX_BYTES", str(20 * 1024 * 1024)))
 MAX_XLSX_BYTES = int(os.environ.get("MAX_XLSX_BYTES", str(20 * 1024 * 1024)))
+MAX_ODT_BYTES = int(os.environ.get("MAX_ODT_BYTES", str(20 * 1024 * 1024)))
+MAX_RTF_BYTES = int(os.environ.get("MAX_RTF_BYTES", str(20 * 1024 * 1024)))
 MAX_OCR_BYTES = int(os.environ.get("MAX_OCR_BYTES", str(50 * 1024 * 1024)))
 SESSION_TIMEOUT_S = int(os.environ.get("SESSION_TIMEOUT_S", "1800"))
 TMP_DIR = Path(os.environ.get("TMP_DIR", "/tmp/pdfhorse"))
@@ -108,6 +110,8 @@ _EMAIL_RE = re.compile(r"^[^\s@]+@[^\s@]+\.[^\s@]+$")
 
 DOCX_MIME = "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
 XLSX_MIME = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+ODT_MIME = "application/vnd.oasis.opendocument.text"
+RTF_MIME = "application/rtf"
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -252,6 +256,18 @@ async def convert_docx_to_pdf(file: UploadFile = File(...)) -> FileResponse:
 async def convert_xlsx_to_pdf(file: UploadFile = File(...)) -> FileResponse:
     """Converteert .xlsx → PDF via LibreOffice headless. v0.7.0-Knuth."""
     return await _office_to_pdf(file, ext="xlsx", mime=XLSX_MIME, max_bytes=MAX_XLSX_BYTES)
+
+
+@app.post("/api/convert/odt-to-pdf")
+async def convert_odt_to_pdf(file: UploadFile = File(...)) -> FileResponse:
+    """Converteert .odt → PDF via LibreOffice headless. v0.9.1-Mittelbach."""
+    return await _office_to_pdf(file, ext="odt", mime=ODT_MIME, max_bytes=MAX_ODT_BYTES)
+
+
+@app.post("/api/convert/rtf-to-pdf")
+async def convert_rtf_to_pdf(file: UploadFile = File(...)) -> FileResponse:
+    """Converteert .rtf → PDF via LibreOffice headless. v0.9.1-Mittelbach."""
+    return await _office_to_pdf(file, ext="rtf", mime=RTF_MIME, max_bytes=MAX_RTF_BYTES)
 
 
 def _cleanup_task(work_dir: Path):

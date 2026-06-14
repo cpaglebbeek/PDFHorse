@@ -6,9 +6,19 @@
   <meta name="description" content="Anonieme browser-first PDF-bewerker: merge, split, OCR, invullen en ondertekenen. iCt Horse." />
   <title>PDFHorse — anonieme PDF-bewerker</title>
 
+  <!-- Tailwind Play CDN: dynamic per-request build → SRI niet mogelijk. CSP fungeert als guard. -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.0.379/pdf.min.mjs" type="module"></script>
+  <script
+    src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"
+    integrity="sha384-weMABwrltA6jWR8DDe9Jp5blk+tZQh7ugpCsF3JwSA53WZM9/14PjS5LAJNHNjAI"
+    crossorigin="anonymous"
+    referrerpolicy="no-referrer"></script>
+  <script
+    src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.0.379/pdf.min.mjs"
+    type="module"
+    integrity="sha384-uwJM5C0hGZH5Ed/vHx4Ht1PUd8ABIDVIcLbHydZOdFL5eTUG8Jdr32xNVIyn0kYH"
+    crossorigin="anonymous"
+    referrerpolicy="no-referrer"></script>
   <script type="module">
     // Configureer PDF.js worker
     if (window['pdfjs-dist/build/pdf']) {
@@ -24,8 +34,17 @@
       console.warn('PDF.js load failed:', e);
     }
   </script>
-  <script src="https://unpkg.com/signature_pad@5.0.4/dist/signature_pad.umd.min.js"></script>
-  <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <script
+    src="https://unpkg.com/signature_pad@5.0.4/dist/signature_pad.umd.min.js"
+    integrity="sha384-sAvQstqOmAfqxD54T2ZBU8/E8IQJJuNT4hEHwUULkoBRze+eTQ7tZNcXEA5yPzhE"
+    crossorigin="anonymous"
+    referrerpolicy="no-referrer"></script>
+  <script
+    defer
+    src="https://unpkg.com/alpinejs@3.14.1/dist/cdn.min.js"
+    integrity="sha384-l8f0VcPi/M1iHPv8egOnY/15TDwqgbOR1anMIJWvU6nLRgZVLTLSaNqi/TOoT5Fh"
+    crossorigin="anonymous"
+    referrerpolicy="no-referrer"></script>
 
   <link rel="stylesheet" href="css/styles.css" />
 </head>

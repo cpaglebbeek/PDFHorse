@@ -3,6 +3,26 @@
 > Versie-historie. Formaat: [Keep a Changelog](https://keepachangelog.com/) op hoofdlijnen, met PDFHorse-eigen codenamen (thema: PDF-pioniers).
 > Bijgewerkt bij elke release. Datums = release naar `main`.
 
+## [v0.10.0-Thanh] — 2026-06-17
+
+> Codenaam **Hàn Thế Thành** — uitvinder van pdfTeX (directe PDF-generatie uit TeX). Past in PDF-pioniers/LaTeX-lijn na Knuth/Reid/Lamport/Mittelbach. `Brotz` blijft gereserveerd voor v1.0.0.
+
+### Added — Ondertekenen: verplaatsbare handtekening
+- Een **geplaatste** handtekening is nu **versleepbaar** naar de juiste positie (`startSignDrag`). Pointer-events dekken muis, touch én pen. Positie wordt geklemd binnen de pagina-canvas; de canvas-rect wordt per beweging opnieuw gemeten zodat scrollen tijdens het slepen niet verschuift. Plaatsen-via-klik en ✕-verwijderen blijven werken.
+- Hint-tekst + `cursor-move`/`touch-none` op de handtekening-overlay.
+
+### Added — Fill → Sign overdracht
+- Na **Invullen** wordt de ingevulde PDF beschikbaar gemaakt voor **Ondertekenen** (`signHandoff`-state). Bij wisselen naar de Ondertekenen-tab (terwijl er nog geen sign-bestand geladen is) wordt die PDF **automatisch** overgenomen; daarnaast een expliciete knop **"→ Onderteken deze PDF"** in de Invullen-tab.
+- Zo kun je een formulier invullen én ondertekenen zonder tussentijds downloaden + opnieuw uploaden.
+
+### Changed
+- `app.js`: nieuwe state `signHandoff`; nieuwe methodes `goTab()`, `continueToSign()`, `startSignDrag()`. `_signLoad` opgesplitst in `_signLoad` (uploadpad) + `_signLoadBytes` (laden uit geheugen) — DRY render-logica. `runFill` zet de overdracht klaar.
+- `index.html`: tab-knoppen via `goTab(t.id)`; handtekening-overlay versleepbaar; knop in Invullen-tab; header → v0.10.0 — Thanh.
+- `version.json` → 0.10.0 / Thanh / 2026-06-17.
+
+### Notes
+- **Client-only** — geen backend-, endpoint- of dependency-wijziging. Backend leest versie bij import, dus deploy = `git pull` + rsync frontend + `systemctl restart pdfhorse`.
+
 ## [v0.9.1-Mittelbach] — 2026-06-14
 
 ### Added — Security-hardening (SRI)

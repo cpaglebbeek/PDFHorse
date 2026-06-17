@@ -33,6 +33,10 @@ function pdfHorseApp() {
     health: { status: '…', version: '…', codename: '…' },
     limits: {},
 
+    // Overdracht tussen tabs: een ingevulde PDF doorgeven aan Ondertekenen
+    // zodat je na "Invullen" verder kunt met "Ondertekenen" op dezelfde PDF.
+    signHandoff: null,            // { bytes: Uint8Array, name: string } of null
+
     merge: {
       files: [],
       dragOver: false,
@@ -146,6 +150,29 @@ function pdfHorseApp() {
     _apiUrl(p) {
       const base = (window.PDFHORSE_API_BASE || '').replace(/\/$/, '');
       return base + p;
+    },
+
+    // ---------- Tab-navigatie + fill→sign-overdracht ----------
+
+    goTab(id) {
+      this.active = id;
+      // Wissel je naar Ondertekenen terwijl er net een PDF is ingevuld en er
+      // nog geen sign-bestand geladen is? Dan automatisch de ingevulde PDF
+      // overnemen zodat je naadloos verder kunt met ondertekenen.
+      if (id === 'sign' && this.signHandoff && !this.sign.file) {
+        this.continueToSign();
+      }
+    },
+
+    async continueToSign() {
+      if (!this.signHandoff) return;
+      const { bytes, name } = this.signHandoff;
+      this.signHandoff = null;          // verbruik de overdracht
+      this.active = 'sign';
+      // Wacht tot de Ondertekenen-tab zichtbaar is (canvases in DOM) en laad.
+      await this.$nextTick();
+      await this._signLoadBytes(bytes, name);
+      this.sign.notice = `Overgenomen uit "Invullen": ${name}. Plaats je handtekening, of klik Wissen voor een ander bestand.`;
     },
 
     // ---------- Merge ----------
@@ -902,10 +929,29 @@ function pdfHorseApp() {
       if (!isPdf) { this.sign.error = `"${f.name}" is geen PDF.`; return; }
       if (f.size > MAX_FILE_BYTES) { this.sign.error = `"${f.name}" overschrijdt 50 MB.`; return; }
       if (!window.PDFLib) { this.sign.error = 'pdf-lib is niet geladen.'; return; }
-      this.sign.loading = true;
       this.sign.file = f;
+      let bytes;
       try {
-        this.sign.pdfBytes = new Uint8Array(await f.arrayBuffer());
+        bytes = new Uint8Array(await f.arrayBuffer());
+      } catch (e) {
+        this.sign.error = 'Kon bestand niet lezen.';
+        this.sign.file = null;
+        return;
+      }
+      await this._signLoadBytes(bytes, f.name);
+    },
+
+    // Laadt PDF-bytes (uit upload óf overdracht uit "Invullen") in de
+    // Ondertekenen-tab en rendert de pagina-previews. Zet sign.file naar een
+    // pseudo-bestand {name} als er nog geen echt File-object geladen is.
+    async _signLoadBytes(bytes, name) {
+      this.sign.placements = [];
+      this.sign.pages = [];
+      if (!window.PDFLib) { this.sign.error = 'pdf-lib is niet geladen.'; return; }
+      this.sign.loading = true;
+      if (!this.sign.file) this.sign.file = { name };
+      try {
+        this.sign.pdfBytes = new Uint8Array(bytes);
         const srcCheck = await window.PDFLib.PDFDocument.load(this.sign.pdfBytes, { ignoreEncryption: false });
         this.sign.pageCount = srcCheck.getPageCount();
         this.sign.pages = Array.from({ length: this.sign.pageCount }, (_, i) => ({ index: i }));
@@ -932,7 +978,7 @@ function pdfHorseApp() {
         }
       } catch (e) {
         if (String(e).toLowerCase().includes('encrypt')) {
-          this.sign.error = `"${f.name}" is versleuteld en kan niet worden ondertekend.`;
+          this.sign.error = `"${name}" is versleuteld en kan niet worden ondertekend.`;
         } else {
           this.sign.error = e.message || String(e);
         }
@@ -1081,6 +1127,37 @@ function pdfHorseApp() {
       });
     },
 
+    // Versleep een geplaatste handtekening met muis/touch/pen. Werkt met
+    // pointer-events; klemt de positie binnen de pagina-canvas. De rect wordt
+    // per move opnieuw gemeten zodat scrollen tijdens slepen niet verschuift.
+    startSignDrag(ev, p) {
+      ev.preventDefault();
+      ev.stopPropagation();
+      const canvas = document.getElementById('sign-canvas-' + p.page);
+      if (!canvas) return;
+      const startRect = canvas.getBoundingClientRect();
+      const grabDX = ev.clientX - (startRect.left + p.x);
+      const grabDY = ev.clientY - (startRect.top + p.y);
+      try { ev.target.setPointerCapture && ev.target.setPointerCapture(ev.pointerId); } catch {}
+      const move = (e) => {
+        const r = canvas.getBoundingClientRect();
+        let nx = e.clientX - r.left - grabDX;
+        let ny = e.clientY - r.top - grabDY;
+        nx = Math.max(0, Math.min(nx, r.width - 8));
+        ny = Math.max(0, Math.min(ny, r.height - 8));
+        p.x = nx;
+        p.y = ny;
+      };
+      const up = () => {
+        document.removeEventListener('pointermove', move);
+        document.removeEventListener('pointerup', up);
+        document.removeEventListener('pointercancel', up);
+      };
+      document.addEventListener('pointermove', move);
+      document.addEventListener('pointerup', up);
+      document.addEventListener('pointercancel', up);
+    },
+
     removeSignPlacement(id) {
       this.sign.placements = this.sign.placements.filter(p => p.id !== id);
     },
@@ -1198,7 +1275,10 @@ function pdfHorseApp() {
         const fn = `${baseName}_filled.pdf`;
         this._downloadBlob(out, fn, 'application/pdf');
         this._setOutput(out, fn, `fill (${this.fill.fields.length} veld(en))`);
-        this.fill.notice = `Ingevuld: ${this.fill.fields.length} veld(en) → ${fn} gedownload.`;
+        // Maak de ingevulde PDF beschikbaar voor de Ondertekenen-tab, zodat je
+        // er direct een handtekening op kunt zetten (auto bij tab-wissel of knop).
+        this.signHandoff = { bytes: new Uint8Array(out), name: fn };
+        this.fill.notice = `Ingevuld: ${this.fill.fields.length} veld(en) → ${fn} gedownload. Je kunt nu doorgaan naar Ondertekenen.`;
       } catch (e) {
         this.fill.error = e.message || String(e);
       } finally {

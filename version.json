@@ -1,8 +1,8 @@
 {
-  "version": "0.9.1",
-  "codename": "Mittelbach",
-  "released": "2026-06-14",
-  "status": "sri+odt+rtf",
+  "version": "0.10.0",
+  "codename": "Thanh",
+  "released": "2026-06-17",
+  "status": "draggable-sign+fill-to-sign-handoff",
   "theme": "PDF-pioniers",
-  "notes": "v0.9.1-Mittelbach (groen bump): (1) SRI-integriteit op 4 CDN-scripts (pdf-lib, PDF.js, signature_pad, Alpine — Alpine gepind op 3.14.1) — Tailwind Play CDN uitgezonderd want dynamic per-request build. (2) Convert-tab uitgebreid met .odt (OpenDocument Text) en .rtf via bestaande _office_to_pdf-helper — 2 nieuwe endpoints /api/convert/odt-to-pdf en /api/convert/rtf-to-pdf, kleur-badges indigo/rose, 20 MB-limiet. pytest 20/20. Codename Frank Mittelbach, LaTeX3-team-lead — document-format quality + kwaliteits-borging, na Knuth→Reid→Lamport. Brotz blijft v1.0.0 reserve."
+  "notes": "v0.10.0-Thanh (oranje bump, UX-uitbreiding Ondertekenen): (1) Geplaatste handtekening is nu VERSLEEPBAAR — pointer-events (muis/touch/pen), klemt binnen de pagina-canvas, rect per move opnieuw gemeten zodat scrollen niet verschuift (startSignDrag). (2) Fill->Sign-OVERDRACHT: na 'Invullen' wordt de ingevulde PDF automatisch overgenomen in 'Ondertekenen' bij tab-wissel (als er nog geen sign-bestand is) plus expliciete knop 'Onderteken deze PDF'. Refactor _signLoad -> _signLoad + _signLoadBytes zodat een PDF ook uit geheugen geladen kan worden; signHandoff-state + goTab()/continueToSign(). Geen backend-/dependency-wijziging, client-only. Codename Han The Thanh, uitvinder van pdfTeX (PDF-generatie uit TeX) — past in PDF-pioniers/LaTeX-thema na Knuth/Reid/Lamport/Mittelbach. Brotz blijft v1.0.0 reserve."
 }

@@ -1,0 +1,58 @@
+/* iCt Horse huisstijl-theme voor PDFHorse — dark, Space Grotesk, teal accent.
+ * Overschrijft de Tailwind slate/white-utilities (per type: achtergrond/tekst/border/knop)
+ * zodat de app ingebed op icthorse.nl native oogt. v0.12.0-Carlisle. */
+:root{
+  --ih-bg:#070b14; --ih-card:#0c1a2a; --ih-card2:#0e1f30; --ih-border:#13283a;
+  --ih-text:#e5f4ed; --ih-dim:#9fb4ad; --ih-teal:#59c5a8; --ih-green:#69c996;
+}
+html, body{
+  background-color:var(--ih-bg) !important;
+  color:var(--ih-text) !important;
+  font-family:"Space Grotesk", system-ui, -apple-system, Arial, sans-serif !important;
+}
+
+/* ---- Achtergronden ---- */
+.bg-slate-50, .bg-slate-100, .bg-slate-200{ background-color:var(--ih-card2) !important; }
+.bg-white{ background-color:var(--ih-card) !important; }
+header.bg-slate-900{ background-color:#06101c !important; border-bottom:1px solid var(--ih-border); }
+.bg-slate-900{ background-color:var(--ih-card) !important; }
+
+/* ---- Primaire knoppen (bg-slate-900 text-white) → teal met donkere tekst ---- */
+button.bg-slate-900, a.bg-slate-900, label.bg-slate-900{
+  background-color:var(--ih-teal) !important; color:var(--ih-bg) !important;
+}
+button.bg-slate-900:hover, a.bg-slate-900:hover{ background-color:var(--ih-green) !important; }
+
+/* ---- Tekst ---- */
+.text-slate-900{ color:var(--ih-text) !important; }
+.text-slate-700{ color:#d6e7df !important; }
+.text-slate-600, .text-slate-500{ color:var(--ih-dim) !important; }
+.text-slate-400, .text-slate-300{ color:#7e948c !important; }
+.text-white{ color:var(--ih-text) !important; }
+button.bg-slate-900 .text-white, button.bg-slate-900 span{ color:inherit !important; }
+/* leesbaarheid status-meldingen op donker */
+.text-emerald-700{ color:#5fd0a0 !important; }
+.text-red-700{ color:#ff8b6b !important; }
+
+/* ---- Borders ---- */
+.border-slate-200, .border-slate-300, .border-slate-400{ border-color:var(--ih-border) !important; }
+.border-slate-900, .border-slate-500{ border-color:var(--ih-teal) !important; }
+.border-dashed:hover{ border-color:var(--ih-teal) !important; }
+
+/* ---- Actieve tab ---- */
+[role="tab"][aria-selected="true"]{ color:var(--ih-teal) !important; }
+
+/* ---- Formuliervelden ---- */
+input, textarea, select{
+  background-color:rgba(0,0,0,.35) !important; color:var(--ih-text) !important;
+  border-color:var(--ih-border) !important;
+}
+input::placeholder, textarea::placeholder{ color:#6f857d !important; }
+.bg-yellow-50{ background-color:rgba(240,198,116,.14) !important; color:var(--ih-text) !important; }
+
+/* ---- Links in header ---- */
+header a{ color:var(--ih-text) !important; }
+header a:hover{ color:var(--ih-teal) !important; }
+
+/* ---- Shadows zachter op donker ---- */
+.shadow, .shadow-sm, .shadow-md{ box-shadow:0 2px 10px rgba(0,0,0,.4) !important; }

@@ -3,6 +3,19 @@
 > Versie-historie. Formaat: [Keep a Changelog](https://keepachangelog.com/) op hoofdlijnen, met PDFHorse-eigen codenamen (thema: PDF-pioniers).
 > Bijgewerkt bij elke release. Datums = release naar `main`.
 
+## [v0.12.0-Carlisle] — 2026-06-17
+
+> Codenaam **David Carlisle** — LaTeX-kernontwikkelaar. PDF-pioniers/LaTeX-lijn na Rahtz. `Brotz` blijft gereserveerd voor v1.0.0.
+
+### Changed — iCt Horse huisstijl-rebrand (dark)
+- Nieuw `frontend/css/icthorse-theme.css`: overschrijft de Tailwind `slate`/`white`-utilities (per type: achtergrond/tekst/border/knop) naar iCt Horse-tokens — dark `--bg #070b14`, cards `#0c1a2a`, mint tekst `#e5f4ed`, teal accent `#59c5a8`. Primaire knoppen (`bg-slate-900`) → teal met donkere tekst; actieve tab → teal; status-meldingen leesbaar op donker.
+- **Space Grotesk** als font (Google Fonts), consistent met icthorse.nl.
+- Header: iCt Horse-logo + "een dienst van iCt Horse →". Versielabel → v0.12.0 — Carlisle.
+- Doel: de app oogt **native** wanneer 'ie ingebed wordt op `icthorse.nl/PDFHorse/` (Fase 3 van het artefact/branding-traject).
+
+### Notes
+- **Geen functionele/backend-wijziging** — alle 8 features ongewijzigd; pytest onaangetast. Deploy = rsync frontend + `systemctl restart pdfhorse`.
+
 ## [v0.11.0-Rahtz] — 2026-06-17
 
 > Codenaam **Sebastian Rahtz** — `hyperref`/PDF-integratie in LaTeX. PDF-pioniers/LaTeX-lijn na Thanh. `Brotz` blijft gereserveerd voor v1.0.0.

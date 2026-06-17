@@ -1,8 +1,8 @@
 {
-  "version": "0.11.0",
-  "codename": "Rahtz",
+  "version": "0.12.0",
+  "codename": "Carlisle",
   "released": "2026-06-17",
-  "status": "export-live-signature-png-svg",
+  "status": "icthorse-huisstijl-rebrand",
   "theme": "PDF-pioniers",
-  "notes": "v0.11.0-Rahtz (oranje bump, Ondertekenen modus C): de live-getekende handtekening kan nu geExporteerd/gedownload worden als PNG (transparante achtergrond via _whiteToTransparentDataUrl) of als SVG (echte vector via signature_pad toDataURL('image/svg+xml')). Nieuwe methodes exportSignPng() + exportSignSvg() + _downloadDataUrl(); twee knoppen in het modus-C-blok. Client-only, geen backend-/dependency-wijziging. Codename Sebastian Rahtz (hyperref / PDF-integratie in LaTeX), PDF-pioniers/LaTeX-lijn na Thanh. Brotz blijft v1.0.0 reserve."
+  "notes": "v0.12.0-Carlisle (oranje bump, UI-rebrand): PDFHorse-frontend in iCt Horse dark-huisstijl zodat 'ie ingebed op icthorse.nl/PDFHorse native oogt. Nieuw css/icthorse-theme.css overschrijft de Tailwind slate/white-utilities (achtergrond/tekst/border/knop apart) naar iCt Horse-tokens (--bg #070b14, --card #0c1a2a, --teal-green #59c5a8, mint tekst) + Space Grotesk-font + iCt Horse-logo in de header ('een dienst van iCt Horse'). Geen functionele/backend-wijziging; alle 8 features ongewijzigd. Codenaam David Carlisle (LaTeX-kernontwikkelaar), PDF-pioniers/LaTeX-lijn na Rahtz. Brotz blijft v1.0.0 reserve."
 }

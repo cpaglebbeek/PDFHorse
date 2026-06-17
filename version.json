@@ -1,8 +1,8 @@
 {
-  "version": "0.14.0",
-  "codename": "Braams",
+  "version": "0.15.0",
+  "codename": "Kew",
   "released": "2026-06-17",
-  "status": "delen-tab + invul-bugfix",
+  "status": "auto-veldherkenning",
   "theme": "PDF-pioniers",
-  "notes": "v0.14.0-Braams: (1) Nieuwe tab '🔗 Delen & meekijken' — het herbruikbare clipboard-artefact (cross-origin van icthorse.nl, api=https://icthorse.nl/clipboard/api.php) inline in de app; ?watch=CODE opent direct deze tab. (2) Bugfix invul-veld: de getypte tekst was onzichtbaar (lichte thema-tekst op het witte PDF-canvas) → invul-veld nu donkere tekst op licht-geel. Codenaam Johannes Braams (babel/LaTeX)."
+  "notes": "v0.15.0-Kew: Invullen-tab krijgt knop '✨ AUTO — herken velden' bovenaan. autoDetectFields() leest de PDF-form (AcroForm) via pdf-lib, neemt tekstvelden (minify-bestendig via setText-detectie) + hun widget-rechthoek per pagina, en plaatst automatisch invulvelden op de juiste canvas-positie (zelfde transform als runFill). Flat PDF zonder formuliervelden → nette melding. Codenaam Jonathan Kew (XeTeX)."
 }

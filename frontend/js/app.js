@@ -689,6 +689,61 @@ function pdfHorseApp() {
       this.fill.fields = this.fill.fields.filter(f => f.id !== id);
     },
 
+    // AUTO — herken invulbare formuliervelden (AcroForm) en plaats er automatisch
+    // tekstvelden op. Logica: lees de PDF-form, neem tekst-achtige velden + hun
+    // widget-rechthoek per pagina, en map naar canvas-coords (zelfde transform als runFill).
+    async autoDetectFields() {
+      if (this.fill.busy) return;
+      if (!this.fill.pdfBytes) { this.fill.error = 'Laad eerst een PDF.'; return; }
+      this.fill.busy = true; this.fill.error = ''; this.fill.notice = '';
+      try {
+        const { PDFDocument } = window.PDFLib;
+        const doc = await PDFDocument.load(this.fill.pdfBytes.slice(), { ignoreEncryption: false });
+        let form = null;
+        try { form = doc.getForm(); } catch (e) { form = null; }
+        const fields = form ? form.getFields() : [];
+        const pages = doc.getPages();
+        const pageRefs = pages.map(p => p.ref);
+        let added = 0;
+        for (const field of fields) {
+          // Alleen tekstvelden — minify-bestendig via de publieke setText-methode
+          // (constructor.name is onbruikbaar omdat pdf-lib geminified van CDN komt).
+          if (typeof field.setText !== 'function') continue;
+          let widgets = [];
+          try { widgets = field.acroField.getWidgets(); } catch (e) { continue; }
+          for (const w of widgets) {
+            let r; try { r = w.getRectangle(); } catch (e) { continue; }
+            if (!r || r.width <= 1 || r.height <= 1) continue;
+            let pIdx = 0;
+            try { const pref = w.P && w.P(); if (pref) { const idx = pageRefs.findIndex(x => x === pref); if (idx >= 0) pIdx = idx; } } catch (e) { /* fallback pagina 0 */ }
+            const prev = this.fill.pages[pIdx], pdfPage = pages[pIdx];
+            if (!prev || !pdfPage) continue;
+            const { width: pdfW, height: pdfH } = pdfPage.getSize();
+            const sx = prev.width / pdfW, sy = prev.height / pdfH;
+            const fontSize = Math.max(8, Math.min(20, Math.round(r.height * 0.62)));
+            this.fill.fields.push({
+              id: ++this.fill.seq,
+              page: pIdx,
+              x: (r.x + 2) * sx,
+              y: (pdfH - (r.y + r.height * 0.28)) * sy,
+              text: '',
+              fontSize,
+            });
+            added++;
+          }
+        }
+        if (added > 0) {
+          this.fill.notice = `${added} invulveld(en) automatisch herkend en geplaatst — typ je tekst. Klik handmatig op de pagina voor extra velden.`;
+        } else {
+          this.fill.error = 'Geen invulbare formuliervelden (AcroForm) gevonden — deze PDF is waarschijnlijk "plat". Plaats velden handmatig door op de pagina te klikken.';
+        }
+      } catch (e) {
+        this.fill.error = 'Auto-herkennen mislukt: ' + (e.message || String(e));
+      } finally {
+        this.fill.busy = false;
+      }
+    },
+
     fillReset() {
       this.fill.file = null;
       this.fill.pdfBytes = null;

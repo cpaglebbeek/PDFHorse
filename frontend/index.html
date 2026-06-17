@@ -267,6 +267,16 @@
       </label>
 
       <div x-show="fill.file" class="mt-2">
+        <div class="mb-3 flex flex-wrap items-center gap-2">
+          <button type="button"
+            class="px-4 py-2 rounded bg-slate-900 text-white text-sm font-medium disabled:opacity-40"
+            :disabled="fill.busy"
+            @click="autoDetectFields()">
+            <span x-show="!fill.busy">✨ AUTO — herken velden</span>
+            <span x-show="fill.busy">Bezig…</span>
+          </button>
+          <span class="text-xs text-slate-500">Plaatst automatisch invulvelden op basis van de formuliervelden in de PDF.</span>
+        </div>
         <div class="flex flex-wrap items-center justify-between gap-2 text-sm mb-3">
           <div>
             <span class="font-medium" x-text="fill.file ? fill.file.name : ''"></span>

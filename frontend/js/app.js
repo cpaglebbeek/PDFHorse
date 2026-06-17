@@ -29,6 +29,7 @@ function pdfHorseApp() {
       { id: 'sign',    label: 'Ondertekenen' },
       { id: 'convert', label: 'Converteren' },
       { id: 'ocr',     label: 'OCR' },
+      { id: 'delen',   label: '🔗 Delen & meekijken' },
     ],
     health: { status: '…', version: '…', codename: '…' },
     limits: {},
@@ -128,6 +129,11 @@ function pdfHorseApp() {
     init() {
       this.fetchHealth();
       this.fetchLimits();
+      // Meekijk-link geopend (?watch=CODE) → toon direct de Delen-tab zodat de
+      // kijker het gedeelde scherm ziet (het clipboard-artefact koppelt zelf).
+      try {
+        if (new URLSearchParams(location.search).get('watch')) this.active = 'delen';
+      } catch (e) { /* no-op */ }
     },
 
     async fetchHealth() {

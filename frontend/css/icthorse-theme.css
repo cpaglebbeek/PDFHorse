@@ -48,7 +48,10 @@ input, textarea, select{
   border-color:var(--ih-border) !important;
 }
 input::placeholder, textarea::placeholder{ color:#6f857d !important; }
-.bg-yellow-50{ background-color:rgba(240,198,116,.14) !important; color:var(--ih-text) !important; }
+/* Invul-veld (Invullen-tab) ligt op het WITTE PDF-canvas → donkere tekst + licht-geel veld
+   (anders is de getypte tekst onzichtbaar; fix v0.13.x). */
+input.bg-yellow-50, .bg-yellow-50{ background-color:#fdf6d8 !important; color:#1a1a1a !important; -webkit-text-fill-color:#1a1a1a !important; }
+input.bg-yellow-50::placeholder{ color:#8a7a3a !important; }
 
 /* ---- Links in header ---- */
 header a{ color:var(--ih-text) !important; }

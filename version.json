@@ -1,8 +1,8 @@
 {
-  "version": "0.13.0",
-  "codename": "Goossens",
+  "version": "0.14.0",
+  "codename": "Braams",
   "released": "2026-06-17",
-  "status": "donate-teaser",
+  "status": "delen-tab + invul-bugfix",
   "theme": "PDF-pioniers",
-  "notes": "v0.13.0-Goossens (oranje bump): donatie-teaser bij de finale acties (download/print/mail) via het herbruikbare iCt Horse donate-artefact (<icthorse-donate>, cross-origin van icthorse.nl/artefacts/donate). Subtiel uitklap onder de output-bar: 'Blij met deze dienst? Laat het blijken!' → bedrag (€1 default + presets + custom) → bunq.me-betaallink (METSDiensten) + QR via de gedeelde /artefacts/_lib/qr_generator.js. Geen betaal-API/gegevens in code. Codenaam Michel Goossens (LaTeX Companion), PDF-pioniers/LaTeX-lijn na Carlisle. Brotz blijft v1.0.0 reserve."
+  "notes": "v0.14.0-Braams: (1) Nieuwe tab '🔗 Delen & meekijken' — het herbruikbare clipboard-artefact (cross-origin van icthorse.nl, api=https://icthorse.nl/clipboard/api.php) inline in de app; ?watch=CODE opent direct deze tab. (2) Bugfix invul-veld: de getypte tekst was onzichtbaar (lichte thema-tekst op het witte PDF-canvas) → invul-veld nu donkere tekst op licht-geel. Codenaam Johannes Braams (babel/LaTeX)."
 }

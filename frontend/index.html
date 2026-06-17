@@ -65,6 +65,8 @@
   <link rel="stylesheet" href="css/icthorse-theme.css" />
   <!-- iCt Horse donate-artefact (gedeeld, herbruikbaar) — teaser bij download/print/mail -->
   <script src="https://icthorse.nl/artefacts/donate/icthorse-donate.js" defer></script>
+  <!-- iCt Horse clipboard-artefact (gedeeld) — Delen & meekijken-tab -->
+  <script src="https://icthorse.nl/artefacts/clipboard/icthorse-clipboard.js" defer></script>
 </head>
 <body class="bg-slate-50 text-slate-900 min-h-screen flex flex-col">
 
@@ -584,6 +586,16 @@
 
       <p x-show="ocr.error" x-text="ocr.error" class="mt-3 text-sm text-red-700"></p>
       <p x-show="ocr.notice" x-text="ocr.notice" class="mt-3 text-sm text-emerald-700"></p>
+    </section>
+
+    <section x-show="active === 'delen'" role="tabpanel" aria-labelledby="tab-delen">
+      <h2 class="text-lg font-semibold mb-2">Delen &amp; meekijken</h2>
+      <p class="text-sm text-slate-600 mb-4">
+        Stuur tekst snel naar je andere apparaat, of laat iemand <strong>live met je scherm meekijken</strong> via één link — direct hier, anoniem, geen account.
+      </p>
+      <div class="max-w-xl">
+        <icthorse-clipboard api="https://icthorse.nl/clipboard/api.php" heading="none"></icthorse-clipboard>
+      </div>
     </section>
 
     <hr class="my-6 border-slate-200" />

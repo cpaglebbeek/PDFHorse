@@ -1,8 +1,8 @@
 {
-  "version": "0.12.0",
-  "codename": "Carlisle",
+  "version": "0.13.0",
+  "codename": "Goossens",
   "released": "2026-06-17",
-  "status": "icthorse-huisstijl-rebrand",
+  "status": "donate-teaser",
   "theme": "PDF-pioniers",
-  "notes": "v0.12.0-Carlisle (oranje bump, UI-rebrand): PDFHorse-frontend in iCt Horse dark-huisstijl zodat 'ie ingebed op icthorse.nl/PDFHorse native oogt. Nieuw css/icthorse-theme.css overschrijft de Tailwind slate/white-utilities (achtergrond/tekst/border/knop apart) naar iCt Horse-tokens (--bg #070b14, --card #0c1a2a, --teal-green #59c5a8, mint tekst) + Space Grotesk-font + iCt Horse-logo in de header ('een dienst van iCt Horse'). Geen functionele/backend-wijziging; alle 8 features ongewijzigd. Codenaam David Carlisle (LaTeX-kernontwikkelaar), PDF-pioniers/LaTeX-lijn na Rahtz. Brotz blijft v1.0.0 reserve."
+  "notes": "v0.13.0-Goossens (oranje bump): donatie-teaser bij de finale acties (download/print/mail) via het herbruikbare iCt Horse donate-artefact (<icthorse-donate>, cross-origin van icthorse.nl/artefacts/donate). Subtiel uitklap onder de output-bar: 'Blij met deze dienst? Laat het blijken!' → bedrag (€1 default + presets + custom) → bunq.me-betaallink (METSDiensten) + QR via de gedeelde /artefacts/_lib/qr_generator.js. Geen betaal-API/gegevens in code. Codenaam Michel Goossens (LaTeX Companion), PDF-pioniers/LaTeX-lijn na Carlisle. Brotz blijft v1.0.0 reserve."
 }

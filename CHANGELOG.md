@@ -3,6 +3,17 @@
 > Versie-historie. Formaat: [Keep a Changelog](https://keepachangelog.com/) op hoofdlijnen, met PDFHorse-eigen codenamen (thema: PDF-pioniers).
 > Bijgewerkt bij elke release. Datums = release naar `main`.
 
+## [v0.13.0-Goossens] — 2026-06-17
+
+> Codenaam **Michel Goossens** (LaTeX Companion). PDF-pioniers/LaTeX-lijn na Carlisle. `Brotz` blijft gereserveerd voor v1.0.0.
+
+### Added — Donatie-teaser bij finale acties
+- Subtiele teaser onder de output-bar (bij **download/print/mail**): *"Blij met deze dienst? Laat het blijken!"* + korte uitleg dat hosting geld kost → bedrag (**€1** default + presets €1/€3/€5 + zelf invullen) → **bunq.me-betaallink** (`bunq.me/METSDiensten/<bedrag>/Donatie PDFHorse`) + **QR**.
+- Geleverd via het herbruikbare iCt Horse **donate-artefact** (`<icthorse-donate>`, cross-origin geladen van `icthorse.nl/artefacts/donate/`) op de gedeelde QR-engine `/artefacts/_lib/qr_generator.js`. Geen betaal-API of betaalgegevens in code (bunq.me-link; donateur bevestigt zelf in bunq).
+
+### Notes
+- `index.html`: donate-script in `<head>` + `<icthorse-donate>` in de output-bar. Geen backend-wijziging. Deploy = rsync frontend + restart.
+
 ## [v0.12.0-Carlisle] — 2026-06-17
 
 > Codenaam **David Carlisle** — LaTeX-kernontwikkelaar. PDF-pioniers/LaTeX-lijn na Rahtz. `Brotz` blijft gereserveerd voor v1.0.0.

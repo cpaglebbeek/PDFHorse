@@ -63,6 +63,8 @@
   <link rel="stylesheet" href="css/styles.css" />
   <!-- iCt Horse huisstijl-theme (na Tailwind + styles.css zodat overrides winnen) -->
   <link rel="stylesheet" href="css/icthorse-theme.css" />
+  <!-- iCt Horse donate-artefact (gedeeld, herbruikbaar) — teaser bij download/print/mail -->
+  <script src="https://icthorse.nl/artefacts/donate/icthorse-donate.js" defer></script>
 </head>
 <body class="bg-slate-50 text-slate-900 min-h-screen flex flex-col">
 
@@ -634,6 +636,11 @@
         </div>
 
         <p x-show="output.error" x-text="output.error" class="text-sm text-red-700"></p>
+
+        <!-- Donatie-teaser (artefact) — verschijnt bij elke uitvoer na download/print/mail -->
+        <div class="pt-3 mt-1 border-t border-slate-200">
+          <icthorse-donate desc="Donatie PDFHorse"></icthorse-donate>
+        </div>
       </div>
     </section>
 

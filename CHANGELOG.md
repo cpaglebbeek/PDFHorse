@@ -3,6 +3,23 @@
 > Versie-historie. Formaat: [Keep a Changelog](https://keepachangelog.com/) op hoofdlijnen, met PDFHorse-eigen codenamen (thema: PDF-pioniers).
 > Bijgewerkt bij elke release. Datums = release naar `main`.
 
+## [v0.11.0-Rahtz] — 2026-06-17
+
+> Codenaam **Sebastian Rahtz** — `hyperref`/PDF-integratie in LaTeX. PDF-pioniers/LaTeX-lijn na Thanh. `Brotz` blijft gereserveerd voor v1.0.0.
+
+### Added — Ondertekenen: getekende handtekening exporteren
+- In **modus C (live tekenen)** kun je de getekende handtekening nu downloaden als bestand voor hergebruik:
+  - **PNG** — transparante achtergrond (bijna-witte pixels → alpha 0) via `_whiteToTransparentDataUrl`.
+  - **SVG** — echte vector via signature_pad `toDataURL('image/svg+xml')`.
+- Nieuwe methodes `exportSignPng()`, `exportSignSvg()` + helper `_downloadDataUrl()`. Twee knoppen "⬇ PNG" / "⬇ SVG" in het modus-C-blok, met lege-pad-check.
+
+### Changed
+- `index.html`: export-knoppen + toelichting in modus C; header → v0.11.0 — Rahtz.
+- `version.json` → 0.11.0 / Rahtz / 2026-06-17.
+
+### Notes
+- **Client-only** — geen backend-/dependency-wijziging. Deploy = rsync frontend + `systemctl restart pdfhorse`.
+
 ## [v0.10.0-Thanh] — 2026-06-17
 
 > Codenaam **Hàn Thế Thành** — uitvinder van pdfTeX (directe PDF-generatie uit TeX). Past in PDF-pioniers/LaTeX-lijn na Knuth/Reid/Lamport/Mittelbach. `Brotz` blijft gereserveerd voor v1.0.0.

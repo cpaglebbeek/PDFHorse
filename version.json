@@ -1,8 +1,8 @@
 {
-  "version": "0.10.0",
-  "codename": "Thanh",
+  "version": "0.11.0",
+  "codename": "Rahtz",
   "released": "2026-06-17",
-  "status": "draggable-sign+fill-to-sign-handoff",
+  "status": "export-live-signature-png-svg",
   "theme": "PDF-pioniers",
-  "notes": "v0.10.0-Thanh (oranje bump, UX-uitbreiding Ondertekenen): (1) Geplaatste handtekening is nu VERSLEEPBAAR — pointer-events (muis/touch/pen), klemt binnen de pagina-canvas, rect per move opnieuw gemeten zodat scrollen niet verschuift (startSignDrag). (2) Fill->Sign-OVERDRACHT: na 'Invullen' wordt de ingevulde PDF automatisch overgenomen in 'Ondertekenen' bij tab-wissel (als er nog geen sign-bestand is) plus expliciete knop 'Onderteken deze PDF'. Refactor _signLoad -> _signLoad + _signLoadBytes zodat een PDF ook uit geheugen geladen kan worden; signHandoff-state + goTab()/continueToSign(). Geen backend-/dependency-wijziging, client-only. Codename Han The Thanh, uitvinder van pdfTeX (PDF-generatie uit TeX) — past in PDF-pioniers/LaTeX-thema na Knuth/Reid/Lamport/Mittelbach. Brotz blijft v1.0.0 reserve."
+  "notes": "v0.11.0-Rahtz (oranje bump, Ondertekenen modus C): de live-getekende handtekening kan nu geExporteerd/gedownload worden als PNG (transparante achtergrond via _whiteToTransparentDataUrl) of als SVG (echte vector via signature_pad toDataURL('image/svg+xml')). Nieuwe methodes exportSignPng() + exportSignSvg() + _downloadDataUrl(); twee knoppen in het modus-C-blok. Client-only, geen backend-/dependency-wijziging. Codename Sebastian Rahtz (hyperref / PDF-integratie in LaTeX), PDF-pioniers/LaTeX-lijn na Thanh. Brotz blijft v1.0.0 reserve."
 }

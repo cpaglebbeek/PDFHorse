@@ -1042,6 +1042,38 @@ function pdfHorseApp() {
       return work.toDataURL('image/png');
     },
 
+    // Exporteer de zojuist getekende handtekening (modus C) als bestand zodat
+    // je hem kunt bewaren/hergebruiken. SVG = echte vector (signature_pad), PNG
+    // = transparante achtergrond (bijna-witte pixels → alpha 0).
+    exportSignPng() {
+      this.sign.sigError = '';
+      if (!this.sign._pad || this.sign._pad.isEmpty()) {
+        this.sign.sigError = 'Teken eerst een handtekening.';
+        return;
+      }
+      const canvas = document.getElementById('sign-pad');
+      this._whiteToTransparentDataUrl(canvas)
+        .then(url => this._downloadDataUrl(url, 'handtekening.png', 'image/png'))
+        .catch(() => this._downloadDataUrl(canvas.toDataURL('image/png'), 'handtekening.png', 'image/png'));
+    },
+
+    exportSignSvg() {
+      this.sign.sigError = '';
+      if (!this.sign._pad || this.sign._pad.isEmpty()) {
+        this.sign.sigError = 'Teken eerst een handtekening.';
+        return;
+      }
+      // signature_pad geeft een base64 SVG-dataURL; decodeer naar exacte bytes.
+      const dataUrl = this.sign._pad.toDataURL('image/svg+xml');
+      this._downloadDataUrl(dataUrl, 'handtekening.svg', 'image/svg+xml');
+    },
+
+    _downloadDataUrl(dataUrl, filename, mime) {
+      const b64 = dataUrl.split(',', 2)[1] || '';
+      const bytes = this._base64ToUint8(b64);
+      this._downloadBlob(bytes, filename, mime);
+    },
+
     async onSignBitmap(ev) {
       this.sign.sigError = '';
       const f = ev.target.files && ev.target.files[0];

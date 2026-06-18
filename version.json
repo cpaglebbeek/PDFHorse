@@ -1,8 +1,8 @@
 {
-  "version": "0.15.0",
-  "codename": "Kew",
+  "version": "0.16.0",
+  "codename": "Beebe",
   "released": "2026-06-17",
-  "status": "auto-veldherkenning",
+  "status": "i18n-nl-en",
   "theme": "PDF-pioniers",
-  "notes": "v0.15.0-Kew: Invullen-tab krijgt knop '✨ AUTO — herken velden' bovenaan. autoDetectFields() leest de PDF-form (AcroForm) via pdf-lib, neemt tekstvelden (minify-bestendig via setText-detectie) + hun widget-rechthoek per pagina, en plaatst automatisch invulvelden op de juiste canvas-positie (zelfde transform als runFill). Flat PDF zonder formuliervelden → nette melding. Codenaam Jonathan Kew (XeTeX)."
+  "notes": "v0.16.0-Beebe: volledige NL/EN-versie zonder code-kopie. i18n.json = live SSOT (NL-bron → EN), js/i18n.js doet overlay-vertaling van DOM-teksten + attributen + Alpine-gerenderde teksten (MutationObserver) + regex-sjablonen voor meldingen met variabelen. Taal via ?lang=en (of opgeslagen keuze), default NL, met NL/EN-toggle in de header. EN-wrapper icthorse.nl/PDFHorse/en/ laadt de app met ?lang=en. Codenaam Nelson Beebe."
 }

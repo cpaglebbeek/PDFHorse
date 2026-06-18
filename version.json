@@ -1,8 +1,8 @@
 {
-  "version": "0.17.0",
-  "codename": "Warnock",
+  "version": "0.18.0",
+  "codename": "Oberdiek",
   "released": "2026-06-18",
-  "status": "logo-brand",
+  "status": "auto-flat-detect",
   "theme": "PDF-pioniers",
-  "notes": "v0.17.0-Warnock: eigen PDFHorse brand-logo — P/D/F als 'Connecting the Dots'-constellation in iCt Horse brand-gradient (cool teal → warm coral). Bron: frontend/assets/pdfhorse-logo.svg (full 400x480 met wordmark + tagline) + pdfhorse-mark.svg (badge-only 400x400 voor header/favicon). Header in frontend/index.html toont nu de eigen mark in plaats van het iCt Horse parent-logo. 9 vertex-dots (3 blauw #25a6ca / 3 geel #ffcd26 / 3 groen #41a36b) verbonden via threads + mesh-edges, polygonen ingevuld met brand-gradient. Codenaam John Warnock (Adobe co-founder, PDF-uitvinder 1991). Iteraties v1-v5 (paardenhoofd, zeepaardje, network, constellation, connect) gearchiveerd in frontend/assets/iterations/."
+  "notes": "v0.18.0-Oberdiek: AUTO-veldherkenning werkt nu ook op PLATTE PDF's (zonder AcroForm). Detecteert dot-runs (./·/…) en underscore-runs in de PDF.js text-stream via getTextContent, mergt adjacente runs op dezelfde baseline, en plaatst per detected run een invulveld met text-baseline ~0.55× lift boven de lijn (handgeschreven-stijl). Tweede verbetering: manuele klik snapt nu naar de dichtstbijzijnde gedetecteerde dot-lijn binnen 18px Y / 24px X-slop, met dezelfde lift — fix voor de DSA-mandaat-casus (B_pdfhorse_filled.pdf 2026-06-17) waarbij user-clicks willekeurig boven/op/onder de dot-lijn landden. Verified e2e met Playwright: 7/7 dot-runs gedetecteerd in DSA SEPA-mandaat, AUTO plaatst alle 7 in één klik. Backend pytest 20/20 groen. Codenaam Heiko Oberdiek — hyperref/pdfx maintainer, LaTeX-PDF specialist. Brotz blijft reserve voor v1.0.0."
 }

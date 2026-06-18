@@ -75,7 +75,7 @@
       <a href="./" class="flex items-center gap-2">
         <img src="assets/pdfhorse-mark.svg" alt="PDFHorse mark" style="height:72px;width:72px" />
         <span class="text-xl font-bold">PDFHorse</span>
-        <span class="text-xs text-slate-400">v0.20.1 — Wozencraft</span>
+        <span class="text-xs text-slate-400">v0.21.0 — Bienz</span>
       </a>
       <a href="https://icthorse.nl/" class="text-sm text-slate-300 hover:text-white">een dienst van iCt Horse →</a>
     </div>
@@ -632,6 +632,7 @@
           <div class="flex flex-wrap gap-2 text-sm">
             <button type="button" :class="watermark.mode === 'text' ? 'bg-slate-900 text-white' : 'border'" class="px-3 py-1 rounded" @click="watermark.mode = 'text'">Tekst toevoegen</button>
             <button type="button" :class="watermark.mode === 'image' ? 'bg-slate-900 text-white' : 'border'" class="px-3 py-1 rounded" @click="watermark.mode = 'image'">Beeld toevoegen</button>
+            <button type="button" :class="watermark.mode === 'doc' ? 'bg-slate-900 text-white' : 'border'" class="px-3 py-1 rounded" @click="watermark.mode = 'doc'">Document toevoegen</button>
             <button type="button" :class="watermark.mode === 'read' ? 'bg-slate-900 text-white' : 'border'" class="px-3 py-1 rounded" @click="watermark.mode = 'read'">Lezen</button>
           </div>
 
@@ -669,6 +670,23 @@
             </button>
           </div>
 
+          <!-- Document -->
+          <div x-show="watermark.mode === 'doc'" class="mt-3 space-y-2">
+            <label class="block text-sm">
+              <span class="text-slate-600">Document om als (onzichtbare) payload in te bedden (willekeurig type)</span>
+              <input id="watermark-doc-input" type="file" class="block mt-1 text-xs" @change="onWatermarkDoc($event)" />
+            </label>
+            <p x-show="watermark.docName" class="text-xs text-slate-600">Gekozen: <span class="font-mono" x-text="watermark.docName"></span></p>
+            <p class="text-xs text-slate-500">Het document wordt als base64-payload als PDF-bijlage ingebed — onzichtbaar in de weergave, maar terug te lezen via modus "Lezen" (en via de 🔐 Geavanceerd-tab).</p>
+            <button type="button"
+              class="px-4 py-2 rounded bg-slate-900 text-white text-sm disabled:opacity-40"
+              :disabled="!watermark.docBytes || watermark.busy"
+              @click="runWatermarkDoc()">
+              <span x-show="!watermark.busy">Document als watermerk inbedden</span>
+              <span x-show="watermark.busy">Bezig…</span>
+            </button>
+          </div>
+
           <!-- Lezen -->
           <div x-show="watermark.mode === 'read'" class="mt-3 space-y-2">
             <p class="text-xs text-slate-500">Lees PDFHorse-watermerk-payloads (tekst/SVG) uit de metadata, plus vaak-herhaalde tekst uit de tekstlaag als detectie.</p>
@@ -681,6 +699,16 @@
             </button>
 
             <div x-show="watermark.readResult" class="mt-2 text-sm space-y-2">
+              <div x-show="watermark.readDoc" class="p-2 rounded border border-emerald-200 bg-emerald-50">
+                <div class="font-medium">📎 Document-payload</div>
+                <div class="text-xs mt-1">
+                  <span class="font-mono" x-text="watermark.readDoc ? watermark.readDoc.name : ''"></span>
+                  <template x-if="watermark.readDoc && !watermark.readDoc.enc">
+                    <button type="button" class="ml-2 px-2 py-0.5 rounded bg-slate-900 text-white" @click="downloadWatermarkDoc()">⬇ Download</button>
+                  </template>
+                  <span x-show="watermark.readDoc && watermark.readDoc.enc" class="ml-2 text-amber-700">versleuteld — open via 🔐 Geavanceerd met je private key</span>
+                </div>
+              </div>
               <div>
                 <div class="font-medium">Payloads (<span x-text="watermark.readResult ? watermark.readResult.payloads.length : 0"></span>)</div>
                 <template x-if="watermark.readResult && watermark.readResult.payloads.length">

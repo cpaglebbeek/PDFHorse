@@ -132,11 +132,14 @@ function pdfHorseApp() {
     watermark: {
       file: null,
       pdfBytes: null,
-      mode: 'text',            // 'text' | 'image' | 'read'
+      mode: 'text',            // 'text' | 'image' | 'doc' | 'read'
       text: '',
       imageName: '',
       imageSrc: null,          // { svg } of { pngDataUrl }
+      docBytes: null,          // document-payload (willekeurig bestand)
+      docName: '',
       readResult: null,        // { payloads, repeatedText } na lezen
+      readDoc: null,           // { name, bytes, enc } embedded document-payload na lezen
       dragOver: false,
       busy: false,
       error: '',
@@ -1042,16 +1045,34 @@ function pdfHorseApp() {
       if (!this.watermark.pdfBytes) { this.watermark.error = 'Laad eerst een PDF.'; return; }
       const eng = this._watermarkEngine();
       if (!eng) { this.watermark.error = 'Watermerk-engine niet geladen — refresh de pagina.'; return; }
-      this.watermark.busy = true; this.watermark.error = ''; this.watermark.notice = ''; this.watermark.readResult = null;
+      this.watermark.busy = true; this.watermark.error = ''; this.watermark.notice = '';
+      this.watermark.readResult = null; this.watermark.readDoc = null;
       try {
         const res = await eng.read(this.watermark.pdfBytes.slice());
         this.watermark.readResult = {
           payloads: res.payloads || [],
           repeatedText: res.repeatedText || [],
         };
+        // Ook een embedded document-payload (modus Document / Geavanceerd-tab) proberen te lezen.
+        const pe = this._payloadEngine();
+        if (pe) {
+          try {
+            const env = await pe.extract(this.watermark.pdfBytes.slice());
+            if (env) {
+              if (env.enc) {
+                this.watermark.readDoc = { name: env.name || 'payload.bin', bytes: null, enc: true };
+              } else {
+                this.watermark.readDoc = { name: env.name || 'payload.bin', bytes: await pe.open(env, null), enc: false };
+              }
+            }
+          } catch (e) { /* geen document-payload in deze PDF — geen probleem */ }
+        }
         const n = this.watermark.readResult.payloads.length;
-        this.watermark.notice = n
-          ? `${n} PDFHorse-watermerk-payload(s) gevonden.`
+        const parts = [];
+        if (n) parts.push(`${n} watermerk-payload(s)`);
+        if (this.watermark.readDoc) parts.push(`document-payload "${this.watermark.readDoc.name}"`);
+        this.watermark.notice = parts.length
+          ? parts.join(' + ') + ' gevonden.'
           : 'Geen PDFHorse-payload gevonden; mogelijk herhaalde tekst hieronder.';
       } catch (e) {
         this.watermark.error = e.message || String(e);
@@ -1059,13 +1080,48 @@ function pdfHorseApp() {
         this.watermark.busy = false;
       }
     },
+    // ---- Document-payload als watermerk (hergebruikt PDFHorsePayload-engine) ----
+    _payloadEngine() { return window.PDFHorsePayload || null; },
+    async onWatermarkDoc(ev) {
+      this.watermark.error = '';
+      const f = ev.target.files && ev.target.files[0];
+      ev.target.value = '';
+      if (!f) return;
+      if (f.size > MAX_FILE_BYTES) { this.watermark.error = `"${f.name}" overschrijdt 50 MB.`; return; }
+      try { this.watermark.docBytes = new Uint8Array(await f.arrayBuffer()); this.watermark.docName = f.name; }
+      catch (e) { this.watermark.error = 'Kon document niet lezen.'; }
+    },
+    async runWatermarkDoc() {
+      if (this.watermark.busy) return;
+      if (!this.watermark.pdfBytes) { this.watermark.error = 'Laad eerst een PDF.'; return; }
+      if (!this.watermark.docBytes) { this.watermark.error = 'Kies eerst een document om in te bedden.'; return; }
+      const pe = this._payloadEngine();
+      if (!pe) { this.watermark.error = 'Payload-engine niet geladen — refresh de pagina.'; return; }
+      this.watermark.busy = true; this.watermark.error = ''; this.watermark.notice = '';
+      try {
+        const envelope = pe.buildPlain(this.watermark.docName, this.watermark.docBytes);
+        const out = await pe.attach(this.watermark.pdfBytes, envelope);
+        const fn = this.watermark.file.name.replace(/\.pdf$/i, '') + '_watermark.pdf';
+        this._downloadBlob(out, fn, 'application/pdf');
+        this._setOutput(out, fn, `watermerk (document-payload: ${this.watermark.docName})`);
+        this.watermark.notice = `Document "${this.watermark.docName}" als watermerk-payload ingebed → ${fn} gedownload. Lees het terug via modus "Lezen".`;
+      } catch (e) { this.watermark.error = e.message || String(e); }
+      finally { this.watermark.busy = false; }
+    },
+    downloadWatermarkDoc() {
+      if (!this.watermark.readDoc || !this.watermark.readDoc.bytes) return;
+      this._downloadBlob(this.watermark.readDoc.bytes, this.watermark.readDoc.name || 'payload.bin', 'application/octet-stream');
+    },
     watermarkReset() {
       this.watermark.file = null;
       this.watermark.pdfBytes = null;
       this.watermark.text = '';
       this.watermark.imageName = '';
       this.watermark.imageSrc = null;
+      this.watermark.docBytes = null;
+      this.watermark.docName = '';
       this.watermark.readResult = null;
+      this.watermark.readDoc = null;
       this.watermark.error = '';
       this.watermark.notice = '';
     },

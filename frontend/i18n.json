@@ -117,7 +117,13 @@
     "Payload-bestand (willekeurig type)": "Payload file (any type)",
     "Versleutelen met peer public key (hybride RSA-OAEP + AES-GCM)": "Encrypt with peer public key (hybrid RSA-OAEP + AES-GCM)",
     "Payload inbedden & PDF downloaden": "Embed payload & download PDF",
-    "Payload uithalen & downloaden": "Extract payload & download"
+    "Payload uithalen & downloaden": "Extract payload & download",
+    "Document toevoegen": "Add document",
+    "Document om als (onzichtbare) payload in te bedden (willekeurig type)": "Document to embed as (invisible) payload (any type)",
+    "Het document wordt als base64-payload als PDF-bijlage ingebed — onzichtbaar in de weergave, maar terug te lezen via modus \"Lezen\" (en via de 🔐 Geavanceerd-tab).": "The document is embedded as a base64 payload (PDF attachment) — invisible in the view, but readable again via 'Read' mode (and via the 🔐 Advanced tab).",
+    "Document als watermerk inbedden": "Embed document as watermark",
+    "📎 Document-payload": "📎 Document payload",
+    "versleuteld — open via 🔐 Geavanceerd met je private key": "encrypted — open via 🔐 Advanced with your private key"
   },
   "attr": {
     "bv. 1-3, 5, 8-10": "e.g. 1-3, 5, 8-10",

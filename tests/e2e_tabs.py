@@ -120,6 +120,31 @@ with sync_playwright() as p:
     except Exception as e:
         check("payload encrypted round-trip", False, repr(e)[:160])
 
+    # TEST 4 — Watermerk document-payload -> lezen -> download
+    try:
+        tab("Watermerk")
+        ab = WM.get_by_role("button", name="Ander bestand", exact=True)
+        if ab.count() and ab.first.is_visible():
+            ab.first.click()
+        page.set_input_files("#watermark-file-input", SAMPLE)
+        WM.get_by_role("button", name="Document toevoegen", exact=True).click()
+        page.set_input_files("#watermark-doc-input", str(PAYLOAD))
+        with page.expect_download(timeout=30000) as di:
+            WM.get_by_role("button", name="Document als watermerk inbedden", exact=True).click()
+        wmd = TMP / "wm_doc.pdf"; di.value.save_as(str(wmd))
+        WM.get_by_role("button", name="Ander bestand", exact=True).click()
+        page.set_input_files("#watermark-file-input", str(wmd))
+        WM.get_by_role("button", name="Lezen", exact=True).click()
+        WM.get_by_role("button", name="Watermerk lezen", exact=True).click()
+        page.get_by_text("Document-payload", exact=False).first.wait_for(timeout=30000)
+        with page.expect_download(timeout=30000) as di:
+            WM.get_by_role("button", name="Download").first.click()
+        dl = TMP / "wm_doc_extracted.bin"; di.value.save_as(str(dl))
+        check("watermerk document-payload: inbedden -> lezen -> download byte-exact",
+              dl.read_bytes() == PAYLOAD_BYTES, f"{len(dl.read_bytes())} vs {len(PAYLOAD_BYTES)} bytes")
+    except Exception as e:
+        check("watermerk document-payload round-trip", False, repr(e)[:160])
+
     browser.close()
 
 print("\nJS errors (excl. /api 404):", "\n".join(errors) if errors else "(geen)")

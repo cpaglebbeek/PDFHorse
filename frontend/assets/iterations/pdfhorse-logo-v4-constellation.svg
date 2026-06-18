@@ -1,0 +1,202 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 480" width="400" height="480"
+     role="img" aria-labelledby="ph4-title ph4-desc">
+  <title id="ph4-title">PDFHorse</title>
+  <desc id="ph4-desc">PDFHorse logo v4 — P, D en F als triangulated constellation-mesh, exact in de stijl van deco_network_topright en deco_footer_stripe op de iCt Horse Facturatie. "Connecting the dots."</desc>
+
+  <defs>
+    <radialGradient id="ph4-halo" cx="0.5" cy="0.42" r="0.65">
+      <stop offset="0%"   stop-color="#59c5a8" stop-opacity="0.22"/>
+      <stop offset="100%" stop-color="#59c5a8" stop-opacity="0"/>
+    </radialGradient>
+    <pattern id="ph4-dots" x="0" y="0" width="22" height="22" patternUnits="userSpaceOnUse">
+      <circle cx="1.5" cy="1.5" r="1" fill="#59c5a8" fill-opacity="0.07"/>
+    </pattern>
+  </defs>
+
+  <!-- Badge -->
+  <rect x="10" y="10" width="380" height="380" rx="48" fill="#070b14"/>
+  <rect x="10" y="10" width="380" height="380" rx="48" fill="url(#ph4-dots)"/>
+  <rect x="10" y="10" width="380" height="380" rx="48" fill="url(#ph4-halo)"/>
+  <rect x="10" y="10" width="380" height="380" rx="48" fill="none"
+        stroke="#178384" stroke-opacity="0.45" stroke-width="1.5"/>
+
+  <!-- ========= LAYER 1: translucent polygon FILLS (back) ========= -->
+  <g stroke="none">
+    <!-- P -->
+    <polygon points="75,200 110,200 132,224" fill="#25a6ca" fill-opacity="0.20"/>
+    <polygon points="75,200 132,224 75,248"  fill="#b6dbde" fill-opacity="0.30"/>
+    <polygon points="75,248 132,224 110,248" fill="#41a36b" fill-opacity="0.18"/>
+    <polygon points="75,248 110,248 75,300"  fill="#b0d0d7" fill-opacity="0.18"/>
+    <!-- Bridge P→D -->
+    <polygon points="110,200 165,200 132,224" fill="#b6dbde" fill-opacity="0.22"/>
+    <polygon points="132,224 165,200 165,248" fill="#54c3b1" fill-opacity="0.15"/>
+    <polygon points="110,248 132,224 165,248" fill="#ded8c3" fill-opacity="0.22"/>
+    <polygon points="75,300 110,248 165,300"  fill="#b0d0d7" fill-opacity="0.15"/>
+    <polygon points="110,248 165,248 165,300" fill="#ded8c3" fill-opacity="0.18"/>
+    <!-- D -->
+    <polygon points="165,200 195,200 235,224" fill="#25a6ca" fill-opacity="0.20"/>
+    <polygon points="165,200 235,224 165,248" fill="#b6dbde" fill-opacity="0.30"/>
+    <polygon points="165,248 235,224 245,250" fill="#41a36b" fill-opacity="0.18"/>
+    <polygon points="165,248 245,250 235,276" fill="#b6dbde" fill-opacity="0.28"/>
+    <polygon points="165,248 235,276 165,300" fill="#25a6ca" fill-opacity="0.18"/>
+    <polygon points="165,300 235,276 195,300" fill="#41a36b" fill-opacity="0.16"/>
+    <!-- Bridge D→F -->
+    <polygon points="195,200 255,200 235,224" fill="#b6dbde" fill-opacity="0.22"/>
+    <polygon points="235,224 255,200 255,248" fill="#54c3b1" fill-opacity="0.15"/>
+    <polygon points="235,224 245,250 255,248" fill="#ded8c3" fill-opacity="0.22"/>
+    <polygon points="245,250 235,276 255,248" fill="#b0d0d7" fill-opacity="0.18"/>
+    <polygon points="195,300 235,276 255,300" fill="#b6dbde" fill-opacity="0.18"/>
+    <!-- F -->
+    <polygon points="255,200 320,200 305,248" fill="#25a6ca" fill-opacity="0.20"/>
+    <polygon points="255,200 305,248 255,248" fill="#b6dbde" fill-opacity="0.30"/>
+    <polygon points="255,248 305,248 255,300" fill="#41a36b" fill-opacity="0.18"/>
+    <!-- Outer ambient triangles -->
+    <polygon points="40,100 80,80 75,200"    fill="#25a6ca" fill-opacity="0.08"/>
+    <polygon points="80,80 200,60 110,200"   fill="#b6dbde" fill-opacity="0.10"/>
+    <polygon points="200,60 340,95 320,200"  fill="#41a36b" fill-opacity="0.07"/>
+    <polygon points="340,95 370,200 305,248" fill="#25a6ca" fill-opacity="0.08"/>
+    <polygon points="40,100 75,200 35,260"   fill="#b6dbde" fill-opacity="0.08"/>
+    <polygon points="35,260 75,300 50,360"   fill="#25a6ca" fill-opacity="0.08"/>
+    <polygon points="50,360 75,300 200,370"  fill="#b0d0d7" fill-opacity="0.08"/>
+    <polygon points="200,370 165,300 255,300" fill="#41a36b" fill-opacity="0.07"/>
+    <polygon points="200,370 255,300 350,350" fill="#b6dbde" fill-opacity="0.08"/>
+    <polygon points="350,350 255,300 305,248" fill="#25a6ca" fill-opacity="0.08"/>
+    <polygon points="350,350 305,248 370,200" fill="#b0d0d7" fill-opacity="0.08"/>
+  </g>
+
+  <!-- ========= LAYER 2: mesh EDGES (straight thin lines) ========= -->
+  <g stroke="#d5d9c9" stroke-width="1" stroke-opacity="0.7" fill="none" stroke-linecap="round">
+    <!-- Outer constellation strands radiating into the trio -->
+    <line x1="40"  y1="100" x2="75"  y2="200"/>
+    <line x1="40"  y1="100" x2="80"  y2="80"/>
+    <line x1="80"  y1="80"  x2="75"  y2="200"/>
+    <line x1="80"  y1="80"  x2="110" y2="200"/>
+    <line x1="80"  y1="80"  x2="200" y2="60"/>
+    <line x1="200" y1="60"  x2="110" y2="200"/>
+    <line x1="200" y1="60"  x2="165" y2="200"/>
+    <line x1="200" y1="60"  x2="255" y2="200"/>
+    <line x1="200" y1="60"  x2="340" y2="95"/>
+    <line x1="340" y1="95"  x2="320" y2="200"/>
+    <line x1="340" y1="95"  x2="255" y2="200"/>
+    <line x1="340" y1="95"  x2="370" y2="200"/>
+    <line x1="370" y1="200" x2="320" y2="200"/>
+    <line x1="370" y1="200" x2="305" y2="248"/>
+    <line x1="40"  y1="100" x2="35"  y2="260"/>
+    <line x1="35"  y1="260" x2="75"  y2="200"/>
+    <line x1="35"  y1="260" x2="75"  y2="300"/>
+    <line x1="35"  y1="260" x2="50"  y2="360"/>
+    <line x1="50"  y1="360" x2="75"  y2="300"/>
+    <line x1="50"  y1="360" x2="200" y2="370"/>
+    <line x1="200" y1="370" x2="75"  y2="300"/>
+    <line x1="200" y1="370" x2="165" y2="300"/>
+    <line x1="200" y1="370" x2="255" y2="300"/>
+    <line x1="200" y1="370" x2="350" y2="350"/>
+    <line x1="350" y1="350" x2="255" y2="300"/>
+    <line x1="350" y1="350" x2="305" y2="248"/>
+    <line x1="350" y1="350" x2="370" y2="200"/>
+
+    <!-- ===== P mesh ===== -->
+    <line x1="75" y1="200" x2="75"  y2="248"/>
+    <line x1="75" y1="248" x2="75"  y2="300"/>
+    <line x1="75" y1="200" x2="110" y2="200"/>
+    <line x1="110" y1="200" x2="132" y2="224"/>
+    <line x1="132" y1="224" x2="110" y2="248"/>
+    <line x1="110" y1="248" x2="75"  y2="248"/>
+    <line x1="75" y1="200"  x2="132" y2="224"/>
+    <line x1="75" y1="248"  x2="132" y2="224"/>
+    <line x1="75" y1="300"  x2="110" y2="248"/>
+
+    <!-- Bridge P → D -->
+    <line x1="110" y1="200" x2="165" y2="200"/>
+    <line x1="132" y1="224" x2="165" y2="200"/>
+    <line x1="132" y1="224" x2="165" y2="248"/>
+    <line x1="110" y1="248" x2="165" y2="248"/>
+    <line x1="75"  y1="300" x2="165" y2="300"/>
+    <line x1="110" y1="248" x2="165" y2="300"/>
+
+    <!-- ===== D mesh ===== -->
+    <line x1="165" y1="200" x2="165" y2="248"/>
+    <line x1="165" y1="248" x2="165" y2="300"/>
+    <line x1="165" y1="200" x2="195" y2="200"/>
+    <line x1="195" y1="200" x2="235" y2="224"/>
+    <line x1="235" y1="224" x2="245" y2="250"/>
+    <line x1="245" y1="250" x2="235" y2="276"/>
+    <line x1="235" y1="276" x2="195" y2="300"/>
+    <line x1="195" y1="300" x2="165" y2="300"/>
+    <line x1="165" y1="200" x2="235" y2="224"/>
+    <line x1="165" y1="248" x2="235" y2="224"/>
+    <line x1="165" y1="248" x2="245" y2="250"/>
+    <line x1="165" y1="248" x2="235" y2="276"/>
+    <line x1="165" y1="300" x2="235" y2="276"/>
+
+    <!-- Bridge D → F -->
+    <line x1="195" y1="200" x2="255" y2="200"/>
+    <line x1="235" y1="224" x2="255" y2="200"/>
+    <line x1="235" y1="224" x2="255" y2="248"/>
+    <line x1="245" y1="250" x2="255" y2="248"/>
+    <line x1="235" y1="276" x2="255" y2="248"/>
+    <line x1="195" y1="300" x2="255" y2="300"/>
+    <line x1="235" y1="276" x2="255" y2="300"/>
+
+    <!-- ===== F mesh ===== -->
+    <line x1="255" y1="200" x2="255" y2="248"/>
+    <line x1="255" y1="248" x2="255" y2="300"/>
+    <line x1="255" y1="200" x2="320" y2="200"/>
+    <line x1="255" y1="248" x2="305" y2="248"/>
+    <line x1="255" y1="200" x2="305" y2="248"/>
+    <line x1="320" y1="200" x2="305" y2="248"/>
+    <line x1="255" y1="300" x2="305" y2="248"/>
+  </g>
+
+  <!-- ========= LAYER 3: vertex NODES (front) ========= -->
+  <g>
+    <!-- Bright YELLOW at letter outer corners -->
+    <circle cx="110" cy="200" r="4.4" fill="#ffcd26"/>
+    <circle cx="132" cy="224" r="4.4" fill="#ffcd26"/>
+    <circle cx="235" cy="224" r="4.4" fill="#ffcd26"/>
+    <circle cx="320" cy="200" r="4.4" fill="#ffcd26"/>
+
+    <!-- Bright BLUE at letter top-left corners (stem tops) -->
+    <circle cx="75"  cy="200" r="4.4" fill="#25a6ca"/>
+    <circle cx="165" cy="200" r="4.4" fill="#25a6ca"/>
+    <circle cx="255" cy="200" r="4.4" fill="#25a6ca"/>
+
+    <!-- Bright GREEN at letter bottom + key junctions -->
+    <circle cx="75"  cy="300" r="4.4" fill="#41a36b"/>
+    <circle cx="165" cy="300" r="4.4" fill="#41a36b"/>
+    <circle cx="255" cy="300" r="4.4" fill="#41a36b"/>
+    <circle cx="245" cy="250" r="4.0" fill="#41a36b"/>
+    <circle cx="305" cy="248" r="4.0" fill="#41a36b"/>
+
+    <!-- Sage/cream mid-nodes -->
+    <circle cx="75"  cy="248" r="2.8" fill="#d5d9c9"/>
+    <circle cx="110" cy="248" r="2.8" fill="#d5d9c9"/>
+    <circle cx="165" cy="248" r="2.8" fill="#d5d9c9"/>
+    <circle cx="195" cy="200" r="2.8" fill="#d5d9c9"/>
+    <circle cx="195" cy="300" r="2.8" fill="#d5d9c9"/>
+    <circle cx="235" cy="276" r="2.8" fill="#d5d9c9"/>
+    <circle cx="255" cy="248" r="2.8" fill="#d5d9c9"/>
+
+    <!-- Outer constellation nodes (subtle) -->
+    <circle cx="40"  cy="100" r="2.2" fill="#81bfc7" opacity="0.7"/>
+    <circle cx="80"  cy="80"  r="2.6" fill="#25a6ca" opacity="0.7"/>
+    <circle cx="200" cy="60"  r="3.0" fill="#ffcd26" opacity="0.8"/>
+    <circle cx="340" cy="95"  r="2.6" fill="#41a36b" opacity="0.8"/>
+    <circle cx="370" cy="200" r="2.2" fill="#81bfc7" opacity="0.7"/>
+    <circle cx="35"  cy="260" r="2.2" fill="#81bfc7" opacity="0.7"/>
+    <circle cx="50"  cy="360" r="2.6" fill="#25a6ca" opacity="0.7"/>
+    <circle cx="200" cy="370" r="3.0" fill="#ffcd26" opacity="0.7"/>
+    <circle cx="350" cy="350" r="2.6" fill="#41a36b" opacity="0.7"/>
+  </g>
+
+  <!-- Wordmark -->
+  <g font-family="'Space Grotesk', system-ui, -apple-system, BlinkMacSystemFont, sans-serif"
+     font-weight="700" text-anchor="middle">
+    <text x="200" y="446" font-size="40" letter-spacing="1.5">
+      <tspan fill="#fa8f1a">PDF</tspan><tspan fill="#e5f4ed">Horse</tspan>
+    </text>
+    <text x="200" y="468" font-size="10" letter-spacing="4.5" fill="#54c3b1" opacity="0.75">
+      CONNECTING  THE  DOTS
+    </text>
+  </g>
+</svg>

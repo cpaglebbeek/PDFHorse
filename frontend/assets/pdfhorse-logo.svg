@@ -1,0 +1,196 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 480" width="400" height="480"
+     role="img" aria-labelledby="ph6-title ph6-desc">
+  <title id="ph6-title">PDFHorse — Connecting the Dots (color)</title>
+  <desc id="ph6-desc">PDFHorse logo v6 — v5 strakke P/D/F monoline-presentatie met vlakken tussen de knooppunten gevuld in de iCt Horse brand-gradient (cool teal → warm coral over P → D → F), in dezelfde stijl als het zeepaardje-silhouet uit v2.</desc>
+
+  <defs>
+    <radialGradient id="ph6-halo" cx="0.5" cy="0.42" r="0.65">
+      <stop offset="0%"   stop-color="#59c5a8" stop-opacity="0.22"/>
+      <stop offset="100%" stop-color="#59c5a8" stop-opacity="0"/>
+    </radialGradient>
+    <pattern id="ph6-dots" x="0" y="0" width="22" height="22" patternUnits="userSpaceOnUse">
+      <circle cx="1.5" cy="1.5" r="1" fill="#59c5a8" fill-opacity="0.06"/>
+    </pattern>
+
+    <!-- Letter-triangle gradients (cool → warm sweep) -->
+    <linearGradient id="ph6-grad-P" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%"   stop-color="#095263" stop-opacity="0.85"/>
+      <stop offset="100%" stop-color="#54c3b1" stop-opacity="0.65"/>
+    </linearGradient>
+    <linearGradient id="ph6-grad-D" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%"   stop-color="#23a396" stop-opacity="0.85"/>
+      <stop offset="100%" stop-color="#abcb3e" stop-opacity="0.65"/>
+    </linearGradient>
+    <linearGradient id="ph6-grad-F" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%"   stop-color="#abcb3e" stop-opacity="0.85"/>
+      <stop offset="100%" stop-color="#fa8f1a" stop-opacity="0.65"/>
+    </linearGradient>
+
+    <!-- Inter-letter bridge fills (softer) -->
+    <linearGradient id="ph6-grad-PD" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%"   stop-color="#54c3b1" stop-opacity="0.40"/>
+      <stop offset="100%" stop-color="#69c996" stop-opacity="0.40"/>
+    </linearGradient>
+    <linearGradient id="ph6-grad-DF" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%"   stop-color="#abcb3e" stop-opacity="0.40"/>
+      <stop offset="100%" stop-color="#ce9016" stop-opacity="0.40"/>
+    </linearGradient>
+
+    <!-- Vertex glow halos -->
+    <radialGradient id="ph6-glow-y" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0%" stop-color="#ffcd26" stop-opacity="0.65"/>
+      <stop offset="100%" stop-color="#ffcd26" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="ph6-glow-b" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0%" stop-color="#25a6ca" stop-opacity="0.65"/>
+      <stop offset="100%" stop-color="#25a6ca" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="ph6-glow-g" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0%" stop-color="#41a36b" stop-opacity="0.65"/>
+      <stop offset="100%" stop-color="#41a36b" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <!-- Badge -->
+  <rect x="10" y="10" width="380" height="380" rx="48" fill="#070b14"/>
+  <rect x="10" y="10" width="380" height="380" rx="48" fill="url(#ph6-dots)"/>
+  <rect x="10" y="10" width="380" height="380" rx="48" fill="url(#ph6-halo)"/>
+  <rect x="10" y="10" width="380" height="380" rx="48" fill="none"
+        stroke="#178384" stroke-opacity="0.45" stroke-width="1.5"/>
+
+  <!-- ========= LAYER 1: COLOR PANELS between vertex nodes ========= -->
+  <g stroke="none">
+    <!-- P letter-triangle: cool deep-teal → teal -->
+    <polygon points="75,160 138,195 75,300" fill="url(#ph6-grad-P)"/>
+
+    <!-- D letter-triangle: mid teal → yellow-green -->
+    <polygon points="165,160 240,230 165,300" fill="url(#ph6-grad-D)"/>
+
+    <!-- F letter-triangle: yellow-green → warm orange -->
+    <polygon points="255,160 320,160 255,300" fill="url(#ph6-grad-F)"/>
+
+    <!-- Inter-letter bridge: P→D (above the threads) -->
+    <polygon points="138,195 165,160 240,230" fill="url(#ph6-grad-PD)"/>
+    <!-- Inter-letter bridge: D→F -->
+    <polygon points="240,230 255,160 320,160" fill="url(#ph6-grad-DF)"/>
+
+    <!-- Bottom bridge: cool D-green to F-green sweep -->
+    <polygon points="75,300 165,300 138,195"  fill="url(#ph6-grad-PD)" opacity="0.55"/>
+    <polygon points="165,300 255,300 240,230" fill="url(#ph6-grad-DF)" opacity="0.55"/>
+  </g>
+
+  <!-- ========= LAYER 2: subtle mesh edges between dots ========= -->
+  <g stroke="#d5d9c9" stroke-width="0.8" stroke-opacity="0.55" fill="none" stroke-linecap="round">
+    <!-- Within each letter (the 3 vertices form a triangle) -->
+    <line x1="75"  y1="160" x2="138" y2="195"/>
+    <line x1="138" y1="195" x2="75"  y2="300"/>
+    <line x1="165" y1="160" x2="240" y2="230"/>
+    <line x1="240" y1="230" x2="165" y2="300"/>
+    <line x1="255" y1="160" x2="320" y2="160"/>
+    <line x1="255" y1="300" x2="320" y2="160"/>
+    <!-- Cross-letter mesh edges -->
+    <line x1="138" y1="195" x2="165" y2="160"/>
+    <line x1="138" y1="195" x2="240" y2="230"/>
+    <line x1="240" y1="230" x2="255" y2="160"/>
+    <line x1="240" y1="230" x2="320" y2="160"/>
+    <line x1="240" y1="230" x2="255" y2="300"/>
+  </g>
+
+  <!-- ========= LAYER 3: connection threads (the "dots" linkage) ========= -->
+  <line x1="48" y1="160" x2="352" y2="160"
+        stroke="#d5d9c9" stroke-width="1" stroke-opacity="0.55"
+        stroke-dasharray="2 6" stroke-linecap="round"/>
+  <line x1="48" y1="300" x2="352" y2="300"
+        stroke="#d5d9c9" stroke-width="1" stroke-opacity="0.55"
+        stroke-dasharray="2 6" stroke-linecap="round"/>
+  <path d="M 138 195 Q 195 222, 240 230 T 320 160"
+        stroke="#fa8f1a" stroke-width="1.4" fill="none"
+        stroke-opacity="0.65" stroke-linecap="round"
+        stroke-dasharray="3 4"/>
+
+  <!-- ========= LAYER 4: glow halos behind vertex dots ========= -->
+  <g>
+    <circle cx="75"  cy="160" r="13" fill="url(#ph6-glow-b)"/>
+    <circle cx="165" cy="160" r="13" fill="url(#ph6-glow-b)"/>
+    <circle cx="255" cy="160" r="13" fill="url(#ph6-glow-b)"/>
+    <circle cx="138" cy="195" r="13" fill="url(#ph6-glow-y)"/>
+    <circle cx="240" cy="230" r="13" fill="url(#ph6-glow-y)"/>
+    <circle cx="320" cy="160" r="13" fill="url(#ph6-glow-y)"/>
+    <circle cx="75"  cy="300" r="13" fill="url(#ph6-glow-g)"/>
+    <circle cx="165" cy="300" r="13" fill="url(#ph6-glow-g)"/>
+    <circle cx="255" cy="300" r="13" fill="url(#ph6-glow-g)"/>
+  </g>
+
+  <!-- ========= LAYER 5: letters — monoline, crisp mint over color panels ========= -->
+  <g fill="none" stroke="#e5f4ed" stroke-width="4.2"
+     stroke-linecap="round" stroke-linejoin="round"
+     vector-effect="non-scaling-stroke">
+    <!-- P -->
+    <path d="M 75 300 L 75 160 L 115 160 C 145 160, 145 230, 115 230 L 75 230"/>
+    <!-- D -->
+    <path d="M 165 300 L 165 160 L 200 160 C 250 160, 250 300, 200 300 L 165 300"/>
+    <!-- F -->
+    <path d="M 255 300 L 255 160 L 320 160"/>
+    <path d="M 255 220 L 305 220"/>
+  </g>
+  <!-- Letter inner accent: thin darker stroke for depth -->
+  <g fill="none" stroke="#0c1a2a" stroke-width="0.8"
+     stroke-linecap="round" stroke-linejoin="round" stroke-opacity="0.35">
+    <path d="M 75 300 L 75 160 L 115 160 C 145 160, 145 230, 115 230 L 75 230"/>
+    <path d="M 165 300 L 165 160 L 200 160 C 250 160, 250 300, 200 300 L 165 300"/>
+    <path d="M 255 300 L 255 160 L 320 160"/>
+    <path d="M 255 220 L 305 220"/>
+  </g>
+
+  <!-- ========= LAYER 6: vertex dots (the "connected dots") ========= -->
+  <g>
+    <circle cx="75"  cy="160" r="6"   fill="#25a6ca"/>
+    <circle cx="165" cy="160" r="6"   fill="#25a6ca"/>
+    <circle cx="255" cy="160" r="6"   fill="#25a6ca"/>
+
+    <circle cx="138" cy="195" r="6"   fill="#ffcd26"/>
+    <circle cx="240" cy="230" r="6"   fill="#ffcd26"/>
+    <circle cx="320" cy="160" r="6"   fill="#ffcd26"/>
+
+    <circle cx="75"  cy="300" r="6"   fill="#41a36b"/>
+    <circle cx="165" cy="300" r="6"   fill="#41a36b"/>
+    <circle cx="255" cy="300" r="6"   fill="#41a36b"/>
+
+    <!-- Inner rim ring for premium feel -->
+    <g fill="none" stroke-width="1.4">
+      <circle cx="75"  cy="160" r="6" stroke="#0c1a2a" stroke-opacity="0.5"/>
+      <circle cx="165" cy="160" r="6" stroke="#0c1a2a" stroke-opacity="0.5"/>
+      <circle cx="255" cy="160" r="6" stroke="#0c1a2a" stroke-opacity="0.5"/>
+      <circle cx="138" cy="195" r="6" stroke="#0c1a2a" stroke-opacity="0.5"/>
+      <circle cx="240" cy="230" r="6" stroke="#0c1a2a" stroke-opacity="0.5"/>
+      <circle cx="320" cy="160" r="6" stroke="#0c1a2a" stroke-opacity="0.5"/>
+      <circle cx="75"  cy="300" r="6" stroke="#0c1a2a" stroke-opacity="0.5"/>
+      <circle cx="165" cy="300" r="6" stroke="#0c1a2a" stroke-opacity="0.5"/>
+      <circle cx="255" cy="300" r="6" stroke="#0c1a2a" stroke-opacity="0.5"/>
+    </g>
+
+    <!-- Highlight pip on each dot -->
+    <g fill="#ffffff" opacity="0.65">
+      <circle cx="73"  cy="158" r="1.5"/>
+      <circle cx="163" cy="158" r="1.5"/>
+      <circle cx="253" cy="158" r="1.5"/>
+      <circle cx="136" cy="193" r="1.5"/>
+      <circle cx="238" cy="228" r="1.5"/>
+      <circle cx="318" cy="158" r="1.5"/>
+      <circle cx="73"  cy="298" r="1.5"/>
+      <circle cx="163" cy="298" r="1.5"/>
+      <circle cx="253" cy="298" r="1.5"/>
+    </g>
+  </g>
+
+  <!-- Wordmark -->
+  <g font-family="'Space Grotesk', system-ui, -apple-system, BlinkMacSystemFont, sans-serif"
+     font-weight="700" text-anchor="middle">
+    <text x="200" y="446" font-size="40" letter-spacing="1.5">
+      <tspan fill="#fa8f1a">PDF</tspan><tspan fill="#e5f4ed">Horse</tspan>
+    </text>
+    <text x="200" y="468" font-size="10" letter-spacing="4.5" fill="#54c3b1" opacity="0.85">
+      CONNECTING  THE  DOTS
+    </text>
+  </g>
+</svg>

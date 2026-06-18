@@ -1,9 +1,9 @@
 {
-  "version": "0.21.0",
-  "codename": "Bienz",
+  "version": "0.22.0",
+  "codename": "Merkle",
   "released": "2026-06-18",
-  "status": "watermark-document-payload",
-  "notes": "v0.21.0-Bienz: Watermerk-tab krijgt 4e modus 'Document toevoegen' — bed een willekeurig document als (onzichtbare) base64-payload in de PDF in, hergebruikt de PDFHorsePayload-engine (embedded-file attachment, naam pdfhorse-payload.json, envelope plain). Modus 'Lezen' is uitgebreid: leest naast tekst/SVG-watermerk-payloads nu ook de embedded document-payload terug en biedt een download-knop (versleutelde payloads tonen hint naar Geavanceerd-tab). Cross-compatibel met de Geavanceerd-tab (zelfde attachment). Wiring: watermark state docBytes/docName/readDoc + handlers onWatermarkDoc/runWatermarkDoc/downloadWatermarkDoc + runWatermarkRead-uitbreiding in app.js; modus-knop + doc-blok + lees-download in index.html; NL/EN via i18n.json. Codenaam Tim Bienz — co-auteur van de PDF Reference (Adobe, 1993). Brotz blijft reserve voor v1.0.0.",
+  "status": "hashing-tab",
+  "notes": "v0.22.0-Merkle: Nieuwe 🔒 Hashing-tab met file hashing (SHA-256/512 via WebCrypto), conceptual hashing (PDF.js tekstlaag → NFC+lowercase+whitespace-collapse → SHA-256), per-pagina perceptual hash (8x8 avg-hash uit canvas-render), en blockchain anchoring via OpenTimestamps (a.pool.opentimestamps.org/digest, proxied door backend /api/anchor om CORS te omzeilen). Embedding na hashing als payload (hergebruik PDFHorsePayload — pdfhorse-payload.json envelope met file_sha256+concept_sha256+page_phashes+ots+owner+ts) PLUS visueel watermerk (hergebruik PDFHorseWatermark — footer 'SHA-256:<8>… · PoA <iso> · iCt Horse'). Genereert Proof of Authenticity rapport (pdf-lib): titel, first-owner, alle hashes, anchor-bewijs hex, tijdstempel, verify-instructies, iCt Horse branding — gedownload als losse pdfhorse-poa.pdf én embedded als pdfhorse-poa.pdf bijlage in de PDF (B3). Verify-modus: PDF in → herbereken hashes → vergelijk → groen/rood-tabel. Codenaam Ralph Merkle — uitvinder Merkle-trees, fundament hash-anchoring + Bitcoin block-tree. Brotz blijft reserve v1.0.0.",
   "theme": "PDF-pioniers",
-  "history": "v0.20.1-Wozencraft: Playwright E2E 6/6 + null-safe watermerk-lees-fix. v0.20.0-Wozencraft: Geavanceerd-tab (payload+keypair). v0.19.0-Geschke: Watermerk-tab. v0.18.0-Oberdiek: AUTO op platte PDF's."
+  "history": "v0.21.0-Bienz: Watermerk document-payload modus. v0.20.1-Wozencraft: E2E 6/6 + null-safe lees-fix. v0.20.0-Wozencraft: Geavanceerd-tab (payload+keypair). v0.19.0-Geschke: Watermerk-tab. v0.18.0-Oberdiek: AUTO op platte PDF's."
 }

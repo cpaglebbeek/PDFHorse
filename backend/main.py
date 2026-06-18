@@ -7,6 +7,7 @@ Endpoints:
   POST /api/convert/xlsx-to-pdf    — xlsx → PDF via LibreOffice headless (v0.7.0)
   POST /api/ocr                    — gescande PDF doorzoekbaar (v0.8.0)
   POST /api/mail                   — mail PDF via Hostinger SMTP (v0.9.0)
+  POST /api/anchor                 — proxy SHA-256 digest naar OpenTimestamps (v0.22.0)
 """
 from __future__ import annotations
 
@@ -19,6 +20,8 @@ import smtplib
 import subprocess
 import threading
 import time
+import urllib.error
+import urllib.request
 import uuid
 from collections import defaultdict, deque
 from contextlib import asynccontextmanager
@@ -26,9 +29,9 @@ from email.message import EmailMessage
 from email.utils import formataddr, make_msgid
 from pathlib import Path
 
-from fastapi import FastAPI, File, Form, HTTPException, Request, UploadFile, status
+from fastapi import Body, FastAPI, File, Form, HTTPException, Request, UploadFile, status
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse, JSONResponse
+from fastapi.responses import FileResponse, JSONResponse, Response
 
 # Versie + codenaam komen uit version.json zodat één bron-van-waarheid blijft
 # bestaan (voorkomt drift tussen frontend label en backend /api/health).
@@ -86,10 +89,22 @@ MAX_MAIL_BODY_LEN = int(os.environ.get("MAX_MAIL_BODY_LEN", "100000"))
 MAIL_RATE_PER_HOUR = int(os.environ.get("MAIL_RATE_PER_HOUR", "5"))
 MAIL_RATE_WINDOW_S = int(os.environ.get("MAIL_RATE_WINDOW_S", "3600"))
 
+# Anchoring (v0.22.0-Merkle) — proxy naar OpenTimestamps calendar.
+# Browser kan de calendar niet rechtstreeks bereiken (CORS), dus we doen het server-zijde.
+# Calendar accepteert raw 32-byte SHA-256 digest in body en retourneert binaire timestamp-bytes.
+# Stub-mode voor tests/dev zonder netwerk-call.
+OTS_CALENDAR_URL = os.environ.get("OTS_CALENDAR_URL", "https://a.pool.opentimestamps.org/digest")
+OTS_TIMEOUT_S = int(os.environ.get("OTS_TIMEOUT_S", "20"))
+ANCHOR_STUB = os.environ.get("PDFHORSE_ANCHOR_STUB", "0") in ("1", "true", "yes")
+ANCHOR_RATE_PER_HOUR = int(os.environ.get("ANCHOR_RATE_PER_HOUR", "20"))
+ANCHOR_RATE_WINDOW_S = int(os.environ.get("ANCHOR_RATE_WINDOW_S", "3600"))
+
 # In-process rate-limiter (per remote IP). State-loss bij restart is acceptabel:
 # low-volume endpoint, restarts zijn zeldzaam, geen privacy-impact.
 _mail_rate_lock = threading.Lock()
 _mail_rate_buckets: dict[str, deque[float]] = defaultdict(deque)
+_anchor_rate_lock = threading.Lock()
+_anchor_rate_buckets: dict[str, deque[float]] = defaultdict(deque)
 
 
 def _rate_limit_check(ip: str) -> tuple[bool, int]:
@@ -101,6 +116,19 @@ def _rate_limit_check(ip: str) -> tuple[bool, int]:
         while bucket and bucket[0] < cutoff:
             bucket.popleft()
         if len(bucket) >= MAIL_RATE_PER_HOUR:
+            return False, len(bucket)
+        bucket.append(now)
+        return True, len(bucket)
+
+
+def _anchor_rate_check(ip: str) -> tuple[bool, int]:
+    now = time.time()
+    cutoff = now - ANCHOR_RATE_WINDOW_S
+    with _anchor_rate_lock:
+        bucket = _anchor_rate_buckets[ip]
+        while bucket and bucket[0] < cutoff:
+            bucket.popleft()
+        if len(bucket) >= ANCHOR_RATE_PER_HOUR:
             return False, len(bucket)
         bucket.append(now)
         return True, len(bucket)
@@ -497,6 +525,89 @@ async def mail(
     return JSONResponse(
         status_code=200,
         content={"status": "sent", "to": to_addr, "bytes": total},
+    )
+
+
+_HEX64 = re.compile(r"^[0-9a-fA-F]{64}$")
+
+
+def _ots_fetch(digest_bytes: bytes) -> bytes:
+    """Synchroon HTTP-POST naar OpenTimestamps calendar.
+
+    Geen externe lib nodig — `urllib` volstaat. Calendar verwacht raw 32-byte digest
+    in body, retourneert binaire (incomplete) timestamp. Latere `ots upgrade` (door
+    de gebruiker, los van deze service) maakt het Bitcoin-anchor compleet.
+    """
+    req = urllib.request.Request(
+        OTS_CALENDAR_URL,
+        data=digest_bytes,
+        method="POST",
+        headers={
+            "Content-Type": "application/x-www-form-urlencoded",
+            "User-Agent": f"PDFHorse/{VERSION}",
+            "Accept": "application/octet-stream",
+        },
+    )
+    with urllib.request.urlopen(req, timeout=OTS_TIMEOUT_S) as resp:  # noqa: S310
+        return resp.read()
+
+
+@app.post("/api/anchor")
+async def anchor(
+    request: Request,
+    payload: dict = Body(...),
+) -> Response:
+    """Anchor een SHA-256 digest via OpenTimestamps calendar. v0.22.0-Merkle.
+
+    Body: `{"sha256": "<64-hex>"}`.
+    Returns: binary `.ots` stub (application/octet-stream).
+    Privacy: digest gaat 1× naar de OTS-calendar; geen origineel bestand,
+    geen owner-data, geen logging.
+    """
+    client_ip = (request.client.host if request.client else "unknown") or "unknown"
+    allowed, used = _anchor_rate_check(client_ip)
+    if not allowed:
+        raise HTTPException(
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+            detail=f"Anchor-limiet bereikt ({used}/{ANCHOR_RATE_PER_HOUR} per uur per IP).",
+        )
+
+    digest_hex = (payload.get("sha256") or "").strip()
+    if not _HEX64.match(digest_hex):
+        raise HTTPException(status_code=400, detail="sha256 moet 64 hex-tekens zijn.")
+    digest_bytes = bytes.fromhex(digest_hex)
+
+    if ANCHOR_STUB:
+        # Deterministische pseudo-ots-bytes voor tests: magic + digest + iso-tijdstempel.
+        ts = f"{int(time.time())}".encode()
+        stub = b"PDFHORSE-OTS-STUB\x00" + digest_bytes + b"\x00" + ts
+        return Response(
+            content=stub,
+            media_type="application/octet-stream",
+            headers={
+                "X-PDFHorse-Anchor": "stub",
+                "X-PDFHorse-Calendar": "stub",
+            },
+        )
+
+    try:
+        ots_bytes = await asyncio.to_thread(_ots_fetch, digest_bytes)
+    except urllib.error.HTTPError as e:
+        raise HTTPException(status_code=502, detail=f"OTS-calendar fout: {e.code} {e.reason}")
+    except urllib.error.URLError as e:
+        raise HTTPException(status_code=503, detail=f"OTS-calendar onbereikbaar: {e.reason}")
+    except TimeoutError:
+        raise HTTPException(status_code=504, detail="OTS-calendar timeout.")
+    if not ots_bytes:
+        raise HTTPException(status_code=502, detail="OTS-calendar leverde lege response.")
+
+    return Response(
+        content=ots_bytes,
+        media_type="application/octet-stream",
+        headers={
+            "X-PDFHorse-Anchor": "ots",
+            "X-PDFHorse-Calendar": OTS_CALENDAR_URL,
+        },
     )
 
 

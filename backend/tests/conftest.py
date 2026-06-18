@@ -14,5 +14,7 @@ def _reset_mail_rate_bucket():
     from backend import main as backend_main
 
     backend_main._mail_rate_buckets.clear()
+    backend_main._anchor_rate_buckets.clear()
     yield
     backend_main._mail_rate_buckets.clear()
+    backend_main._anchor_rate_buckets.clear()

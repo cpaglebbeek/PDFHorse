@@ -869,6 +869,150 @@
       <p x-show="advanced.notice" x-text="advanced.notice" class="mt-3 text-sm text-emerald-700"></p>
     </section>
 
+    <section x-show="active === 'hashing'" role="tabpanel" aria-labelledby="tab-hashing">
+      <h2 class="text-lg font-semibold mb-2">Hashing &amp; Proof of Authenticity</h2>
+      <p class="text-sm text-slate-600 mb-4">
+        Maak van een PDF een <strong>aantoonbaar origineel</strong>. PDFHorse berekent drie soorten hashes
+        (file SHA-256/512, conceptueel SHA-256 over de tekstlaag, en per pagina een perceptuele 8x8-hash),
+        verankert de SHA-256 op de Bitcoin-blockchain via <em>OpenTimestamps</em>, en levert je terug:
+        (1) de PDF met embedded payload + zichtbaar watermerk, en (2) een <strong>Proof of Authenticity</strong>-rapport.
+      </p>
+
+      <div class="border border-slate-200 rounded p-3 bg-white mb-4">
+        <div class="text-xs font-semibold uppercase text-slate-500 mb-2">Modus</div>
+        <div class="flex flex-wrap gap-2 text-sm">
+          <button type="button" :class="hashing.mode === 'sign' ? 'bg-slate-900 text-white' : 'border'" class="px-3 py-1 rounded" @click="hashing.mode = 'sign'">🔒 Hashen &amp; verankeren</button>
+          <button type="button" :class="hashing.mode === 'verify' ? 'bg-slate-900 text-white' : 'border'" class="px-3 py-1 rounded" @click="hashing.mode = 'verify'">✅ Verifiëren</button>
+        </div>
+      </div>
+
+      <!-- Hashen & verankeren -->
+      <div x-show="hashing.mode === 'sign'" class="space-y-3">
+        <label for="hash-pdf-input"
+          class="block border-2 border-dashed rounded-lg p-6 text-center bg-white cursor-pointer transition"
+          :class="hashing.dragOver ? 'border-slate-900 bg-slate-100' : 'border-slate-300 hover:border-slate-500'"
+          @dragover.prevent="hashing.dragOver = true"
+          @dragleave.prevent="hashing.dragOver = false"
+          @drop.prevent="hashing.dragOver = false; onHashPdfDrop($event)">
+          <div class="text-slate-600 text-sm">
+            <span x-show="!hashing.pdfFile"><span class="font-medium">Klik of sleep een PDF hierheen</span><br/><span class="text-xs text-slate-500">max 50 MB</span></span>
+            <span x-show="hashing.pdfFile" class="font-medium" x-text="hashing.pdfFile ? hashing.pdfFile.name : ''"></span>
+          </div>
+          <input id="hash-pdf-input" type="file" accept="application/pdf,.pdf" class="hidden" @change="onHashPdfInput($event)" />
+        </label>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <label class="block text-sm">
+            <span class="text-slate-700">First owner — naam</span>
+            <input type="text" x-model="hashing.ownerName" placeholder="bv. Voornaam Achternaam"
+              class="mt-1 w-full px-3 py-2 border border-slate-300 rounded text-sm focus:outline-none focus:border-slate-900" />
+          </label>
+          <label class="block text-sm">
+            <span class="text-slate-700">First owner — e-mail (optioneel)</span>
+            <input type="email" x-model="hashing.ownerEmail" placeholder="bv. naam@voorbeeld.nl"
+              class="mt-1 w-full px-3 py-2 border border-slate-300 rounded text-sm focus:outline-none focus:border-slate-900" />
+          </label>
+        </div>
+        <label class="block text-sm">
+          <span class="text-slate-700">Verklaring (optioneel)</span>
+          <input type="text" x-model="hashing.ownerStatement" placeholder='bv. "Ik claim de auteurschap van dit document per [datum]"'
+            class="mt-1 w-full px-3 py-2 border border-slate-300 rounded text-sm focus:outline-none focus:border-slate-900" />
+        </label>
+
+        <div class="flex flex-wrap gap-x-5 gap-y-1 text-sm">
+          <label class="inline-flex items-center gap-2"><input type="checkbox" x-model="hashing.useSha512" class="rounded border-slate-400" /> SHA-512 ook</label>
+          <label class="inline-flex items-center gap-2"><input type="checkbox" x-model="hashing.useConceptual" class="rounded border-slate-400" /> Conceptuele hash</label>
+          <label class="inline-flex items-center gap-2"><input type="checkbox" x-model="hashing.usePerceptual" class="rounded border-slate-400" /> Perceptuele hashes per pagina</label>
+          <label class="inline-flex items-center gap-2"><input type="checkbox" x-model="hashing.useAnchor" class="rounded border-slate-400" /> Verankeren via OpenTimestamps</label>
+          <label class="inline-flex items-center gap-2"><input type="checkbox" x-model="hashing.useWatermark" class="rounded border-slate-400" /> Zichtbaar watermerk</label>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-3 text-sm">
+          <button type="button" class="px-4 py-2 rounded bg-slate-900 text-white disabled:opacity-40"
+            :disabled="!hashing.pdfBytes || hashing.busy"
+            @click="runHash()">
+            <span x-show="!hashing.busy">Hash, anker &amp; PoA-rapport maken</span>
+            <span x-show="hashing.busy">Bezig… <span x-text="hashing.progress"></span></span>
+          </button>
+          <button type="button" class="px-3 py-2 rounded border text-slate-700" @click="hashingReset()">Wissen</button>
+        </div>
+      </div>
+
+      <!-- Verifiëren -->
+      <div x-show="hashing.mode === 'verify'" class="space-y-3">
+        <label for="hash-pdf-verify-input"
+          class="block border-2 border-dashed rounded-lg p-6 text-center bg-white cursor-pointer transition"
+          :class="hashing.dragOver ? 'border-slate-900 bg-slate-100' : 'border-slate-300 hover:border-slate-500'"
+          @dragover.prevent="hashing.dragOver = true"
+          @dragleave.prevent="hashing.dragOver = false"
+          @drop.prevent="hashing.dragOver = false; onHashPdfDrop($event)">
+          <div class="text-slate-600 text-sm">
+            <span x-show="!hashing.pdfFile"><span class="font-medium">Sleep hier een PDF met embedded PoA-payload</span></span>
+            <span x-show="hashing.pdfFile" class="font-medium" x-text="hashing.pdfFile ? hashing.pdfFile.name : ''"></span>
+          </div>
+          <input id="hash-pdf-verify-input" type="file" accept="application/pdf,.pdf" class="hidden" @change="onHashPdfInput($event)" />
+        </label>
+        <div class="flex flex-wrap items-center gap-3 text-sm">
+          <button type="button" class="px-4 py-2 rounded bg-slate-900 text-white disabled:opacity-40"
+            :disabled="!hashing.pdfBytes || hashing.busy"
+            @click="runVerify()">
+            <span x-show="!hashing.busy">Verifiëren</span><span x-show="hashing.busy">Bezig…</span>
+          </button>
+          <button type="button" class="px-3 py-2 rounded border text-slate-700" @click="hashingReset()">Wissen</button>
+        </div>
+      </div>
+
+      <!-- Resultaten Sign -->
+      <div x-show="hashing.result && hashing.mode === 'sign'" class="mt-4 border border-emerald-300 bg-emerald-50 rounded p-3 space-y-2 text-sm">
+        <div class="font-semibold text-emerald-900">Proof of Authenticity aangemaakt ✓</div>
+        <div><span class="text-slate-600">SHA-256:</span> <span class="font-mono break-all" x-text="hashing.result ? hashing.result.file.sha256 : ''"></span></div>
+        <div x-show="hashing.result && hashing.result.file.sha512">
+          <span class="text-slate-600">SHA-512:</span> <span class="font-mono break-all" x-text="hashing.result ? hashing.result.file.sha512 : ''"></span>
+        </div>
+        <div x-show="hashing.result && hashing.result.conceptual">
+          <span class="text-slate-600">Conceptueel:</span> <span class="font-mono break-all" x-text="hashing.result && hashing.result.conceptual ? hashing.result.conceptual.sha256 : ''"></span>
+        </div>
+        <div x-show="hashing.result && hashing.result.perceptual">
+          <span class="text-slate-600">Perceptueel:</span> <span x-text="hashing.result && hashing.result.perceptual ? hashing.result.perceptual.length + ' pagina(\'s)' : ''"></span>
+        </div>
+        <div x-show="hashing.result && hashing.result.anchor">
+          <span class="text-slate-600">Anchor:</span> <span class="font-mono text-xs" x-text="hashing.result && hashing.result.anchor ? (hashing.result.anchor.mode + ' · ' + hashing.result.anchor.calendar) : ''"></span>
+        </div>
+        <div class="flex flex-wrap gap-2 pt-2">
+          <button type="button" class="px-3 py-1.5 rounded bg-slate-900 text-white text-sm" @click="downloadSignedPdf()">⬇ PDF met PoA</button>
+          <button type="button" class="px-3 py-1.5 rounded border text-sm" @click="downloadPoaReport()">⬇ Los PoA-rapport</button>
+        </div>
+      </div>
+
+      <!-- Resultaten Verify -->
+      <div x-show="hashing.verifyResult" class="mt-4 border rounded p-3 space-y-2 text-sm"
+        :class="hashing.verifyResult && hashing.verifyResult.file.ok ? 'border-emerald-300 bg-emerald-50' : 'border-red-300 bg-red-50'">
+        <div class="font-semibold" :class="hashing.verifyResult && hashing.verifyResult.file.ok ? 'text-emerald-900' : 'text-red-800'">
+          <span x-show="hashing.verifyResult && hashing.verifyResult.file.ok">Verificatie geslaagd ✓</span>
+          <span x-show="hashing.verifyResult && !hashing.verifyResult.file.ok">Verificatie MISLUKT ✗ — file-hash komt niet overeen</span>
+        </div>
+        <div><span class="text-slate-600">File:</span> <span :class="hashing.verifyResult && hashing.verifyResult.file.ok ? 'text-emerald-700' : 'text-red-700'" x-text="hashing.verifyResult && hashing.verifyResult.file.ok ? 'match' : 'mismatch'"></span></div>
+        <div x-show="hashing.verifyResult && hashing.verifyResult.conceptual">
+          <span class="text-slate-600">Conceptueel:</span>
+          <span :class="hashing.verifyResult && hashing.verifyResult.conceptual && hashing.verifyResult.conceptual.ok ? 'text-emerald-700' : 'text-red-700'"
+            x-text="hashing.verifyResult && hashing.verifyResult.conceptual ? (hashing.verifyResult.conceptual.ok ? 'match' : 'mismatch') : ''"></span>
+        </div>
+        <template x-if="hashing.verifyResult && hashing.verifyResult.pages.length">
+          <div>
+            <div class="text-slate-600 mb-1">Pagina-pHashes (Hamming-afstand t.o.v. origineel):</div>
+            <ul class="font-mono text-xs space-y-0.5">
+              <template x-for="p in hashing.verifyResult.pages" :key="p.page">
+                <li>p<span x-text="p.page"></span>: <span :class="p.hamming <= 5 ? 'text-emerald-700' : (p.hamming <= 15 ? 'text-amber-700' : 'text-red-700')" x-text="p.hamming + '/64'"></span> (<span x-text="p.actual"></span> vs <span x-text="p.expected"></span>)</li>
+              </template>
+            </ul>
+          </div>
+        </template>
+      </div>
+
+      <p x-show="hashing.error" x-text="hashing.error" class="mt-3 text-sm text-red-700"></p>
+      <p x-show="hashing.notice" x-text="hashing.notice" class="mt-3 text-sm text-emerald-700"></p>
+    </section>
+
     <hr class="my-6 border-slate-200" />
 
     <section aria-label="Uitvoer" class="bg-slate-100 rounded-lg p-4 border border-slate-200">
@@ -950,8 +1094,12 @@
 
   <!-- Watermerk-engine (window.PDFHorseWatermark) — gebruikt door de Watermerk-tab -->
   <script src="js/watermark.js"></script>
-  <!-- Payload-engine (window.PDFHorsePayload) — gebruikt door de Geavanceerd-tab -->
+  <!-- Payload-engine (window.PDFHorsePayload) — gebruikt door de Geavanceerd-tab + Hashing-tab -->
   <script src="js/payload.js"></script>
+  <!-- Hash-engine (window.PDFHorseHash) — gebruikt door de Hashing-tab -->
+  <script src="js/hash.js"></script>
+  <!-- PoA-rapport (window.PDFHorsePoaReport) — gebruikt door de Hashing-tab -->
+  <script src="js/poa-report.js"></script>
   <script src="js/app.js"></script>
   <!-- i18n overlay-vertaling (live SSOT: i18n.json); ?lang=en → Engels, default NL -->
   <script src="js/i18n.js"></script>

@@ -3,6 +3,41 @@
 > Versie-historie. Formaat: [Keep a Changelog](https://keepachangelog.com/) op hoofdlijnen, met PDFHorse-eigen codenamen (thema: PDF-pioniers).
 > Bijgewerkt bij elke release. Datums = release naar `main`.
 
+## [v0.18.0-Oberdiek] — 2026-06-18
+
+> Codenaam **Heiko Oberdiek** — hyperref / pdfx maintainer, LaTeX-PDF integratiespecialist. PDF-pioniers/LaTeX-lijn na Warnock. `Brotz` blijft gereserveerd voor v1.0.0.
+
+### Added — AUTO veldherkenning óók voor platte PDF's + snap-to-line bij manuele klik
+
+- **`_collectFlatFields()` / `_mergeAdjacentDetected()` in `frontend/js/app.js`:** scant per pagina de PDF.js `getTextContent()` text-items op dot-runs (regex `^[\s]*[.·…_](?:[\s]*[.·…_]){2,}[\s]*$`) en underscore-runs. Per detected item: `x = transform[4]`, `y_baseline = viewportH - transform[5]`, `fontSize = |transform[3]|`, `width = item.width`. Merged adjacent runs op dezelfde baseline (Δy ≤ 2 px) met X-gap ≤ 20 px tot één veld.
+- **`autoDetectFields()` uitgebreid:** fallback-pad als AcroForm leeg is — itereert `fill.detected` en plaatst per run een veld met `y = baseline − 0.55 × fontSize` (tekst boven de dot-lijn, handgeschreven-stijl) en `fontSize = round(detected.fontSize × 0.85)`.
+- **`addFillField()` snap-to-line:** bij muisklik zoekt `_findSnapCandidate()` de dichtstbijzijnde detected run binnen 18 px Y-tolerantie en 24 px X-slop. Bij hit: zelfde `x` / baseline-lift / fontSize-mapping als AUTO; bij miss: rauwe klik-coords (oude gedrag). Veld krijgt `snapped: true|false` voor debug/UI.
+- **`fill.detected` state** in component-data + reset in `_fillLoad`/`fillReset`.
+- **CSS-pixel → canvas-pixel scaling fix** in `addFillField`: `sx = canvas.width / rect.width` (zelfde voor Y) — voorkomt drift wanneer canvas via CSS gerescaled is op kleine viewports.
+
+### Fixed — Casus DSA SEPA-mandaat-formulier
+
+- E-mailcasus 2026-06-17 (`Mandaat formulier (5).pdf`): user moest 5 velden handmatig plaatsen, tekst landde op willekeurige hoogte rond de dot-lijn met X-offset ~10ch. Met v0.18.0: 1× klik op AUTO → 7/7 velden netjes boven hun lijn, X-aligned met veld-start.
+
+### Verified
+
+- **Backend pytest:** 20/20 groen (geen backend-wijziging).
+- **Frontend node-syntax-check:** `node --check frontend/js/app.js` groen.
+- **E2E Playwright-test** (`/tmp/pdfhorse-fill-compare/test_autofill.py`): serveert frontend statisch, laadt DSA-mandaat, klikt AUTO, dumpt detected + placed fields, downloadt resultaat-PDF, rasterizeert met `pdftoppm` + `magick`. Detected 7/7 dot-runs, AUTO plaatst 7/7 als `snapped=true`.
+- **Visuele diff** (`B_pdfhorse_filled.pdf` vs `C_autofilled.pdf`): tekst nu boven dot-lijn (was: door/onder/willekeurig); X start exact bij dot-begin (was: 10ch random offset).
+
+### Notes — Limitaties
+
+- Detectie werkt alleen voor PDF's met **tekstueel** rendered dotted-lines/underscores (wkhtmltopdf, LibreOffice, MS Word). PDF's met **vector-strokes** (echte horizontale lijntjes) of **image-only**-formulieren worden niet gedetecteerd — daar valt user terug op handmatige klik.
+- Geen UI-overlay die detected fields visueel highlight; AUTO-knop is de UI. Eventueel later toevoegen.
+
+### Deploy
+
+- Frontend rsync naar HC55 `/var/www/pdfhorse/frontend/` + cache-bust headers (al ingericht).
+- Geen backend-restart nodig.
+
+---
+
 ## [v0.13.0-Goossens] — 2026-06-17
 
 > Codenaam **Michel Goossens** (LaTeX Companion). PDF-pioniers/LaTeX-lijn na Carlisle. `Brotz` blijft gereserveerd voor v1.0.0.

@@ -2,7 +2,7 @@
 
 > **iCt Horse tooling SaaS — browser-first PDF-bewerker met merge, split, invullen, ondertekenen, converteren (docx/xlsx/odt/rtf/png/jpg), OCR (NL+EN) en mail.**
 >
-> Versie: **v0.9.1-Mittelbach** · Licentie: **AGPL-3.0** · Status: **alle 8 features LIVE + SRI-gehard**
+> Versie: **v0.18.0-Oberdiek** · Licentie: **AGPL-3.0** · Status: **alle features LIVE + AUTO-veldherkenning ook voor platte PDF's**
 
 🚀 **LIVE op https://horsecloud55.ddns.net/PDFHorse/** (sinds 2026-06-04)
 Gepland (Hostinger reverse-proxy): https://icthorse.nl/PDFHorse/

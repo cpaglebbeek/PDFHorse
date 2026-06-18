@@ -7,7 +7,6 @@
     "een dienst van iCt Horse →": "a service by iCt Horse →",
     "Bewerk een PDF — zonder upload, zonder account": "Edit a PDF — no upload, no account",
     "Merge, split, invullen en ondertekenen draaien volledig in je browser. OCR en mailen gebeuren server-zijde en worden direct na bewerking gewist.": "Merge, split, fill and sign run entirely in your browser. OCR and e-mail happen server-side and are deleted immediately after processing.",
-
     "Merge": "Merge",
     "Split": "Split",
     "Invullen": "Fill in",
@@ -15,7 +14,6 @@
     "Converteren": "Convert",
     "OCR": "OCR",
     "🔗 Delen & meekijken": "🔗 Share & watch along",
-
     "Merge — samenvoegen": "Merge — combine",
     "Split — opdelen": "Split — divide",
     "Invullen — tekst op PDF": "Fill in — text on PDF",
@@ -24,7 +22,6 @@
     "OCR — gescande PDF doorzoekbaar maken": "OCR — make a scanned PDF searchable",
     "Delen & meekijken": "Share & watch along",
     "Laatste uitvoer": "Latest output",
-
     "Klik hier of sleep PDF's / .docx": "Click here or drag PDFs / .docx",
     "Klik of sleep één PDF hierheen": "Click or drag one PDF here",
     "Klik of sleep bestanden": "Click or drag files",
@@ -32,7 +29,6 @@
     "max 50 MB": "max 50 MB",
     "max 50 MB · NL + EN": "max 50 MB · NL + EN",
     ".docx · .xlsx · .odt · .rtf · .png · .jpg · max 20 MB per office, 50 MB per afbeelding": ".docx · .xlsx · .odt · .rtf · .png · .jpg · max 20 MB per office file, 50 MB per image",
-
     "Wissen": "Clear",
     "Bezig…": "Working…",
     "Download": "Download",
@@ -43,13 +39,11 @@
     "Ontvanger": "Recipient",
     "Onderwerp": "Subject",
     "Pagina's renderen…": "Rendering pages…",
-
     "✨ AUTO — herken velden": "✨ AUTO — detect fields",
     "Plaatst automatisch invulvelden op basis van de formuliervelden in de PDF.": "Automatically places fill fields based on the form fields in the PDF.",
     "Tekstgrootte": "Text size",
     "Klik op een pagina → tekstveld": "Click a page → text field",
     "→ Onderteken deze PDF": "→ Sign this PDF",
-
     "Handtekening-bron": "Signature source",
     "A — bitmap upload": "A — bitmap upload",
     "B — SVG upload": "B — SVG upload",
@@ -63,29 +57,22 @@
     "Preview:": "Preview:",
     "Wis handtekening": "Clear signature",
     "Klik op een pagina om de handtekening te plaatsen — daarna kun je hem verslepen naar de juiste plek.": "Click a page to place the signature — then drag it to the right spot.",
-
     "Combineer alle tot 1 PDF (in opgegeven volgorde)": "Combine all into 1 PDF (in the given order)",
     "Combineer naar 1 PDF": "Combine into 1 PDF",
     "Doorzoekbaar maken": "Make searchable",
     "Bezig… (kan 30s–3min duren)": "Working… (may take 30s–3min)",
-
     "Page-ranges": "Page ranges",
-
     "Stuur tekst snel naar je andere apparaat, of laat iemand": "Quickly send text to your other device, or let someone",
     "live met je scherm meekijken": "watch your screen live",
     "via één link — direct hier, anoniem, geen account.": "via a single link — right here, anonymous, no account.",
-
     "Nog geen uitvoer. Gebruik een van de tabs hierboven.": "No output yet. Use one of the tabs above.",
     "Geen archief, geen kopie naar ons.": "No archive, no copy to us.",
-
     "Server:": "Server:",
     "versie": "version",
     "codenaam": "codename",
-
     "PDFHorse — anonieme PDF-bewerker · AGPL-3.0 ·": "PDFHorse — anonymous PDF editor · AGPL-3.0 ·",
     "broncode": "source code",
     "Privacy-first: geen account, geen logs van inhoud, OCR-uploads ≤ 30 min.": "Privacy-first: no account, no logs of content, OCR uploads ≤ 30 min.",
-
     "Samenvoegen (": "Merge (",
     "Splitsen (": "Split (",
     "Converteer (": "Convert (",
@@ -93,7 +80,26 @@
     "Download ondertekende PDF (": "Download signed PDF (",
     " docx vereisen server-conversie": " docx require server conversion",
     "Totaal:": "Total:",
-    "Geldige bereiken: 1..": "Valid ranges: 1.."
+    "Geldige bereiken: 1..": "Valid ranges: 1..",
+    "💧 Watermerk": "💧 Watermark",
+    "Watermerk — (vrijwel) onzichtbaar merken": "Watermark — (nearly) invisible marking",
+    "Voeg een (vrijwel) onzichtbaar watermerk toe aan een PDF — tekst of een SVG/PNG-logo, getegeld in de\n        achtergrondkleur zodat het onzichtbaar is maar in de tekst-/objectlaag terug te lezen blijft.\n        Of": "Add a (nearly) invisible watermark to a PDF — text or an SVG/PNG logo, tiled in the\n        background colour so it is invisible yet remains readable in the text/object layer.\n        Or",
+    "een eerder geplaatst watermerk terug. Volledig in je browser — geen upload.": "a previously placed watermark. Entirely in your browser — no upload.",
+    "Watermerk-modus": "Watermark mode",
+    "Tekst toevoegen": "Add text",
+    "Beeld toevoegen": "Add image",
+    "Lezen": "Read",
+    "Watermerk-tekst": "Watermark text",
+    "De tekst wordt klein en in de achtergrondkleur over elke pagina getegeld — onzichtbaar voor het oog, leesbaar in de tekstlaag en als payload.": "The text is tiled small and in the background colour across every page — invisible to the eye, readable in the text layer and as payload.",
+    "Watermerk toevoegen": "Add watermark",
+    "SVG of PNG (logo / merk-afbeelding)": "SVG or PNG (logo / brand image)",
+    "PNG wordt eerst naar vector (SVG) getraceerd zodat het object terug te lezen blijft. Herkleurd naar de achtergrondkleur en getegeld.": "PNG is first traced to vector (SVG) so the object stays readable. Recoloured to the background colour and tiled.",
+    "Beeld-watermerk toevoegen": "Add image watermark",
+    "Lees PDFHorse-watermerk-payloads (tekst/SVG) uit de metadata, plus vaak-herhaalde tekst uit de tekstlaag als detectie.": "Read PDFHorse watermark payloads (text/SVG) from the metadata, plus frequently-repeated text from the text layer as detection.",
+    "Watermerk lezen": "Read watermark",
+    "Vaak herhaalde tekst (mogelijk watermerk)": "Frequently repeated text (possible watermark)",
+    "Geen payload in metadata.": "No payload in metadata.",
+    "Ander bestand": "Other file"
   },
   "attr": {
     "bv. 1-3, 5, 8-10": "e.g. 1-3, 5, 8-10",
@@ -106,15 +112,45 @@
     "Omlaag": "Down"
   },
   "regex": [
-    ["^Samengevoegd: (\\d+) bestanden → (.+) gedownload\\.$", "Merged: $1 files → $2 downloaded."],
-    ["^Gesplitst: (\\d+) PDF('s)? gedownload\\.$", "Split: $1 PDF(s) downloaded."],
-    ["^Ingevuld: (\\d+) veld\\(en\\) → (.+) gedownload\\. Je kunt nu doorgaan naar Ondertekenen\\.$", "Filled: $1 field(s) → $2 downloaded. You can now continue to Sign."],
-    ["^Ondertekend: (.+) gedownload\\.$", "Signed: $1 downloaded."],
-    ["^Geconverteerd: (\\d+) PDF('s)? gedownload\\.$", "Converted: $1 PDF(s) downloaded."],
-    ["^Gecombineerd: (\\d+) bestanden → (.+) gedownload\\.$", "Combined: $1 files → $2 downloaded."],
-    ["^Doorzoekbaar gemaakt → (.+) gedownload\\.$", "Made searchable → $1 downloaded."],
-    ["^(\\d+) invulveld\\(en\\) automatisch herkend en geplaatst.*$", "$1 fill field(s) auto-detected and placed — type your text. Click on the page to add more fields."],
-    ["^Verstuurd naar (.+)\\.$", "Sent to $1."],
-    ["geen invulbare formuliervelden.*", "No fillable form fields (AcroForm) found — this PDF is likely \"flat\". Place fields manually by clicking on the page."]
+    [
+      "^Samengevoegd: (\\d+) bestanden → (.+) gedownload\\.$",
+      "Merged: $1 files → $2 downloaded."
+    ],
+    [
+      "^Gesplitst: (\\d+) PDF('s)? gedownload\\.$",
+      "Split: $1 PDF(s) downloaded."
+    ],
+    [
+      "^Ingevuld: (\\d+) veld\\(en\\) → (.+) gedownload\\. Je kunt nu doorgaan naar Ondertekenen\\.$",
+      "Filled: $1 field(s) → $2 downloaded. You can now continue to Sign."
+    ],
+    [
+      "^Ondertekend: (.+) gedownload\\.$",
+      "Signed: $1 downloaded."
+    ],
+    [
+      "^Geconverteerd: (\\d+) PDF('s)? gedownload\\.$",
+      "Converted: $1 PDF(s) downloaded."
+    ],
+    [
+      "^Gecombineerd: (\\d+) bestanden → (.+) gedownload\\.$",
+      "Combined: $1 files → $2 downloaded."
+    ],
+    [
+      "^Doorzoekbaar gemaakt → (.+) gedownload\\.$",
+      "Made searchable → $1 downloaded."
+    ],
+    [
+      "^(\\d+) invulveld\\(en\\) automatisch herkend en geplaatst.*$",
+      "$1 fill field(s) auto-detected and placed — type your text. Click on the page to add more fields."
+    ],
+    [
+      "^Verstuurd naar (.+)\\.$",
+      "Sent to $1."
+    ],
+    [
+      "geen invulbare formuliervelden.*",
+      "No fillable form fields (AcroForm) found — this PDF is likely \"flat\". Place fields manually by clicking on the page."
+    ]
   ]
 }

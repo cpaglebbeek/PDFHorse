@@ -1,8 +1,8 @@
 {
-  "version": "0.18.0",
-  "codename": "Oberdiek",
+  "version": "0.19.0",
+  "codename": "Geschke",
   "released": "2026-06-18",
-  "status": "auto-flat-detect",
+  "status": "watermark-tab",
   "theme": "PDF-pioniers",
-  "notes": "v0.18.0-Oberdiek: AUTO-veldherkenning werkt nu ook op PLATTE PDF's (zonder AcroForm). Detecteert dot-runs (./·/…) en underscore-runs in de PDF.js text-stream via getTextContent, mergt adjacente runs op dezelfde baseline, en plaatst per detected run een invulveld met text-baseline ~0.55× lift boven de lijn (handgeschreven-stijl). Tweede verbetering: manuele klik snapt nu naar de dichtstbijzijnde gedetecteerde dot-lijn binnen 18px Y / 24px X-slop, met dezelfde lift — fix voor de DSA-mandaat-casus (B_pdfhorse_filled.pdf 2026-06-17) waarbij user-clicks willekeurig boven/op/onder de dot-lijn landden. Verified e2e met Playwright: 7/7 dot-runs gedetecteerd in DSA SEPA-mandaat, AUTO plaatst alle 7 in één klik. Backend pytest 20/20 groen. Codenaam Heiko Oberdiek — hyperref/pdfx maintainer, LaTeX-PDF specialist. Brotz blijft reserve voor v1.0.0."
+  "notes": "v0.19.0-Geschke: nieuwe tab 'Watermerk' (💧) bovenop de bestaande watermark-engine (js/watermark.js, v0.1.0). Drie modi: (1) Tekst toevoegen — (vrijwel) onzichtbaar tekst-watermerk getegeld in de achtergrondkleur, leesbaar in de tekstlaag + als Keywords-payload; (2) Beeld toevoegen — SVG of PNG (PNG→SVG getraceerd via ImageTracer) herkleurd naar achtergrondkleur en getegeld, canonieke SVG als payload; (3) Lezen — leest PDFHorse-WM payloads uit de metadata plus vaak-herhaalde tekst uit de tekstlaag als detectie. Wiring: tabs-array + watermark state + handlers in app.js, sectie in index.html, script-include watermark.js vooor app.js, NL/EN via i18n.json. Engine was al gepusht (commit ada1356) maar nergens aangesloten; deze release sluit hem aan op de UI. Codenaam Charles Geschke — Adobe-medeoprichter (met Warnock), PostScript/PDF-pionier. Brotz blijft reserve voor v1.0.0."
 }

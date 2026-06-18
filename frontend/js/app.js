@@ -29,6 +29,7 @@ function pdfHorseApp() {
       { id: 'sign',    label: 'Ondertekenen' },
       { id: 'convert', label: 'Converteren' },
       { id: 'ocr',     label: 'OCR' },
+      { id: 'watermerk', label: '💧 Watermerk' },
       { id: 'delen',   label: '🔗 Delen & meekijken' },
     ],
     health: { status: '…', version: '…', codename: '…' },
@@ -121,6 +122,20 @@ function pdfHorseApp() {
 
     ocr: {
       file: null,
+      dragOver: false,
+      busy: false,
+      error: '',
+      notice: '',
+    },
+
+    watermark: {
+      file: null,
+      pdfBytes: null,
+      mode: 'text',            // 'text' | 'image' | 'read'
+      text: '',
+      imageName: '',
+      imageSrc: null,          // { svg } of { pngDataUrl }
+      readResult: null,        // { payloads, repeatedText } na lezen
       dragOver: false,
       busy: false,
       error: '',
@@ -913,6 +928,127 @@ function pdfHorseApp() {
       } finally {
         this.ocr.busy = false;
       }
+    },
+
+    // ---------- Watermerk ----------
+
+    onWatermarkFileInput(ev) {
+      this._watermarkLoad(ev.target.files && ev.target.files[0]);
+      ev.target.value = '';
+    },
+    onWatermarkDrop(ev) {
+      const dt = ev.dataTransfer;
+      if (dt && dt.files && dt.files[0]) this._watermarkLoad(dt.files[0]);
+    },
+    async _watermarkLoad(f) {
+      this.watermark.error = '';
+      this.watermark.notice = '';
+      this.watermark.readResult = null;
+      if (!f) return;
+      const isPdf = f.type === 'application/pdf' || /\.pdf$/i.test(f.name);
+      if (!isPdf) { this.watermark.error = `"${f.name}" is geen PDF.`; return; }
+      if (f.size > MAX_FILE_BYTES) { this.watermark.error = `"${f.name}" overschrijdt 50 MB.`; return; }
+      try {
+        this.watermark.pdfBytes = new Uint8Array(await f.arrayBuffer());
+        this.watermark.file = f;
+      } catch (e) {
+        this.watermark.error = 'Kon bestand niet lezen.';
+      }
+    },
+    async onWatermarkImage(ev) {
+      this.watermark.error = '';
+      const f = ev.target.files && ev.target.files[0];
+      ev.target.value = '';
+      if (!f) return;
+      const isSvg = /svg/i.test(f.type) || /\.svg$/i.test(f.name);
+      const isPng = f.type === 'image/png' || /\.png$/i.test(f.name);
+      if (!isSvg && !isPng) { this.watermark.error = 'Alleen SVG of PNG voor beeld-watermerk.'; return; }
+      if (f.size > MAX_IMAGE_BYTES) { this.watermark.error = `"${f.name}" overschrijdt 50 MB.`; return; }
+      try {
+        if (isSvg) {
+          const svg = (await f.text()).replace(/<script[\s\S]*?<\/script>/gi, '');
+          this.watermark.imageSrc = { svg };
+        } else {
+          this.watermark.imageSrc = { pngDataUrl: await this._fileToDataUrl(f) };
+        }
+        this.watermark.imageName = f.name;
+      } catch (e) {
+        this.watermark.error = 'Kon afbeelding niet lezen.';
+      }
+    },
+    _watermarkEngine() {
+      return window.PDFHorseWatermark || null;
+    },
+    async runWatermarkText() {
+      if (this.watermark.busy) return;
+      if (!this.watermark.pdfBytes) { this.watermark.error = 'Laad eerst een PDF.'; return; }
+      const text = (this.watermark.text || '').trim();
+      if (!text) { this.watermark.error = 'Geef watermerk-tekst op.'; return; }
+      const eng = this._watermarkEngine();
+      if (!eng) { this.watermark.error = 'Watermerk-engine niet geladen — refresh de pagina.'; return; }
+      this.watermark.busy = true; this.watermark.error = ''; this.watermark.notice = '';
+      try {
+        const out = await eng.injectText(this.watermark.pdfBytes.slice(), text);
+        const fn = this.watermark.file.name.replace(/\.pdf$/i, '') + '_watermark.pdf';
+        this._downloadBlob(out, fn, 'application/pdf');
+        this._setOutput(out, fn, 'watermerk (tekst, (vrijwel) onzichtbaar)');
+        this.watermark.notice = `Watermerk toegevoegd → ${fn} gedownload.`;
+      } catch (e) {
+        this.watermark.error = e.message || String(e);
+      } finally {
+        this.watermark.busy = false;
+      }
+    },
+    async runWatermarkImage() {
+      if (this.watermark.busy) return;
+      if (!this.watermark.pdfBytes) { this.watermark.error = 'Laad eerst een PDF.'; return; }
+      if (!this.watermark.imageSrc) { this.watermark.error = 'Kies eerst een SVG- of PNG-afbeelding.'; return; }
+      const eng = this._watermarkEngine();
+      if (!eng) { this.watermark.error = 'Watermerk-engine niet geladen — refresh de pagina.'; return; }
+      this.watermark.busy = true; this.watermark.error = ''; this.watermark.notice = '';
+      try {
+        const out = await eng.injectImage(this.watermark.pdfBytes.slice(), this.watermark.imageSrc);
+        const fn = this.watermark.file.name.replace(/\.pdf$/i, '') + '_watermark.pdf';
+        this._downloadBlob(out, fn, 'application/pdf');
+        this._setOutput(out, fn, 'watermerk (beeld, vector-payload)');
+        this.watermark.notice = `Beeld-watermerk toegevoegd → ${fn} gedownload.`;
+      } catch (e) {
+        this.watermark.error = e.message || String(e);
+      } finally {
+        this.watermark.busy = false;
+      }
+    },
+    async runWatermarkRead() {
+      if (this.watermark.busy) return;
+      if (!this.watermark.pdfBytes) { this.watermark.error = 'Laad eerst een PDF.'; return; }
+      const eng = this._watermarkEngine();
+      if (!eng) { this.watermark.error = 'Watermerk-engine niet geladen — refresh de pagina.'; return; }
+      this.watermark.busy = true; this.watermark.error = ''; this.watermark.notice = ''; this.watermark.readResult = null;
+      try {
+        const res = await eng.read(this.watermark.pdfBytes.slice());
+        this.watermark.readResult = {
+          payloads: res.payloads || [],
+          repeatedText: res.repeatedText || [],
+        };
+        const n = this.watermark.readResult.payloads.length;
+        this.watermark.notice = n
+          ? `${n} PDFHorse-watermerk-payload(s) gevonden.`
+          : 'Geen PDFHorse-payload gevonden; mogelijk herhaalde tekst hieronder.';
+      } catch (e) {
+        this.watermark.error = e.message || String(e);
+      } finally {
+        this.watermark.busy = false;
+      }
+    },
+    watermarkReset() {
+      this.watermark.file = null;
+      this.watermark.pdfBytes = null;
+      this.watermark.text = '';
+      this.watermark.imageName = '';
+      this.watermark.imageSrc = null;
+      this.watermark.readResult = null;
+      this.watermark.error = '';
+      this.watermark.notice = '';
     },
 
     // ---------- Convert ----------

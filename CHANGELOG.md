@@ -3,6 +3,36 @@
 > Versie-historie. Formaat: [Keep a Changelog](https://keepachangelog.com/) op hoofdlijnen, met PDFHorse-eigen codenamen (thema: PDF-pioniers).
 > Bijgewerkt bij elke release. Datums = release naar `main`.
 
+## [v0.22.0-Merkle] — 2026-06-18
+
+> Codenaam **Ralph Merkle** — uitvinder Merkle-trees, fundament onder hash-anchoring én Bitcoin's block-tree.
+
+### Added — 🔒 Hashing-tab + Proof of Authenticity
+
+- **`frontend/js/hash.js`** (`window.PDFHorseHash`): file SHA-256/512 (WebCrypto), conceptuele SHA-256 over PDF.js-tekstlaag genormaliseerd (NFC + lowercase + whitespace-collapse + watermerk-strip), perceptuele 8x8 avg-hash per pagina (64-bit/16-hex), Hamming-helper, OTS-anchor via `/api/anchor`.
+- **`frontend/js/poa-report.js`** (`window.PDFHorsePoaReport`): genereert PoA-PDF (pdf-lib) — titel, first owner, hashes, anchor-bewijs (calendar URL + base64-preview), tijdstempel, verify-instructies. WinAnsi-veilig (`_ascii()` strip Unicode → ASCII).
+- **`backend/main.py` `POST /api/anchor`**: proxy naar OpenTimestamps calendar (`a.pool.opentimestamps.org/digest`) om CORS te omzeilen. Stub-mode via `PDFHORSE_ANCHOR_STUB=1` voor tests/dev. Rate-limit 20/uur/IP.
+- **Hashing-tab in `index.html`**: drop-zone, owner-velden (naam/email/verklaring), 5 toggles (SHA-512, conceptueel, perceptueel, anchor, watermerk), 2 modi (Hashen & verankeren, Verifiëren), resultaat-paneel, 2 downloads (PDF met PoA, los PoA-rapport).
+- **`frontend/js/app.js`**: `hashing` state + handlers (`runHash`, `runVerify`, `onHashPdf*`, `downloadSignedPdf`, `downloadPoaReport`, `hashingReset`). Hergebruikt `PDFHorsePayload.attach()` voor zowel `pdfhorse-poa.json` (envelope) als `pdfhorse-poa.pdf` (rapport-bijlage); hergebruikt `PDFHorseWatermark.injectText()` voor footer-stempel.
+- **`frontend/i18n.json`**: 23 nieuwe NL→EN entries.
+
+### Fixed — Conceptueel verifiëren met zichtbaar watermerk
+
+- Watermerk-tegels werden door PDF.js teruggegeven als tekstitems en breken zo de conceptuele hash bij verify. Filter in `extractText()` op prefix `SHA-256:` of `PoA YYYY-MM-DD` (incl. truncated `iCt H` aan paginarand).
+- **RCA:** Functioneel = verify breekt na watermerk; Technisch = tekstlaag-filter ontbrak; Architectonisch = layered hashes moeten ongevoelig zijn voor PDFHorse-eigen modificaties.
+
+### Verified
+
+- **Backend pytest 27/27 groen** (20 oud + 7 nieuw `/api/anchor`: ongeldige hex 400, ontbrekend veld 400, stub-mode 200 + headers, calendar HTTPError 502, calendar URLError 503, rate-limit 429).
+- **E2E Playwright 8/8 groen** (5 oud + 3 nieuw Hashing: sign + PDF-met-PoA download, los PoA-rapport `%PDF-`, verify signed-PDF groen via conceptueel + perceptueel).
+- **node --check** op `hash.js`, `poa-report.js`, `app.js`.
+
+### Notes
+
+- File-hash mismatch ná PoA-flow is verwacht (payload + watermerk wijzigen bytes); verify-uitslag steunt op conceptueel + perceptueel (Hamming ≤ 5/64).
+- WebCrypto vereist HTTPS — OK op HC55/icthorse.nl.
+- OTS-bewijs is `.ots`-stub van calendar; finale Bitcoin-anchor via `ots upgrade` (OpenTimestamps CLI, los van PDFHorse).
+
 ## [v0.18.0-Oberdiek] — 2026-06-18
 
 > Codenaam **Heiko Oberdiek** — hyperref / pdfx maintainer, LaTeX-PDF integratiespecialist. PDF-pioniers/LaTeX-lijn na Warnock. `Brotz` blijft gereserveerd voor v1.0.0.

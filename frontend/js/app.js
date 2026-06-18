@@ -32,6 +32,7 @@ function pdfHorseApp() {
       { id: 'watermerk', label: '💧 Watermerk' },
       { id: 'delen',   label: '🔗 Delen & meekijken' },
       { id: 'geavanceerd', label: '🔐 Geavanceerd' },
+      { id: 'hashing', label: '🔒 Hashing' },
     ],
     health: { status: '…', version: '…', codename: '…' },
     limits: {},
@@ -162,6 +163,30 @@ function pdfHorseApp() {
       busy: false,
       error: '',
       notice: '',
+    },
+
+    hashing: {
+      mode: 'sign',            // 'sign' | 'verify'
+      pdfFile: null,
+      pdfBytes: null,
+      ownerName: '',
+      ownerEmail: '',
+      ownerStatement: '',
+      useSha512: false,
+      useConceptual: true,
+      usePerceptual: true,
+      useAnchor: true,
+      useWatermark: true,
+      dragOver: false,
+      busy: false,
+      progress: '',
+      error: '',
+      notice: '',
+      result: null,            // { file, conceptual, perceptual, anchor, ts }
+      signedBytes: null,       // PDF met embedded payload + watermerk
+      signedName: '',
+      poaBytes: null,          // los PoA-rapport
+      verifyResult: null,      // { file:{ok,...}, conceptual:{...}, pages:[...] }
     },
 
     init() {
@@ -1255,6 +1280,194 @@ function pdfHorseApp() {
       this.advanced.pdfFile = null; this.advanced.pdfBytes = null;
       this.advanced.payloadBytes = null; this.advanced.payloadName = '';
       this.advanced.error = ''; this.advanced.notice = '';
+    },
+
+    // ---------- Hashing & Proof of Authenticity (v0.22.0-Merkle) ----------
+
+    _hashEngine() { return window.PDFHorseHash || null; },
+    _poaEngine() { return window.PDFHorsePoaReport || null; },
+    _payloadEng() { return window.PDFHorsePayload || null; },
+    _wmEngine() { return window.PDFHorseWatermark || null; },
+
+    async onHashPdfInput(ev) {
+      const f = ev.target.files && ev.target.files[0];
+      ev.target.value = '';
+      if (f) await this._hashSetFile(f);
+    },
+    async onHashPdfDrop(ev) {
+      const dt = ev.dataTransfer; const f = dt && dt.files && dt.files[0];
+      if (f) await this._hashSetFile(f);
+    },
+    async _hashSetFile(f) {
+      this.hashing.error = ''; this.hashing.notice = '';
+      this.hashing.result = null; this.hashing.signedBytes = null;
+      this.hashing.poaBytes = null; this.hashing.verifyResult = null;
+      if (!f.name.toLowerCase().endsWith('.pdf')) { this.hashing.error = 'Alleen PDF wordt geaccepteerd.'; return; }
+      this.hashing.pdfFile = f;
+      this.hashing.pdfBytes = new Uint8Array(await f.arrayBuffer());
+    },
+
+    async runHash() {
+      if (this.hashing.busy) return;
+      const H = this._hashEngine(); if (!H) { this.hashing.error = 'Hash-engine niet geladen.'; return; }
+      const Payload = this._payloadEng(); if (!Payload) { this.hashing.error = 'Payload-engine niet geladen.'; return; }
+      const Poa = this._poaEngine(); if (!Poa) { this.hashing.error = 'PoA-rapport niet geladen.'; return; }
+      if (!this.hashing.pdfBytes) { this.hashing.error = 'Kies eerst een PDF.'; return; }
+
+      this.hashing.busy = true; this.hashing.error = ''; this.hashing.notice = '';
+      this.hashing.result = null; this.hashing.signedBytes = null; this.hashing.poaBytes = null;
+      const base = (window.PDFHORSE_API_BASE || '/').replace(/\/?$/, '/');
+      const original = this.hashing.pdfBytes;
+      const origName = (this.hashing.pdfFile && this.hashing.pdfFile.name) || 'document.pdf';
+
+      try {
+        this.hashing.progress = 'hashen…';
+        const file = await H.fileHashes(original);
+        if (!this.hashing.useSha512) delete file.sha512;
+        const conceptual = this.hashing.useConceptual ? await H.conceptualHash(original) : null;
+        const perceptual = this.hashing.usePerceptual ? await H.pagePerceptualHashes(original) : null;
+
+        let anchor = null;
+        if (this.hashing.useAnchor) {
+          this.hashing.progress = 'verankeren (OpenTimestamps)…';
+          const a = await H.anchorOTS(file.sha256, base);
+          anchor = {
+            ots_b64: H._b64FromU8(a.otsBytes),
+            calendar: a.calendar, mode: a.mode, sha256: file.sha256,
+          };
+        }
+
+        const meta = {
+          file: file,
+          conceptual: conceptual,
+          perceptual: perceptual,
+          anchor: anchor,
+          ts: new Date().toISOString(),
+          owner: {
+            name: this.hashing.ownerName || '',
+            email: this.hashing.ownerEmail || '',
+            statement: this.hashing.ownerStatement || '',
+          },
+          source: { filename: origName, bytes: original.length },
+        };
+
+        this.hashing.progress = 'PoA-rapport genereren…';
+        const poaBytes = await Poa.build(meta);
+
+        this.hashing.progress = 'payload inbedden…';
+        const envelope = Payload.buildPlain('pdfhorse-poa.json',
+          new TextEncoder().encode(JSON.stringify({ pdfhorse: 'poa-v1', ...meta })));
+        let outBytes = await Payload.attach(original, envelope);
+
+        // Embed ook het rapport zelf als 2e bijlage — een doc kan twee bijlagen hebben.
+        const L = window.PDFLib;
+        const doc2 = await L.PDFDocument.load(outBytes, { ignoreEncryption: false });
+        await doc2.attach(poaBytes, 'pdfhorse-poa.pdf', {
+          mimeType: 'application/pdf',
+          description: 'PDFHorse Proof of Authenticity',
+          creationDate: new Date(0), modificationDate: new Date(0),
+        });
+        outBytes = await doc2.save();
+
+        if (this.hashing.useWatermark) {
+          this.hashing.progress = 'zichtbaar watermerk plaatsen…';
+          const W = this._wmEngine();
+          if (W) {
+            const stamp = 'SHA-256:' + file.sha256.slice(0, 8) + '… · PoA ' + meta.ts.slice(0, 10) + ' · iCt Horse';
+            outBytes = await W.injectText(outBytes, stamp, { fontSize: 6 });
+          }
+        }
+
+        const stem = origName.replace(/\.pdf$/i, '');
+        this.hashing.signedName = stem + '_poa.pdf';
+        this.hashing.signedBytes = outBytes;
+        this.hashing.poaBytes = poaBytes;
+        this.hashing.result = meta;
+        this.hashing.notice = 'PoA aangemaakt. Beide downloads staan hieronder klaar.';
+      } catch (e) {
+        this.hashing.error = e.message || String(e);
+      } finally {
+        this.hashing.busy = false; this.hashing.progress = '';
+      }
+    },
+
+    async runVerify() {
+      if (this.hashing.busy) return;
+      const H = this._hashEngine(); if (!H) { this.hashing.error = 'Hash-engine niet geladen.'; return; }
+      const Payload = this._payloadEng(); if (!Payload) { this.hashing.error = 'Payload-engine niet geladen.'; return; }
+      if (!this.hashing.pdfBytes) { this.hashing.error = 'Kies eerst een PDF.'; return; }
+
+      this.hashing.busy = true; this.hashing.error = ''; this.hashing.notice = '';
+      this.hashing.verifyResult = null;
+      try {
+        // Lees PoA-envelope. Probeer eerst pdfhorse-poa.json (v0.22), val terug op generieke extract.
+        let meta = null;
+        const pdfjs = window.pdfjsLib;
+        const pdf = await pdfjs.getDocument({ data: this.hashing.pdfBytes.slice() }).promise;
+        const att = await pdf.getAttachments();
+        const key = att && (att['pdfhorse-poa.json'] ? 'pdfhorse-poa.json'
+          : Object.keys(att).find(function (k) { return /pdfhorse-poa/.test(k) && /\.json$/.test(k); }));
+        if (key) {
+          const content = att[key].content || att[key];
+          const obj = JSON.parse(new TextDecoder().decode(content instanceof Uint8Array ? content : new Uint8Array(content)));
+          meta = obj; // pdfhorse: 'poa-v1', ...
+        } else {
+          // backup: oude/andere flow met pdfhorse-payload.json
+          try {
+            const env = await Payload.extract(this.hashing.pdfBytes);
+            const inner = JSON.parse(new TextDecoder().decode(H._u8FromB64(env.data)));
+            if (inner && inner.pdfhorse === 'poa-v1') meta = inner;
+          } catch (e) { /* geen payload */ }
+        }
+        if (!meta || !meta.file) throw new Error('Geen PoA-payload gevonden in deze PDF.');
+
+        // Belangrijk: file-hash herberekenen over de PDF WAAR de payload nog niet in zat — onmogelijk hier.
+        // We verifiëren daarom file-hash over de huidige PDF: bij niet-gewijzigd archief blijft de signed-PDF
+        // anders dan het origineel. Daarom slaan we de originele file-hash in payload op en accepteren we
+        // dat 'file mismatch' = na de PoA-flow is dat verwacht; conceptueel + perceptueel moeten wél matchen.
+        const fileNow = await H.fileHashes(this.hashing.pdfBytes);
+        const conceptNow = meta.conceptual ? await H.conceptualHash(this.hashing.pdfBytes) : null;
+        const phNow = meta.perceptual ? await H.pagePerceptualHashes(this.hashing.pdfBytes) : null;
+
+        const pages = [];
+        if (phNow && meta.perceptual) {
+          for (let i = 0; i < Math.max(phNow.length, meta.perceptual.length); i++) {
+            const a = phNow[i] || '', e = meta.perceptual[i] || '';
+            pages.push({ page: i + 1, expected: e, actual: a, hamming: (a && e) ? H.hammingHex(a, e) : 64 });
+          }
+        }
+        // Verdict: file-hash zal mismatchen na PoA-flow (bijlage + watermerk veranderen de PDF-bytes).
+        // Daarom is "ok" gebaseerd op conceptueel (identieke tekstlaag) + perceptueel (Hamming ≤ 5/64).
+        const conceptOk = conceptNow ? conceptNow.sha256 === meta.conceptual.sha256 : true;
+        const pagesOk = pages.length === 0 || pages.every(function (p) { return p.hamming <= 5; });
+        this.hashing.verifyResult = {
+          ok: conceptOk && pagesOk,
+          file: { ok: fileNow.sha256 === meta.file.sha256, expected: meta.file.sha256, actual: fileNow.sha256 },
+          conceptual: conceptNow ? { ok: conceptOk, expected: meta.conceptual.sha256, actual: conceptNow.sha256 } : null,
+          pages: pages,
+        };
+        this.hashing.notice = 'Verificatie afgerond.';
+      } catch (e) {
+        this.hashing.error = e.message || String(e);
+      } finally { this.hashing.busy = false; }
+    },
+
+    downloadSignedPdf() {
+      if (!this.hashing.signedBytes) return;
+      this._downloadBlob(this.hashing.signedBytes, this.hashing.signedName || 'document_poa.pdf', 'application/pdf');
+      // Output-bar bijwerken zodat mail/print ook op de signed PDF werkt.
+      this._setOutput(this.hashing.signedBytes, this.hashing.signedName || 'document_poa.pdf', 'Hashing — PDF met PoA');
+    },
+    downloadPoaReport() {
+      if (!this.hashing.poaBytes) return;
+      this._downloadBlob(this.hashing.poaBytes, 'pdfhorse-poa.pdf', 'application/pdf');
+    },
+
+    hashingReset() {
+      this.hashing.pdfFile = null; this.hashing.pdfBytes = null;
+      this.hashing.result = null; this.hashing.signedBytes = null;
+      this.hashing.poaBytes = null; this.hashing.verifyResult = null;
+      this.hashing.error = ''; this.hashing.notice = ''; this.hashing.progress = '';
     },
 
     // ---------- Convert ----------

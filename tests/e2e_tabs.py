@@ -37,7 +37,7 @@ with sync_playwright() as p:
             if m.type == "error" and "404" not in m.text else None)
 
     page.goto(BASE, wait_until="domcontentloaded")
-    page.wait_for_function("() => !!window.PDFLib && !!window.PDFHorseWatermark && !!window.PDFHorsePayload", timeout=15000)
+    page.wait_for_function("() => !!window.PDFLib && !!window.PDFHorseWatermark && !!window.PDFHorsePayload && !!window.PDFHorseHash && !!window.PDFHorsePoaReport", timeout=15000)
 
     # Genereer een echte sample-PDF in-browser via window.PDFLib.
     pdf_b64 = page.evaluate("""async () => {
@@ -144,6 +144,37 @@ with sync_playwright() as p:
               dl.read_bytes() == PAYLOAD_BYTES, f"{len(dl.read_bytes())} vs {len(PAYLOAD_BYTES)} bytes")
     except Exception as e:
         check("watermerk document-payload round-trip", False, repr(e)[:160])
+
+    # TEST 5 — Hashing-tab: sign (zonder anchor → geen backend nodig) + verify roundtrip
+    try:
+        tab("Hashing")
+        HZ = page.locator('section[aria-labelledby="tab-hashing"]')
+        page.set_input_files("#hash-pdf-input", SAMPLE)
+        page.get_by_placeholder("bv. Voornaam Achternaam").fill("E2E Tester")
+        # Zet anchor-toggle uit (geen backend in deze testserver). Watermerk laten we aan.
+        HZ.locator("label", has_text="Verankeren via OpenTimestamps").locator("input[type=checkbox]").uncheck()
+        # Hashen + PoA-rapport bouwen (geen download — toont resultaten)
+        HZ.get_by_role("button", name="Hash, anker & PoA-rapport maken", exact=True).click()
+        HZ.get_by_role("button", name="⬇ PDF met PoA", exact=True).wait_for(timeout=60000)
+        with page.expect_download(timeout=10000) as di:
+            HZ.get_by_role("button", name="⬇ PDF met PoA", exact=True).click()
+        signed = TMP / "signed.pdf"; di.value.save_as(str(signed))
+        check("hashing: sign + download PDF met PoA", signed.stat().st_size > 0, f"{signed.stat().st_size} bytes")
+
+        with page.expect_download(timeout=10000) as di2:
+            HZ.get_by_role("button", name="⬇ Los PoA-rapport", exact=True).click()
+        poa = TMP / "poa.pdf"; di2.value.save_as(str(poa))
+        check("hashing: download PoA-rapport (begint met %PDF-)", poa.read_bytes().startswith(b"%PDF-"),
+              f"{poa.stat().st_size} bytes")
+
+        # Verify-modus
+        HZ.get_by_role("button", name="✅ Verifiëren", exact=True).click()
+        page.set_input_files("#hash-pdf-verify-input", str(signed))
+        HZ.get_by_role("button", name="Verifiëren", exact=True).click()
+        page.get_by_text("Verificatie geslaagd", exact=False).first.wait_for(timeout=30000)
+        check("hashing: verify signed-PDF → geslaagd (conceptueel + perceptueel match)", True)
+    except Exception as e:
+        check("hashing round-trip", False, repr(e)[:200])
 
     browser.close()
 

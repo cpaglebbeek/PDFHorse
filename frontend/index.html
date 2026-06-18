@@ -75,7 +75,7 @@
       <a href="./" class="flex items-center gap-2">
         <img src="assets/pdfhorse-mark.svg" alt="PDFHorse mark" style="height:72px;width:72px" />
         <span class="text-xl font-bold">PDFHorse</span>
-        <span class="text-xs text-slate-400">v0.20.0 — Wozencraft</span>
+        <span class="text-xs text-slate-400">v0.20.1 — Wozencraft</span>
       </a>
       <a href="https://icthorse.nl/" class="text-sm text-slate-300 hover:text-white">een dienst van iCt Horse →</a>
     </div>
@@ -656,7 +656,7 @@
           <div x-show="watermark.mode === 'image'" class="mt-3 space-y-2">
             <label class="block text-sm">
               <span class="text-slate-600">SVG of PNG (logo / merk-afbeelding)</span>
-              <input type="file" accept="image/svg+xml,.svg,image/png,.png" class="block mt-1 text-xs" @change="onWatermarkImage($event)" />
+              <input id="watermark-image-input" type="file" accept="image/svg+xml,.svg,image/png,.png" class="block mt-1 text-xs" @change="onWatermarkImage($event)" />
             </label>
             <p x-show="watermark.imageName" class="text-xs text-slate-600">Gekozen: <span class="font-mono" x-text="watermark.imageName"></span></p>
             <p class="text-xs text-slate-500">PNG wordt eerst naar vector (SVG) getraceerd zodat het object terug te lezen blijft. Herkleurd naar de achtergrondkleur en getegeld.</p>
@@ -695,7 +695,7 @@
               <div x-show="watermark.readResult && watermark.readResult.repeatedText.length">
                 <div class="font-medium">Vaak herhaalde tekst (mogelijk watermerk)</div>
                 <ul class="list-disc ml-5 text-xs">
-                  <template x-for="(t, i) in watermark.readResult.repeatedText" :key="i">
+                  <template x-for="(t, i) in (watermark.readResult && watermark.readResult.repeatedText || [])" :key="i">
                     <li><span x-text="t.text"></span> <span class="text-slate-400">(<span x-text="t.count"></span>×)</span></li>
                   </template>
                 </ul>
@@ -756,12 +756,12 @@
           <div class="text-sm font-semibold">Sleutels van/voor een peer</div>
           <label class="block text-sm">
             <span class="text-slate-600">Peer public key uploaden (om vóór iemand te versleutelen)</span>
-            <input type="file" accept="application/json,.json" class="block mt-1 text-xs" @change="onPeerPublicUpload($event)" />
+            <input id="adv-peer-input" type="file" accept="application/json,.json" class="block mt-1 text-xs" @change="onPeerPublicUpload($event)" />
           </label>
           <p x-show="advanced.peerPublicName" class="text-xs text-slate-600">Peer public key: <span class="font-mono" x-text="advanced.peerPublicName"></span></p>
           <label class="block text-sm">
             <span class="text-slate-600">Eigen private key uploaden (om te ontsleutelen)</span>
-            <input type="file" accept="application/json,.json" class="block mt-1 text-xs" @change="onPrivateUpload($event)" />
+            <input id="adv-private-input" type="file" accept="application/json,.json" class="block mt-1 text-xs" @change="onPrivateUpload($event)" />
           </label>
           <p x-show="advanced.privateName" class="text-xs text-slate-600">Private key: <span class="font-mono" x-text="advanced.privateName"></span></p>
         </div>
@@ -786,7 +786,7 @@
 
         <label class="block text-sm">
           <span class="font-medium">Payload-bestand (willekeurig type)</span>
-          <input type="file" class="block mt-1 text-xs" @change="onPayloadInput($event)" />
+          <input id="adv-payload-input" type="file" class="block mt-1 text-xs" @change="onPayloadInput($event)" />
         </label>
         <p x-show="advanced.payloadName" class="text-xs text-slate-600">Payload: <span class="font-mono" x-text="advanced.payloadName"></span></p>
 

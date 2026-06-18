@@ -51,7 +51,9 @@ Nieuwe tab **🔐 Geavanceerd** + engine `js/payload.js` (`window.PDFHorsePayloa
 - **pdf-lib attach** in Node: `/EmbeddedFiles` + `/Names` + attachment-naam aanwezig ✓ (default-save
   comprimeert in object-streams; geverifieerd met `useObjectStreams:false`).
 - HTML-balans: 11 secties open/close, 9 tabs incl. `geavanceerd`.
-- Browser-E2E (Playwright) NIET gedraaid (niet op HC55) — visuele bevestiging gebruiker gevraagd.
+- Browser-E2E (Playwright headless Chromium) GEDRAAID: 6/6 groen incl. payload plain +
+  encrypted byte-exact round-trips door de UI. Test vastgelegd in `tests/e2e_tabs.py`.
+  Bug gevonden+gefixt: Watermerk-lees `x-for` over `repeatedText` null-safe (v0.20.1).
 
 ## Deploy
 Dev-clone push origin → `/opt/pdfhorse` pull → rsync `frontend/` → `/var/www/pdfhorse/frontend/`.

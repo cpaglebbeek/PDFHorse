@@ -39,8 +39,9 @@ Nieuwe tab **💧 Watermerk** bovenop `window.PDFHorseWatermark` (engine v0.1.0)
 ## Verificatie
 - `node --check` app.js + watermark.js: OK. JSON-validatie i18n.json + version.json: OK.
 - Wiring-grep: tab-id, sectie, engine-calls, script-volgorde, 10 handler-refs — alle aanwezig.
-- Browser-E2E (Playwright) NIET gedraaid: niet geïnstalleerd op HC55. Wiring volgt 1-op-1
-  het bewezen sign/fill-patroon; visuele bevestiging door gebruiker na deploy gevraagd.
+- Browser-E2E (Playwright headless Chromium) GEDRAAID: watermerk tekst->lezen vindt de
+  payload terug; geen JS-errors. Test in `tests/e2e_tabs.py`. (Bug gevonden+gefixt in v0.20.1:
+  lees-`x-for` over `repeatedText` null-safe gemaakt.)
 
 ## Deploy
 Dev-clone `~/projects/PDFHorse` → push origin → `/opt/pdfhorse` pull → rsync `frontend/`

@@ -1,8 +1,9 @@
 {
-  "version": "0.20.0",
+  "version": "0.20.1",
   "codename": "Wozencraft",
   "released": "2026-06-18",
-  "status": "payload-keypair-tab",
+  "status": "payload-keypair-tab-e2e",
+  "fix": "v0.20.1: Playwright E2E 6/6 groen (watermerk tekst->lezen, payload plain + encrypted byte-exact round-trips). Bugfix: Watermerk-leesuitvoer x-for over watermark.readResult.repeatedText is null-safe gemaakt (Alpine evalueert x-for ook bij x-show=false -> crashte 'Cannot read properties of null'). Plus stabiele id's op file-inputs (watermark-image-input, adv-payload-input, adv-peer-input, adv-private-input). Test in tests/e2e_tabs.py.",
   "theme": "PDF-pioniers",
   "notes": "v0.20.0-Wozencraft: nieuwe tab 'Geavanceerd' (🔐) — payload-engine (js/payload.js v0.1.0). Bed een willekeurig bestand als base64-payload in een PDF in via een echte PDF embedded-file attachment (pdf-lib doc.attach, envelope-JSON), en haal het er weer uit via PDF.js getAttachments(). Optioneel hybride versleuteld: AES-GCM-256 versleutelt het bestand, RSA-OAEP-2048 wrapt de AES-sessiesleutel met de public key van de ontvanger; ontsleutelen alleen met de bijbehorende private key. Keypair-beheer via WebCrypto, geexporteerd als JWK: keypair aanmaken, keypair downloaden, public key downloaden (delen), peer public key uploaden (versleutelen voor ontvanger), eigen private key uploaden (ontsleutelen). Alles client-side; sleutels verlaten de browser alleen bij expliciete download. Crypto-round-trip + wrong-key-rejection geverifieerd in Node WebCrypto. Wiring: tabs-array + advanced state + handlers in app.js, sectie in index.html, script-include payload.js vooor app.js, NL/EN via i18n.json. Codenaam Wozencraft — PDF-pionier (shortlist). Brotz blijft reserve voor v1.0.0. NB: WebCrypto vereist secure context (HTTPS) — live op icthorse.nl/HC55 OK."
 }

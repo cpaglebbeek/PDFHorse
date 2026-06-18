@@ -66,6 +66,7 @@ function pdfHorseApp() {
       pageCount: 0,
       pages: [],
       fields: [],
+      detected: [],            // [{page, x, y, width, fontSize, kind}] canvas-coords, y = baseline
       fontSize: 12,
       dragOver: false,
       loading: false,
@@ -618,6 +619,7 @@ function pdfHorseApp() {
       this.fill.file = f;
       this.fill.fields = [];
       this.fill.pages = [];
+      this.fill.detected = [];
       try {
         this.fill.pdfBytes = new Uint8Array(await f.arrayBuffer());
         const srcCheck = await window.PDFLib.PDFDocument.load(this.fill.pdfBytes, { ignoreEncryption: false });
@@ -632,7 +634,7 @@ function pdfHorseApp() {
           return;
         }
 
-        // Render alle pages
+        // Render alle pages + scan voor platte (visuele) invul-velden
         await this.$nextTick();
         const loadingTask = window.pdfjsLib.getDocument({ data: this.fill.pdfBytes.slice() });
         const pdf = await loadingTask.promise;
@@ -647,7 +649,14 @@ function pdfHorseApp() {
           await page.render({ canvasContext: ctx, viewport }).promise;
           this.fill.pages[i - 1].width = viewport.width;
           this.fill.pages[i - 1].height = viewport.height;
+          // Detecteer visuele invul-velden (dot-runs / underscore-runs) op deze pagina
+          try {
+            const tc = await page.getTextContent();
+            this._collectFlatFields(tc.items, i - 1, viewport.height);
+          } catch (e) { /* getTextContent kan falen op image-only PDFs — geen blocker */ }
         }
+        // Merge naast elkaar liggende dot-runs op dezelfde baseline (binnen 1 line)
+        this._mergeAdjacentDetected();
       } catch (e) {
         if (String(e).toLowerCase().includes('encrypt')) {
           this.fill.error = `"${f.name}" is versleuteld en kan niet worden ingevuld.`;
@@ -674,15 +683,91 @@ function pdfHorseApp() {
       if (ev.target && ev.target.tagName === 'INPUT') return;
       const canvas = ev.currentTarget;
       const rect = canvas.getBoundingClientRect();
-      const x = ev.clientX - rect.left;
-      const y = ev.clientY - rect.top;
+      // CSS-pixels → canvas-pixels (canvas kan via CSS gerescaled zijn op kleine viewports)
+      const sx = canvas.width  / Math.max(1, rect.width);
+      const sy = canvas.height / Math.max(1, rect.height);
+      const rawX = (ev.clientX - rect.left) * sx;
+      const rawY = (ev.clientY - rect.top)  * sy;
+      // Snap-to-line: zoek dichtstbijzijnde gedetecteerde dot/underscore-run op deze pagina
+      const snap = this._findSnapCandidate(pageIdx, rawX, rawY);
+      const fs = snap
+        ? Math.max(8, Math.min(this.fill.fontSize, Math.round(snap.fontSize * 0.85)))
+        : this.fill.fontSize;
       this.fill.fields.push({
         id: ++this.fill.seq,
         page: pageIdx,
-        x, y,
+        x: snap ? snap.x : rawX,
+        y: snap ? snap.y : rawY,
         text: '',
-        fontSize: this.fill.fontSize,
+        fontSize: fs,
+        snapped: !!snap,
       });
+    },
+
+    // Zoekt de dichtstbijzijnde gedetecteerde dot/underscore-run binnen Y-tolerantie
+    // en geeft {x, y (baseline), fontSize, width} terug — of null als niets in de buurt.
+    _findSnapCandidate(pageIdx, x, y) {
+      if (!this.fill.detected || !this.fill.detected.length) return null;
+      const SNAP_Y = 18;   // verticale tolerantie in px (canvas-coords ≈ pt op scale=1.0)
+      const SLOP_X = 24;   // horizontaal mag user erbuiten klikken
+      let best = null, bestDist = Infinity;
+      for (const d of this.fill.detected) {
+        if (d.page !== pageIdx) continue;
+        const dy = Math.abs(d.y - y);
+        if (dy > SNAP_Y) continue;
+        if (x < d.x - SLOP_X || x > d.x + d.width + SLOP_X) continue;
+        // dichter bij baseline → beter; bij gelijke Y dichter bij start-X → beter
+        const dist = dy * 10 + Math.max(0, d.x - x) + Math.max(0, x - (d.x + d.width));
+        if (dist < bestDist) { best = d; bestDist = dist; }
+      }
+      return best;
+    },
+
+    // Verzamelt dot-runs/underscore-runs uit PDF.js text-items voor pagina pageIdx.
+    // text-item.transform = [a, b, c, d, e, f]  (translate = e,f; fontSize ≈ |d| of |a|).
+    // PDF-coords → canvas-coords: x_canvas = e ; y_canvas_baseline = viewportH - f.
+    _collectFlatFields(items, pageIdx, viewportH) {
+      const DOT_RUN = /^[\s]*[.·…_](?:[\s]*[.·…_]){2,}[\s]*$/;  // ≥3 dots/middots/underscores
+      for (const it of items) {
+        if (!it || typeof it.str !== 'string') continue;
+        if (!DOT_RUN.test(it.str)) continue;
+        const tr = it.transform;
+        if (!tr || tr.length < 6) continue;
+        const fontSize = Math.abs(tr[3]) || Math.abs(tr[0]) || 12;
+        const pdfX = tr[4];
+        const pdfYBaseline = tr[5];
+        const width = it.width || (pdfX > 0 ? Math.max(50, it.str.length * fontSize * 0.28) : 60);
+        this.fill.detected.push({
+          page: pageIdx,
+          x: pdfX,                              // canvas-X (scale = 1.0)
+          y: viewportH - pdfYBaseline,          // canvas-Y baseline
+          width,
+          fontSize,
+          kind: it.str.includes('_') ? 'underscore' : 'dot',
+        });
+      }
+    },
+
+    // Sommige PDF's renderen 1 visueel veld als meerdere text-items met spaties ertussen.
+    // Merge ze als ze (1) zelfde pagina, (2) baseline ≤ 2px verschilt, (3) X-gap ≤ 20px.
+    _mergeAdjacentDetected() {
+      const det = this.fill.detected;
+      if (det.length < 2) return;
+      det.sort((a, b) => a.page - b.page || a.y - b.y || a.x - b.x);
+      const merged = [det[0]];
+      for (let i = 1; i < det.length; i++) {
+        const prev = merged[merged.length - 1];
+        const cur  = det[i];
+        if (cur.page === prev.page
+            && Math.abs(cur.y - prev.y) <= 2
+            && cur.x - (prev.x + prev.width) <= 20) {
+          prev.width = (cur.x + cur.width) - prev.x;
+          if (cur.kind === 'underscore') prev.kind = 'underscore';
+        } else {
+          merged.push(cur);
+        }
+      }
+      this.fill.detected = merged;
     },
 
     removeFillField(id) {
@@ -733,9 +818,27 @@ function pdfHorseApp() {
           }
         }
         if (added > 0) {
-          this.fill.notice = `${added} invulveld(en) automatisch herkend en geplaatst — typ je tekst. Klik handmatig op de pagina voor extra velden.`;
+          this.fill.notice = `${added} AcroForm-veld(en) automatisch herkend en geplaatst — typ je tekst. Klik handmatig op de pagina voor extra velden.`;
         } else {
-          this.fill.error = 'Geen invulbare formuliervelden (AcroForm) gevonden — deze PDF is waarschijnlijk "plat". Plaats velden handmatig door op de pagina te klikken.';
+          // Fallback: platte PDF — gebruik visueel gedetecteerde dot/underscore-runs
+          let visualAdded = 0;
+          for (const d of this.fill.detected) {
+            this.fill.fields.push({
+              id: ++this.fill.seq,
+              page: d.page,
+              x: d.x,
+              y: d.y,                              // baseline op de detected lijn
+              text: '',
+              fontSize: Math.max(8, Math.min(this.fill.fontSize, Math.round(d.fontSize * 0.85))),
+              snapped: true,
+            });
+            visualAdded++;
+          }
+          if (visualAdded > 0) {
+            this.fill.notice = `${visualAdded} invulveld(en) visueel herkend (platte PDF, op basis van dotted/underscore-lijnen) — typ je tekst. Klik handmatig op de pagina voor extra velden.`;
+          } else {
+            this.fill.error = 'Geen invulbare formuliervelden gevonden — noch AcroForm, noch visuele dotted/underscore-lijnen. Plaats velden handmatig door op de pagina te klikken.';
+          }
         }
       } catch (e) {
         this.fill.error = 'Auto-herkennen mislukt: ' + (e.message || String(e));
@@ -750,6 +853,7 @@ function pdfHorseApp() {
       this.fill.pageCount = 0;
       this.fill.pages = [];
       this.fill.fields = [];
+      this.fill.detected = [];
       this.fill.error = '';
       this.fill.notice = '';
     },

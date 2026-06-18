@@ -1,0 +1,134 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 480" width="400" height="480"
+     role="img" aria-labelledby="pdfhorse-title pdfhorse-desc">
+  <title id="pdfhorse-title">PDFHorse</title>
+  <desc id="pdfhorse-desc">iCt Horse PDFHorse logo — gestileerd paardenhoofd boven gestapelde PDF-pagina's met gevouwen hoek, in het iCt Horse teal-green palet met warm accent.</desc>
+
+  <defs>
+    <linearGradient id="ph-brand" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%"   stop-color="#095263"/>
+      <stop offset="30%"  stop-color="#178384"/>
+      <stop offset="60%"  stop-color="#54c3b1"/>
+      <stop offset="100%" stop-color="#abcb3e"/>
+    </linearGradient>
+    <linearGradient id="ph-page" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%"   stop-color="#0c1a2a"/>
+      <stop offset="100%" stop-color="#070b14"/>
+    </linearGradient>
+    <linearGradient id="ph-warm" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%"   stop-color="#fa8f1a"/>
+      <stop offset="100%" stop-color="#f85b32"/>
+    </linearGradient>
+    <radialGradient id="ph-halo" cx="0.5" cy="0.42" r="0.65">
+      <stop offset="0%"   stop-color="#59c5a8" stop-opacity="0.22"/>
+      <stop offset="100%" stop-color="#59c5a8" stop-opacity="0"/>
+    </radialGradient>
+    <pattern id="ph-dots" x="0" y="0" width="22" height="22" patternUnits="userSpaceOnUse">
+      <circle cx="1.5" cy="1.5" r="1" fill="#59c5a8" fill-opacity="0.08"/>
+    </pattern>
+  </defs>
+
+  <!-- Badge -->
+  <rect x="10" y="10" width="380" height="380" rx="48" fill="#070b14"/>
+  <rect x="10" y="10" width="380" height="380" rx="48" fill="url(#ph-dots)"/>
+  <rect x="10" y="10" width="380" height="380" rx="48" fill="url(#ph-halo)"/>
+  <rect x="10" y="10" width="380" height="380" rx="48" fill="none"
+        stroke="#178384" stroke-opacity="0.45" stroke-width="1.5"/>
+
+  <!-- Stacked PDF pages -->
+  <g transform="translate(82 58)">
+    <!-- Back page, tilted -->
+    <g transform="rotate(-7 110 122)" opacity="0.55">
+      <path d="M0 12 Q0 0 12 0 H164 L210 46 V220 Q210 232 198 232 H12 Q0 232 0 220 Z"
+            fill="url(#ph-page)" stroke="#23a396" stroke-width="1.5"/>
+      <path d="M164 0 L210 46 H176 Q164 46 164 34 Z"
+            fill="#0c1a2a" stroke="#23a396" stroke-width="1.5"/>
+    </g>
+    <!-- Middle page -->
+    <g transform="rotate(3 110 122) translate(8 6)" opacity="0.85">
+      <path d="M0 12 Q0 0 12 0 H164 L210 46 V220 Q210 232 198 232 H12 Q0 232 0 220 Z"
+            fill="url(#ph-page)" stroke="#54c3b1" stroke-width="1.5"/>
+      <path d="M164 0 L210 46 H176 Q164 46 164 34 Z"
+            fill="#0c1a2a" stroke="#54c3b1" stroke-width="1.5"/>
+    </g>
+    <!-- Front page (warm-accent fold) -->
+    <g transform="translate(16 14)">
+      <path d="M0 12 Q0 0 12 0 H164 L210 46 V220 Q210 232 198 232 H12 Q0 232 0 220 Z"
+            fill="url(#ph-page)" stroke="#abcb3e" stroke-width="2"/>
+      <path d="M164 0 L210 46 H176 Q164 46 164 34 Z" fill="url(#ph-warm)"/>
+      <!-- "PDF" tag on front page top-left -->
+      <g font-family="'Space Grotesk', system-ui, sans-serif" font-weight="700">
+        <rect x="14" y="18" width="42" height="20" rx="4" fill="#178384" fill-opacity="0.85"/>
+        <text x="35" y="33" font-size="13" fill="#e5f4ed" text-anchor="middle" letter-spacing="1">PDF</text>
+      </g>
+    </g>
+  </g>
+
+  <!-- Horse head silhouette, anchored on front page -->
+  <g transform="translate(126 110)">
+    <!-- mane streaming back -->
+    <path d="
+      M 38 28
+      C 18 22, 4 38, 0 62
+      C -4 92, 6 118, 24 138
+      C 28 142, 26 148, 18 146
+      C 4 142, -8 122, -10 96
+      C -12 64, 0 32, 22 18
+      C 28 14, 34 18, 38 28 Z"
+      fill="url(#ph-brand)" opacity="0.55"/>
+
+    <!-- main head + neck silhouette (right-facing) -->
+    <path d="
+      M 96 0
+      C 102 4, 106 14, 106 26
+      L 118 22
+      C 124 22, 130 30, 130 40
+      L 130 56
+      C 142 60, 156 76, 164 94
+      C 170 110, 170 124, 164 132
+      C 158 138, 148 138, 140 130
+      C 136 126, 132 124, 128 126
+      C 124 132, 116 138, 106 138
+      C 92 138, 78 134, 64 130
+      C 50 128, 38 130, 28 132
+      C 14 134, 4 124, 8 108
+      C 14 88, 14 70, 8 54
+      C 4 38, 18 22, 38 14
+      C 56 8, 76 6, 88 4
+      C 92 2, 94 0, 96 0 Z"
+      fill="url(#ph-brand)"/>
+
+    <!-- Eye -->
+    <circle cx="132" cy="84" r="3.4" fill="#070b14"/>
+    <circle cx="131" cy="83" r="1.1" fill="#e5f4ed" opacity="0.9"/>
+
+    <!-- Nostril -->
+    <ellipse cx="154" cy="116" rx="2.6" ry="3.8" fill="#070b14" opacity="0.55"/>
+
+    <!-- Mouth -->
+    <path d="M144 132 q-6 4 -14 3" stroke="#070b14" stroke-width="1.4" fill="none"
+          stroke-linecap="round" opacity="0.5"/>
+
+    <!-- Mane flow accents -->
+    <g stroke="#070b14" stroke-width="1.6" fill="none" stroke-linecap="round" opacity="0.32">
+      <path d="M 34 30 q-10 6 -12 16"/>
+      <path d="M 18 56 q-8 8 -6 18"/>
+      <path d="M 12 84 q-2 8 4 16"/>
+      <path d="M 18 112 q4 8 14 12"/>
+    </g>
+
+    <!-- Subtle inner highlight along the bridge of the nose -->
+    <path d="M 110 28 C 124 42, 138 64, 152 86"
+          stroke="#e5f4ed" stroke-opacity="0.18" stroke-width="2" fill="none" stroke-linecap="round"/>
+  </g>
+
+  <!-- Wordmark -->
+  <g font-family="'Space Grotesk', system-ui, -apple-system, BlinkMacSystemFont, sans-serif"
+     font-weight="700" text-anchor="middle">
+    <text x="200" y="446" font-size="40" letter-spacing="1.5">
+      <tspan fill="#fa8f1a">PDF</tspan><tspan fill="#e5f4ed">Horse</tspan>
+    </text>
+    <text x="200" y="468" font-size="10" letter-spacing="5" fill="#54c3b1" opacity="0.7">
+      AN  iCt  HORSE  TOOL
+    </text>
+  </g>
+</svg>

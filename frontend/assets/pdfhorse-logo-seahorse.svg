@@ -1,0 +1,161 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 480" width="400" height="480"
+     role="img" aria-labelledby="phs-title phs-desc">
+  <title id="phs-title">PDFHorse</title>
+  <desc id="phs-desc">iCt Horse PDFHorse logo — gestileerd zeepaardje met gekrulde staart boven gestapelde PDF-pagina's met gevouwen hoek, in iCt Horse teal-green palet met warm accent.</desc>
+
+  <defs>
+    <linearGradient id="phs-brand" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%"   stop-color="#095263"/>
+      <stop offset="30%"  stop-color="#178384"/>
+      <stop offset="60%"  stop-color="#54c3b1"/>
+      <stop offset="100%" stop-color="#abcb3e"/>
+    </linearGradient>
+    <linearGradient id="phs-page" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%"   stop-color="#0c1a2a"/>
+      <stop offset="100%" stop-color="#070b14"/>
+    </linearGradient>
+    <linearGradient id="phs-warm" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%"   stop-color="#fa8f1a"/>
+      <stop offset="100%" stop-color="#f85b32"/>
+    </linearGradient>
+    <radialGradient id="phs-halo" cx="0.5" cy="0.42" r="0.65">
+      <stop offset="0%"   stop-color="#59c5a8" stop-opacity="0.22"/>
+      <stop offset="100%" stop-color="#59c5a8" stop-opacity="0"/>
+    </radialGradient>
+    <pattern id="phs-dots" x="0" y="0" width="22" height="22" patternUnits="userSpaceOnUse">
+      <circle cx="1.5" cy="1.5" r="1" fill="#59c5a8" fill-opacity="0.08"/>
+    </pattern>
+    <!-- Subtle bubbles for marine context -->
+    <radialGradient id="phs-bubble" cx="0.35" cy="0.35" r="0.7">
+      <stop offset="0%"   stop-color="#e5f4ed" stop-opacity="0.7"/>
+      <stop offset="60%"  stop-color="#54c3b1" stop-opacity="0.18"/>
+      <stop offset="100%" stop-color="#54c3b1" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <!-- Badge -->
+  <rect x="10" y="10" width="380" height="380" rx="48" fill="#070b14"/>
+  <rect x="10" y="10" width="380" height="380" rx="48" fill="url(#phs-dots)"/>
+  <rect x="10" y="10" width="380" height="380" rx="48" fill="url(#phs-halo)"/>
+  <rect x="10" y="10" width="380" height="380" rx="48" fill="none"
+        stroke="#178384" stroke-opacity="0.45" stroke-width="1.5"/>
+
+  <!-- Floating bubbles (marine atmosphere) -->
+  <g>
+    <circle cx="316" cy="78" r="6" fill="url(#phs-bubble)"/>
+    <circle cx="338" cy="120" r="4" fill="url(#phs-bubble)"/>
+    <circle cx="62"  cy="118" r="3" fill="url(#phs-bubble)"/>
+    <circle cx="48"  cy="208" r="5" fill="url(#phs-bubble)"/>
+  </g>
+
+  <!-- Stacked PDF pages -->
+  <g transform="translate(82 58)">
+    <!-- Back page -->
+    <g transform="rotate(-7 110 122)" opacity="0.55">
+      <path d="M0 12 Q0 0 12 0 H164 L210 46 V220 Q210 232 198 232 H12 Q0 232 0 220 Z"
+            fill="url(#phs-page)" stroke="#23a396" stroke-width="1.5"/>
+      <path d="M164 0 L210 46 H176 Q164 46 164 34 Z"
+            fill="#0c1a2a" stroke="#23a396" stroke-width="1.5"/>
+    </g>
+    <!-- Middle page -->
+    <g transform="rotate(3 110 122) translate(8 6)" opacity="0.85">
+      <path d="M0 12 Q0 0 12 0 H164 L210 46 V220 Q210 232 198 232 H12 Q0 232 0 220 Z"
+            fill="url(#phs-page)" stroke="#54c3b1" stroke-width="1.5"/>
+      <path d="M164 0 L210 46 H176 Q164 46 164 34 Z"
+            fill="#0c1a2a" stroke="#54c3b1" stroke-width="1.5"/>
+    </g>
+    <!-- Front page -->
+    <g transform="translate(16 14)">
+      <path d="M0 12 Q0 0 12 0 H164 L210 46 V220 Q210 232 198 232 H12 Q0 232 0 220 Z"
+            fill="url(#phs-page)" stroke="#abcb3e" stroke-width="2"/>
+      <path d="M164 0 L210 46 H176 Q164 46 164 34 Z" fill="url(#phs-warm)"/>
+      <!-- "PDF" tag on front page top-left -->
+      <g font-family="'Space Grotesk', system-ui, sans-serif" font-weight="700">
+        <rect x="14" y="18" width="42" height="20" rx="4" fill="#178384" fill-opacity="0.85"/>
+        <text x="35" y="33" font-size="13" fill="#e5f4ed" text-anchor="middle" letter-spacing="1">PDF</text>
+      </g>
+    </g>
+  </g>
+
+  <!-- ============ SEAHORSE ============ -->
+  <!-- Snout points LEFT toward the PDFs, tail curls bottom-right -->
+  <g transform="translate(122 100)">
+    <!-- Body tube (upper, thicker) -->
+    <path d="M 78 122
+             C 102 140, 112 170, 102 200"
+          stroke="url(#phs-brand)" stroke-width="38" fill="none" stroke-linecap="round"/>
+
+    <!-- Tail spiral (thinner, tapering toward inner curl) -->
+    <path d="M 102 200
+             C 118 226, 150 232, 164 214
+             C 180 194, 170 162, 146 162
+             C 126 162, 116 184, 128 196
+             C 136 204, 148 198, 146 188"
+          stroke="url(#phs-brand)" stroke-width="26" fill="none" stroke-linecap="round"/>
+
+    <!-- Dorsal fin (back of upper body, right side) -->
+    <path d="M 116 130
+             C 138 124, 150 142, 142 162
+             Q 134 158, 128 152
+             C 122 144, 118 138, 116 130 Z"
+          fill="url(#phs-brand)" opacity="0.92"/>
+
+    <!-- Pectoral fin (small wing under head) -->
+    <path d="M 96 116
+             C 112 120, 120 132, 114 146
+             Q 102 140, 92 128 Z"
+          fill="url(#phs-brand)" opacity="0.85"/>
+
+    <!-- Head (rounded) -->
+    <ellipse cx="78" cy="86" rx="30" ry="34" fill="url(#phs-brand)"/>
+
+    <!-- Snout (horizontal taper pointing left) -->
+    <path d="M 6 86
+             L 50 78
+             L 54 96
+             L 8 100 Z"
+          fill="url(#phs-brand)"/>
+
+    <!-- Coronet (3 spikes on top of head) -->
+    <path d="M 50 54
+             L 56 30
+             L 64 52
+             L 72 22
+             L 82 50
+             L 90 30
+             L 98 54 Z"
+          fill="url(#phs-brand)"/>
+
+    <!-- Body ridges (armored segments) -->
+    <g stroke="#070b14" stroke-width="1.6" fill="none" opacity="0.30" stroke-linecap="round">
+      <path d="M 76 140 C 92 144, 106 152, 112 162"/>
+      <path d="M 70 164 C 88 168, 102 176, 108 186"/>
+      <path d="M 78 192 C 96 196, 110 202, 116 212"/>
+    </g>
+
+    <!-- Snout highlight -->
+    <path d="M 12 88 L 46 84"
+          stroke="#e5f4ed" stroke-opacity="0.28" stroke-width="2"
+          stroke-linecap="round" fill="none"/>
+
+    <!-- Eye -->
+    <circle cx="68" cy="82" r="3.6" fill="#070b14"/>
+    <circle cx="67" cy="81" r="1.2" fill="#e5f4ed" opacity="0.9"/>
+
+    <!-- Tiny gill hint -->
+    <path d="M 92 96 q 4 4 2 10"
+          stroke="#070b14" stroke-width="1.4" fill="none"
+          stroke-linecap="round" opacity="0.35"/>
+  </g>
+
+  <!-- Wordmark -->
+  <g font-family="'Space Grotesk', system-ui, -apple-system, BlinkMacSystemFont, sans-serif"
+     font-weight="700" text-anchor="middle">
+    <text x="200" y="446" font-size="40" letter-spacing="1.5">
+      <tspan fill="#fa8f1a">PDF</tspan><tspan fill="#e5f4ed">Horse</tspan>
+    </text>
+    <text x="200" y="468" font-size="10" letter-spacing="5" fill="#54c3b1" opacity="0.7">
+      AN  iCt  HORSE  TOOL
+    </text>
+  </g>
+</svg>

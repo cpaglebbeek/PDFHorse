@@ -1,0 +1,126 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 480" width="400" height="480"
+     role="img" aria-labelledby="phn-title phn-desc">
+  <title id="phn-title">PDFHorse</title>
+  <desc id="phn-desc">iCt Horse PDFHorse logo — netwerkstijl P/D/F verbonden door bovenliggende bogen, onderliggende bogen en een omarmende arc, geïnspireerd op de network_top_right decoratie van de iCt Horse Facturatie. "Connecting the dots, connecting your PDFs."</desc>
+
+  <defs>
+    <linearGradient id="phn-halo-grad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%"   stop-color="#095263"/>
+      <stop offset="50%"  stop-color="#54c3b1"/>
+      <stop offset="100%" stop-color="#abcb3e"/>
+    </linearGradient>
+    <radialGradient id="phn-halo" cx="0.5" cy="0.42" r="0.65">
+      <stop offset="0%"   stop-color="#59c5a8" stop-opacity="0.22"/>
+      <stop offset="100%" stop-color="#59c5a8" stop-opacity="0"/>
+    </radialGradient>
+    <pattern id="phn-dots" x="0" y="0" width="22" height="22" patternUnits="userSpaceOnUse">
+      <circle cx="1.5" cy="1.5" r="1" fill="#59c5a8" fill-opacity="0.07"/>
+    </pattern>
+  </defs>
+
+  <!-- Badge -->
+  <rect x="10" y="10" width="380" height="380" rx="48" fill="#070b14"/>
+  <rect x="10" y="10" width="380" height="380" rx="48" fill="url(#phn-dots)"/>
+  <rect x="10" y="10" width="380" height="380" rx="48" fill="url(#phn-halo)"/>
+  <rect x="10" y="10" width="380" height="380" rx="48" fill="none"
+        stroke="#178384" stroke-opacity="0.45" stroke-width="1.5"/>
+
+  <!-- Ambient background network curves -->
+  <g fill="none" stroke-linecap="round" stroke-width="1.1">
+    <path d="M 50 120 Q 130 96, 200 122 T 348 130" stroke="#4ab1cd" stroke-opacity="0.22"/>
+    <path d="M 50 360 Q 120 384, 200 362 T 350 358" stroke="#54c3b1" stroke-opacity="0.18"/>
+    <path d="M 332 100 Q 372 200, 348 296" stroke="#81bfc7" stroke-opacity="0.18"/>
+    <path d="M 60 100  Q 28 200,  58 312" stroke="#81bfc7" stroke-opacity="0.18"/>
+    <path d="M 90 380 Q 200 348, 312 384" stroke="#d5d9c9" stroke-opacity="0.16"/>
+  </g>
+
+  <!-- Big embracing arc above the trio (ties P-D-F together) -->
+  <path d="M 320 198 C 360 124, 312 70, 220 70 C 132 70, 62 124, 80 198"
+        stroke="#54c3b1" stroke-opacity="0.55" stroke-width="1.4" fill="none"
+        stroke-linecap="round" stroke-dasharray="2 5"/>
+
+  <!-- Top connector bridges between letters -->
+  <path d="M 115 200 C 125 168, 155 168, 165 200"
+        stroke="#4ab1cd" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+  <path d="M 220 200 C 230 168, 245 168, 255 200"
+        stroke="#4ab1cd" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+
+  <!-- Bottom connector bridges between letters -->
+  <path d="M 75  300 C 100 344, 145 344, 165 300"
+        stroke="#abcb3e" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+  <path d="M 165 300 C 195 344, 245 344, 255 300"
+        stroke="#abcb3e" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+
+  <!-- Diagonal cross-connectors P-stem-top to D-stem-top to F-stem-top (network feel) -->
+  <g fill="none" stroke-linecap="round" stroke-width="1" stroke-opacity="0.45">
+    <path d="M 83 208 L 165 208" stroke="#81bfc7"/>
+    <path d="M 173 208 L 255 208" stroke="#81bfc7"/>
+    <path d="M 83 292 L 165 292" stroke="#d5d9c9"/>
+    <path d="M 173 292 L 255 292" stroke="#d5d9c9"/>
+  </g>
+
+  <!-- ===== Letter P (3 offset hairlines) ===== -->
+  <g fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8">
+    <path d="M 75 200 L 75 300 M 75 200 L 110 200 C 135 200, 135 248, 110 248 L 75 248"
+          stroke="#4ab1cd"/>
+    <path d="M 79 204 L 79 296 M 79 204 L 108 204 C 130 204, 130 244, 108 244 L 79 244"
+          stroke="#81bfc7" stroke-opacity="0.85"/>
+    <path d="M 83 208 L 83 292 M 83 208 L 106 208 C 125 208, 125 240, 106 240 L 83 240"
+          stroke="#d5d9c9" stroke-opacity="0.65"/>
+  </g>
+
+  <!-- ===== Letter D (3 offset hairlines) ===== -->
+  <g fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8">
+    <path d="M 165 200 L 165 300 M 165 200 L 195 200 C 240 200, 240 300, 195 300 L 165 300"
+          stroke="#4ab1cd"/>
+    <path d="M 169 204 L 169 296 M 169 204 L 195 204 C 235 204, 235 296, 195 296 L 169 296"
+          stroke="#81bfc7" stroke-opacity="0.85"/>
+    <path d="M 173 208 L 173 292 M 173 208 L 195 208 C 230 208, 230 292, 195 292 L 173 292"
+          stroke="#d5d9c9" stroke-opacity="0.65"/>
+  </g>
+
+  <!-- ===== Letter F (3 offset hairlines) ===== -->
+  <g fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8">
+    <path d="M 255 200 L 255 300 M 255 200 L 320 200 M 255 248 L 305 248"
+          stroke="#4ab1cd"/>
+    <path d="M 259 204 L 259 296 M 259 204 L 316 204 M 259 252 L 301 252"
+          stroke="#81bfc7" stroke-opacity="0.85"/>
+    <path d="M 263 208 L 263 292 M 263 208 L 312 208 M 263 256 L 297 256"
+          stroke="#d5d9c9" stroke-opacity="0.65"/>
+  </g>
+
+  <!-- ===== Junction nodes ===== -->
+  <g>
+    <!-- Yellow nodes at top-bridge peaks (signature accent from invoice) -->
+    <circle cx="140" cy="170" r="3.4" fill="#ffcd26"/>
+    <circle cx="237" cy="170" r="3.4" fill="#ffcd26"/>
+    <!-- Green nodes at bottom-bridge valleys -->
+    <circle cx="120" cy="338" r="3.4" fill="#41a36b"/>
+    <circle cx="210" cy="338" r="3.4" fill="#41a36b"/>
+    <!-- Crown node at the top of the embracing arc -->
+    <circle cx="220" cy="68" r="3.6" fill="#ffcd26" opacity="0.9"/>
+    <!-- Letter-corner nodes -->
+    <circle cx="75"  cy="200" r="2.4" fill="#4ab1cd"/>
+    <circle cx="165" cy="200" r="2.4" fill="#4ab1cd"/>
+    <circle cx="255" cy="200" r="2.4" fill="#4ab1cd"/>
+    <circle cx="75"  cy="300" r="2.4" fill="#abcb3e"/>
+    <circle cx="165" cy="300" r="2.4" fill="#abcb3e"/>
+    <circle cx="255" cy="300" r="2.4" fill="#abcb3e"/>
+    <!-- F arm endpoints -->
+    <circle cx="320" cy="200" r="2.4" fill="#81bfc7"/>
+    <circle cx="305" cy="248" r="2.4" fill="#81bfc7"/>
+    <!-- P bowl junction -->
+    <circle cx="110" cy="248" r="2.4" fill="#81bfc7"/>
+  </g>
+
+  <!-- Wordmark -->
+  <g font-family="'Space Grotesk', system-ui, -apple-system, BlinkMacSystemFont, sans-serif"
+     font-weight="700" text-anchor="middle">
+    <text x="200" y="446" font-size="40" letter-spacing="1.5">
+      <tspan fill="#fa8f1a">PDF</tspan><tspan fill="#e5f4ed">Horse</tspan>
+    </text>
+    <text x="200" y="468" font-size="10" letter-spacing="4.5" fill="#54c3b1" opacity="0.75">
+      CONNECTING  YOUR  PDFs
+    </text>
+  </g>
+</svg>

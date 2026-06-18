@@ -75,7 +75,7 @@
       <a href="./" class="flex items-center gap-2">
         <img src="assets/pdfhorse-mark.svg" alt="PDFHorse mark" style="height:72px;width:72px" />
         <span class="text-xl font-bold">PDFHorse</span>
-        <span class="text-xs text-slate-400">v0.19.0 — Geschke</span>
+        <span class="text-xs text-slate-400">v0.20.0 — Wozencraft</span>
       </a>
       <a href="https://icthorse.nl/" class="text-sm text-slate-300 hover:text-white">een dienst van iCt Horse →</a>
     </div>
@@ -719,6 +719,128 @@
       </div>
     </section>
 
+    <section x-show="active === 'geavanceerd'" role="tabpanel" aria-labelledby="tab-geavanceerd">
+      <h2 class="text-lg font-semibold mb-2">Geavanceerd — payload &amp; sleutels</h2>
+      <p class="text-sm text-slate-600 mb-4">
+        Bed een willekeurig bestand als base64-payload in een PDF in (echte PDF-bijlage), en haal het er weer uit.
+        Optioneel <strong>versleuteld</strong> met sleutels: AES-GCM versleutelt het bestand, RSA-OAEP wrapt de sessiesleutel
+        met de <em>public key</em> van de ontvanger — alleen die met de bijbehorende <em>private key</em> kan het openen.
+        Volledig in je browser — sleutels verlaten je apparaat alleen als jíj ze downloadt.
+      </p>
+
+      <div class="border border-slate-200 rounded p-3 bg-white mb-4">
+        <div class="text-xs font-semibold uppercase text-slate-500 mb-2">Modus</div>
+        <div class="flex flex-wrap gap-2 text-sm">
+          <button type="button" :class="advanced.mode === 'embed' ? 'bg-slate-900 text-white' : 'border'" class="px-3 py-1 rounded" @click="advanced.mode = 'embed'">Payload inbedden</button>
+          <button type="button" :class="advanced.mode === 'extract' ? 'bg-slate-900 text-white' : 'border'" class="px-3 py-1 rounded" @click="advanced.mode = 'extract'">Payload uithalen</button>
+          <button type="button" :class="advanced.mode === 'keys' ? 'bg-slate-900 text-white' : 'border'" class="px-3 py-1 rounded" @click="advanced.mode = 'keys'">Sleutels</button>
+        </div>
+      </div>
+
+      <!-- Sleutelbeheer -->
+      <div x-show="advanced.mode === 'keys'" class="space-y-4">
+        <div class="border border-slate-200 rounded p-3 bg-white space-y-3">
+          <div class="text-sm font-semibold">Keypair (RSA-OAEP 2048)</div>
+          <div class="flex flex-wrap gap-2 text-sm">
+            <button type="button" class="px-4 py-2 rounded bg-slate-900 text-white disabled:opacity-40" :disabled="advanced.busy" @click="genKeypair()">
+              <span x-show="!advanced.busy">Keypair aanmaken</span><span x-show="advanced.busy">Bezig…</span>
+            </button>
+            <button type="button" class="px-3 py-2 rounded border text-slate-700 disabled:opacity-40" :disabled="!advanced.keypair" @click="downloadKeypair()">⬇ Keypair downloaden</button>
+            <button type="button" class="px-3 py-2 rounded border text-slate-700 disabled:opacity-40" :disabled="!advanced.keypair" @click="downloadPublicKey()">⬇ Public key downloaden</button>
+          </div>
+          <p x-show="advanced.keypair" class="text-xs text-emerald-700">Keypair actief in deze sessie. Deel alleen je <strong>public key</strong>; bewaar je keypair (met private key) veilig.</p>
+          <p class="text-xs text-slate-500">Geef je <em>public key</em> aan een ander zodat die voor jóu kan versleutelen. Om zelf te ontsleutelen heb je je <em>private key</em> nodig (uit je keypair, of hieronder geüpload).</p>
+        </div>
+
+        <div class="border border-slate-200 rounded p-3 bg-white space-y-3">
+          <div class="text-sm font-semibold">Sleutels van/voor een peer</div>
+          <label class="block text-sm">
+            <span class="text-slate-600">Peer public key uploaden (om vóór iemand te versleutelen)</span>
+            <input type="file" accept="application/json,.json" class="block mt-1 text-xs" @change="onPeerPublicUpload($event)" />
+          </label>
+          <p x-show="advanced.peerPublicName" class="text-xs text-slate-600">Peer public key: <span class="font-mono" x-text="advanced.peerPublicName"></span></p>
+          <label class="block text-sm">
+            <span class="text-slate-600">Eigen private key uploaden (om te ontsleutelen)</span>
+            <input type="file" accept="application/json,.json" class="block mt-1 text-xs" @change="onPrivateUpload($event)" />
+          </label>
+          <p x-show="advanced.privateName" class="text-xs text-slate-600">Private key: <span class="font-mono" x-text="advanced.privateName"></span></p>
+        </div>
+      </div>
+
+      <!-- Inbedden -->
+      <div x-show="advanced.mode === 'embed'" class="space-y-3">
+        <label
+          for="adv-pdf-input"
+          class="block border-2 border-dashed rounded-lg p-6 text-center bg-white cursor-pointer transition"
+          :class="advanced.dragOver ? 'border-slate-900 bg-slate-100' : 'border-slate-300 hover:border-slate-500'"
+          @dragover.prevent="advanced.dragOver = true"
+          @dragleave.prevent="advanced.dragOver = false"
+          @drop.prevent="advanced.dragOver = false; onAdvPdfDrop($event)"
+        >
+          <div class="text-slate-600 text-sm">
+            <span x-show="!advanced.pdfFile"><span class="font-medium">Klik of sleep de doel-PDF hierheen</span><br/><span class="text-xs text-slate-500">max 50 MB</span></span>
+            <span x-show="advanced.pdfFile" class="font-medium" x-text="advanced.pdfFile ? advanced.pdfFile.name : ''"></span>
+          </div>
+          <input id="adv-pdf-input" type="file" accept="application/pdf,.pdf" class="hidden" @change="onAdvPdfInput($event)" />
+        </label>
+
+        <label class="block text-sm">
+          <span class="font-medium">Payload-bestand (willekeurig type)</span>
+          <input type="file" class="block mt-1 text-xs" @change="onPayloadInput($event)" />
+        </label>
+        <p x-show="advanced.payloadName" class="text-xs text-slate-600">Payload: <span class="font-mono" x-text="advanced.payloadName"></span></p>
+
+        <label class="inline-flex items-center gap-2 text-sm">
+          <input type="checkbox" x-model="advanced.useEncryption" class="rounded border-slate-400" />
+          <span>Versleutelen met peer public key (hybride RSA-OAEP + AES-GCM)</span>
+        </label>
+        <p x-show="advanced.useEncryption && !advanced.peerPublicJwk" class="text-xs text-amber-700">Laad eerst een peer public key bij <em>Sleutels</em>.</p>
+        <p x-show="advanced.useEncryption && advanced.peerPublicJwk" class="text-xs text-emerald-700">Versleutelt voor: <span class="font-mono" x-text="advanced.peerPublicName"></span></p>
+
+        <div class="flex flex-wrap items-center gap-3 text-sm">
+          <button type="button" class="px-4 py-2 rounded bg-slate-900 text-white disabled:opacity-40"
+            :disabled="!advanced.pdfBytes || !advanced.payloadBytes || advanced.busy"
+            @click="runEmbed()">
+            <span x-show="!advanced.busy">Payload inbedden &amp; PDF downloaden</span>
+            <span x-show="advanced.busy">Bezig…</span>
+          </button>
+          <button type="button" class="px-3 py-2 rounded border text-slate-700" @click="advancedReset()">Wissen</button>
+        </div>
+      </div>
+
+      <!-- Uithalen -->
+      <div x-show="advanced.mode === 'extract'" class="space-y-3">
+        <label
+          for="adv-pdf-input-ex"
+          class="block border-2 border-dashed rounded-lg p-6 text-center bg-white cursor-pointer transition"
+          :class="advanced.dragOver ? 'border-slate-900 bg-slate-100' : 'border-slate-300 hover:border-slate-500'"
+          @dragover.prevent="advanced.dragOver = true"
+          @dragleave.prevent="advanced.dragOver = false"
+          @drop.prevent="advanced.dragOver = false; onAdvPdfDrop($event)"
+        >
+          <div class="text-slate-600 text-sm">
+            <span x-show="!advanced.pdfFile"><span class="font-medium">Klik of sleep een PDF met payload hierheen</span><br/><span class="text-xs text-slate-500">max 50 MB</span></span>
+            <span x-show="advanced.pdfFile" class="font-medium" x-text="advanced.pdfFile ? advanced.pdfFile.name : ''"></span>
+          </div>
+          <input id="adv-pdf-input-ex" type="file" accept="application/pdf,.pdf" class="hidden" @change="onAdvPdfInput($event)" />
+        </label>
+        <p class="text-xs text-slate-500">Is de payload versleuteld, laad dan je <em>private key</em> bij <strong>Sleutels</strong> vóór je uithaalt.</p>
+        <p x-show="advanced.privateName" class="text-xs text-emerald-700">Private key gereed: <span class="font-mono" x-text="advanced.privateName"></span></p>
+        <div class="flex flex-wrap items-center gap-3 text-sm">
+          <button type="button" class="px-4 py-2 rounded bg-slate-900 text-white disabled:opacity-40"
+            :disabled="!advanced.pdfBytes || advanced.busy"
+            @click="runExtract()">
+            <span x-show="!advanced.busy">Payload uithalen &amp; downloaden</span>
+            <span x-show="advanced.busy">Bezig…</span>
+          </button>
+          <button type="button" class="px-3 py-2 rounded border text-slate-700" @click="advancedReset()">Wissen</button>
+        </div>
+      </div>
+
+      <p x-show="advanced.error" x-text="advanced.error" class="mt-3 text-sm text-red-700"></p>
+      <p x-show="advanced.notice" x-text="advanced.notice" class="mt-3 text-sm text-emerald-700"></p>
+    </section>
+
     <hr class="my-6 border-slate-200" />
 
     <section aria-label="Uitvoer" class="bg-slate-100 rounded-lg p-4 border border-slate-200">
@@ -800,6 +922,8 @@
 
   <!-- Watermerk-engine (window.PDFHorseWatermark) — gebruikt door de Watermerk-tab -->
   <script src="js/watermark.js"></script>
+  <!-- Payload-engine (window.PDFHorsePayload) — gebruikt door de Geavanceerd-tab -->
+  <script src="js/payload.js"></script>
   <script src="js/app.js"></script>
   <!-- i18n overlay-vertaling (live SSOT: i18n.json); ?lang=en → Engels, default NL -->
   <script src="js/i18n.js"></script>

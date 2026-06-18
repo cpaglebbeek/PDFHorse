@@ -31,6 +31,7 @@ function pdfHorseApp() {
       { id: 'ocr',     label: 'OCR' },
       { id: 'watermerk', label: '💧 Watermerk' },
       { id: 'delen',   label: '🔗 Delen & meekijken' },
+      { id: 'geavanceerd', label: '🔐 Geavanceerd' },
     ],
     health: { status: '…', version: '…', codename: '…' },
     limits: {},
@@ -136,6 +137,24 @@ function pdfHorseApp() {
       imageName: '',
       imageSrc: null,          // { svg } of { pngDataUrl }
       readResult: null,        // { payloads, repeatedText } na lezen
+      dragOver: false,
+      busy: false,
+      error: '',
+      notice: '',
+    },
+
+    advanced: {
+      mode: 'embed',           // 'embed' | 'extract' | 'keys'
+      pdfFile: null,
+      pdfBytes: null,
+      payloadBytes: null,
+      payloadName: '',
+      useEncryption: false,
+      keypair: null,           // { publicJwk, privateJwk }
+      peerPublicJwk: null,
+      peerPublicName: '',
+      privateJwk: null,        // eigen private key (decrypt)
+      privateName: '',
       dragOver: false,
       busy: false,
       error: '',
@@ -1049,6 +1068,137 @@ function pdfHorseApp() {
       this.watermark.readResult = null;
       this.watermark.error = '';
       this.watermark.notice = '';
+    },
+
+    // ---------- Geavanceerd (payload-bestand + keypair encrypt/decrypt) ----------
+
+    _advEngine() { return window.PDFHorsePayload || null; },
+
+    _downloadJson(obj, filename) {
+      const bytes = new TextEncoder().encode(JSON.stringify(obj, null, 2));
+      this._downloadBlob(bytes, filename, 'application/json');
+    },
+
+    async _advReadJsonFile(f) {
+      return JSON.parse(await f.text());
+    },
+
+    // PDF: doel-PDF (embed) of bron-PDF (extract)
+    onAdvPdfInput(ev) { this._advPdfLoad(ev.target.files && ev.target.files[0]); ev.target.value = ''; },
+    onAdvPdfDrop(ev) { const dt = ev.dataTransfer; if (dt && dt.files && dt.files[0]) this._advPdfLoad(dt.files[0]); },
+    async _advPdfLoad(f) {
+      this.advanced.error = ''; this.advanced.notice = '';
+      if (!f) return;
+      const isPdf = f.type === 'application/pdf' || /\.pdf$/i.test(f.name);
+      if (!isPdf) { this.advanced.error = `"${f.name}" is geen PDF.`; return; }
+      if (f.size > MAX_FILE_BYTES) { this.advanced.error = `"${f.name}" overschrijdt 50 MB.`; return; }
+      try { this.advanced.pdfBytes = new Uint8Array(await f.arrayBuffer()); this.advanced.pdfFile = f; }
+      catch (e) { this.advanced.error = 'Kon PDF niet lezen.'; }
+    },
+
+    // Payload-bestand (willekeurig binair)
+    async onPayloadInput(ev) {
+      this.advanced.error = '';
+      const f = ev.target.files && ev.target.files[0];
+      ev.target.value = '';
+      if (!f) return;
+      if (f.size > MAX_FILE_BYTES) { this.advanced.error = `"${f.name}" overschrijdt 50 MB.`; return; }
+      try { this.advanced.payloadBytes = new Uint8Array(await f.arrayBuffer()); this.advanced.payloadName = f.name; }
+      catch (e) { this.advanced.error = 'Kon payload-bestand niet lezen.'; }
+    },
+
+    // ---- Keypair-beheer ----
+    async genKeypair() {
+      const eng = this._advEngine(); if (!eng) { this.advanced.error = 'Payload-engine niet geladen.'; return; }
+      this.advanced.busy = true; this.advanced.error = ''; this.advanced.notice = '';
+      try {
+        const kp = await eng.generateKeypair();
+        this.advanced.keypair = kp;
+        this.advanced.privateJwk = kp.privateJwk;     // eigen private key, klaar om te ontsleutelen
+        this.advanced.privateName = '(net aangemaakt)';
+        this.advanced.notice = 'Keypair aangemaakt (RSA-OAEP 2048). Download je keypair en bewaar het veilig — sleutels verlaten je browser niet vanzelf.';
+      } catch (e) { this.advanced.error = e.message || String(e); }
+      finally { this.advanced.busy = false; }
+    },
+    downloadKeypair() {
+      if (!this.advanced.keypair) { this.advanced.error = 'Maak eerst een keypair aan.'; return; }
+      this._downloadJson({ pdfhorse: 'keypair-v1', publicJwk: this.advanced.keypair.publicJwk, privateJwk: this.advanced.keypair.privateJwk }, 'pdfhorse-keypair.json');
+    },
+    downloadPublicKey() {
+      const pub = this.advanced.keypair && this.advanced.keypair.publicJwk;
+      if (!pub) { this.advanced.error = 'Maak eerst een keypair aan.'; return; }
+      this._downloadJson({ pdfhorse: 'publickey-v1', publicJwk: pub }, 'pdfhorse-publickey.json');
+    },
+    async onPeerPublicUpload(ev) {
+      this.advanced.error = '';
+      const f = ev.target.files && ev.target.files[0]; ev.target.value = '';
+      if (!f) return;
+      try {
+        const j = await this._advReadJsonFile(f);
+        const jwk = j.publicJwk || (j.kty ? j : null);
+        if (!jwk || jwk.kty !== 'RSA') throw new Error('Geen geldige RSA public key (JWK).');
+        this.advanced.peerPublicJwk = jwk; this.advanced.peerPublicName = f.name;
+        this.advanced.notice = `Peer public key geladen (${f.name}) — je kunt nu voor deze ontvanger versleutelen.`;
+      } catch (e) { this.advanced.error = 'Public key lezen mislukt: ' + (e.message || e); }
+    },
+    async onPrivateUpload(ev) {
+      this.advanced.error = '';
+      const f = ev.target.files && ev.target.files[0]; ev.target.value = '';
+      if (!f) return;
+      try {
+        const j = await this._advReadJsonFile(f);
+        const jwk = j.privateJwk || (j.kty && j.d ? j : null);
+        if (!jwk || jwk.kty !== 'RSA' || !jwk.d) throw new Error('Geen geldige RSA private key (JWK).');
+        this.advanced.privateJwk = jwk; this.advanced.privateName = f.name;
+        this.advanced.notice = `Private key geladen (${f.name}) — klaar om te ontsleutelen.`;
+      } catch (e) { this.advanced.error = 'Private key lezen mislukt: ' + (e.message || e); }
+    },
+
+    // ---- Embed payload in PDF ----
+    async runEmbed() {
+      if (this.advanced.busy) return;
+      const eng = this._advEngine(); if (!eng) { this.advanced.error = 'Payload-engine niet geladen.'; return; }
+      if (!this.advanced.pdfBytes) { this.advanced.error = 'Kies eerst een doel-PDF.'; return; }
+      if (!this.advanced.payloadBytes) { this.advanced.error = 'Kies eerst een payload-bestand.'; return; }
+      if (this.advanced.useEncryption && !this.advanced.peerPublicJwk) { this.advanced.error = 'Encryptie staat aan, maar er is geen peer public key geladen.'; return; }
+      this.advanced.busy = true; this.advanced.error = ''; this.advanced.notice = '';
+      try {
+        let envelope;
+        if (this.advanced.useEncryption) {
+          const encObj = await eng.encrypt(this.advanced.payloadBytes, this.advanced.peerPublicJwk);
+          envelope = eng.buildEncrypted(this.advanced.payloadName, encObj);
+        } else {
+          envelope = eng.buildPlain(this.advanced.payloadName, this.advanced.payloadBytes);
+        }
+        const out = await eng.attach(this.advanced.pdfBytes, envelope);
+        const fn = this.advanced.pdfFile.name.replace(/\.pdf$/i, '') + '_payload.pdf';
+        this._downloadBlob(out, fn, 'application/pdf');
+        this._setOutput(out, fn, `payload (${this.advanced.useEncryption ? 'versleuteld' : 'plain'}: ${this.advanced.payloadName})`);
+        this.advanced.notice = `Payload "${this.advanced.payloadName}" ${this.advanced.useEncryption ? 'versleuteld ' : ''}ingebed → ${fn} gedownload.`;
+      } catch (e) { this.advanced.error = e.message || String(e); }
+      finally { this.advanced.busy = false; }
+    },
+
+    // ---- Extract payload uit PDF ----
+    async runExtract() {
+      if (this.advanced.busy) return;
+      const eng = this._advEngine(); if (!eng) { this.advanced.error = 'Payload-engine niet geladen.'; return; }
+      if (!this.advanced.pdfBytes) { this.advanced.error = 'Kies eerst een PDF met payload.'; return; }
+      this.advanced.busy = true; this.advanced.error = ''; this.advanced.notice = '';
+      try {
+        const env = await eng.extract(this.advanced.pdfBytes);
+        const bytes = await eng.open(env, this.advanced.privateJwk);
+        const name = env.name || 'payload.bin';
+        this._downloadBlob(bytes, name, 'application/octet-stream');
+        this.advanced.notice = `Payload "${name}" (${env.enc ? 'ontsleuteld' : 'plain'}) uit PDF gehaald en gedownload.`;
+      } catch (e) { this.advanced.error = e.message || String(e); }
+      finally { this.advanced.busy = false; }
+    },
+
+    advancedReset() {
+      this.advanced.pdfFile = null; this.advanced.pdfBytes = null;
+      this.advanced.payloadBytes = null; this.advanced.payloadName = '';
+      this.advanced.error = ''; this.advanced.notice = '';
     },
 
     // ---------- Convert ----------

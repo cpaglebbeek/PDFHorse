@@ -1,8 +1,8 @@
 {
-  "version": "0.19.0",
-  "codename": "Geschke",
+  "version": "0.20.0",
+  "codename": "Wozencraft",
   "released": "2026-06-18",
-  "status": "watermark-tab",
+  "status": "payload-keypair-tab",
   "theme": "PDF-pioniers",
-  "notes": "v0.19.0-Geschke: nieuwe tab 'Watermerk' (💧) bovenop de bestaande watermark-engine (js/watermark.js, v0.1.0). Drie modi: (1) Tekst toevoegen — (vrijwel) onzichtbaar tekst-watermerk getegeld in de achtergrondkleur, leesbaar in de tekstlaag + als Keywords-payload; (2) Beeld toevoegen — SVG of PNG (PNG→SVG getraceerd via ImageTracer) herkleurd naar achtergrondkleur en getegeld, canonieke SVG als payload; (3) Lezen — leest PDFHorse-WM payloads uit de metadata plus vaak-herhaalde tekst uit de tekstlaag als detectie. Wiring: tabs-array + watermark state + handlers in app.js, sectie in index.html, script-include watermark.js vooor app.js, NL/EN via i18n.json. Engine was al gepusht (commit ada1356) maar nergens aangesloten; deze release sluit hem aan op de UI. Codenaam Charles Geschke — Adobe-medeoprichter (met Warnock), PostScript/PDF-pionier. Brotz blijft reserve voor v1.0.0."
+  "notes": "v0.20.0-Wozencraft: nieuwe tab 'Geavanceerd' (🔐) — payload-engine (js/payload.js v0.1.0). Bed een willekeurig bestand als base64-payload in een PDF in via een echte PDF embedded-file attachment (pdf-lib doc.attach, envelope-JSON), en haal het er weer uit via PDF.js getAttachments(). Optioneel hybride versleuteld: AES-GCM-256 versleutelt het bestand, RSA-OAEP-2048 wrapt de AES-sessiesleutel met de public key van de ontvanger; ontsleutelen alleen met de bijbehorende private key. Keypair-beheer via WebCrypto, geexporteerd als JWK: keypair aanmaken, keypair downloaden, public key downloaden (delen), peer public key uploaden (versleutelen voor ontvanger), eigen private key uploaden (ontsleutelen). Alles client-side; sleutels verlaten de browser alleen bij expliciete download. Crypto-round-trip + wrong-key-rejection geverifieerd in Node WebCrypto. Wiring: tabs-array + advanced state + handlers in app.js, sectie in index.html, script-include payload.js vooor app.js, NL/EN via i18n.json. Codenaam Wozencraft — PDF-pionier (shortlist). Brotz blijft reserve voor v1.0.0. NB: WebCrypto vereist secure context (HTTPS) — live op icthorse.nl/HC55 OK."
 }

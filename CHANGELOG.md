@@ -3,6 +3,50 @@
 > Versie-historie. Formaat: [Keep a Changelog](https://keepachangelog.com/) op hoofdlijnen, met PDFHorse-eigen codenamen (thema: PDF-pioniers).
 > Bijgewerkt bij elke release. Datums = release naar `main`.
 
+## [v0.24.0-Rivest] — 2026-06-20
+
+> Codenaam **Ronald Rivest** — co-uitvinder RSA (Rivest-Shamir-Adleman) en de "R" in RC2/RC4/RC5/RC6, MD2/MD4/MD5/MD6. Pionier in zowel public-key crypto als hash-functies — passend bij PoA dat op beide leunt. `Brotz` blijft gereserveerd voor v1.0.0.
+
+### Functioneel
+
+- **Twee gerichte PoA-rapport-typen** — sign-time **Claim-rapport** (uitgegeven bij `runHash()`, bewijst CLAIM van eerste eigendom) en verify-time **Match-rapport** (uitgegeven bij `runVerify()`, bewijst overeenkomst tussen ingeleverde PDF en embedded claim met **verdict-%**).
+- **Claim-rapport (2 pagina's)** — p1 Identity & Claim met grote groene verdict-box "CLAIM OF FIRST OWNERSHIP", owner-blok, source-info, timestamps-tabel; p2 Hash Evidence met file-level SHA-256/512 (full hex), conceptuele tekstlaag SHA-256 + normalisatie-uitleg, perceptueel per pagina tabel (Avg 16-hex + dCT/dHash 24-hex preview), anchor met calendar URL/mode/ots_b64 preview en een uit-te-voeren `ots verify` shell-recept.
+- **Match-rapport (2 pagina's)** — p1 Verdict met gekleurde verdict-box (`IDENTICAL`/`LAYOUT_MATCH` → groen, `PROBABLE` → oranje, `NO_MATCH` → rood) + NL uitleg-zin + claim-info (eigenaar, OTS-anker-datum prominent) + current-file-info; p2 Evidence Comparison met file/conceptueel/perceptueel-per-pagina vergelijkings-tabellen (verwacht vs gemeten + match-marker), winnende pHash-laag (*) per pagina, drempel-kolom, eindscore + anchor-verificatie-disclaimer (anchor bewijst de **originele** hash, niet de huidige PDF).
+
+### Technisch
+
+- **`frontend/js/poa-report.js`**:
+  - `buildClaimV2(meta)` en `buildMatchReport(meta, verifyResult, currentFileInfo)` toegevoegd.
+  - Renderer-helpers `header(title, reportId, schema)`, `verdictBox(verdict, scorePct, title, subtitle)` met kleur-mapping per verdict, `table(cols, rows)` met cell-mono/cell-color support, `section(title)` en `newPage()`.
+  - Report-ID = random UUID v4 per rapport via `crypto.getRandomValues`.
+  - WinAnsi-safe `_ascii()` uitgebreid: `✓→OK`, `✗→X`, `⚠→!` (Helvetica/Courier StandardFonts kunnen geen emoji renderen).
+  - Legacy `build(meta)` blijft beschikbaar voor poa-v1 backwards-compat (1-pagina rapport).
+  - Engine `VERSION` `0.1.0` → `0.2.0`.
+- **`frontend/js/app.js`**:
+  - `runHash()` roept `Poa.buildClaimV2(meta)` aan voor poa-v2 envelopes (met fallback op legacy `Poa.build` voor compat). Filenaam blijft `pdfhorse-poa.pdf`.
+  - `runVerify()` genereert `hashing.matchReportBytes` via `Poa.buildMatchReport(meta, verifyResult, currentFileInfo)` — niet-fataal (`console.warn` bij faal, verificatie blijft staan).
+  - Nieuwe handler `downloadMatchReport()` (filenaam `pdfhorse-match-report.pdf`).
+  - State `hashing.matchReportBytes: null` (init + reset).
+- **`frontend/index.html`** Hashing-tab Verify-paneel: nieuwe knop "📄 Match-rapport (PDF)" zichtbaar wanneer `hashing.matchReportBytes` bestaat. Sign-paneel ongewijzigd (krijgt nu claim-v2 vanzelf).
+- **`frontend/i18n.json`**: 7 nieuwe NL→EN entries (`📄 Match-rapport (PDF)`, `PDFHorse Proof of Authenticity` titel, 4× match-verdict uitleg-zinnen voor het rapport, anchor-verificatie-caption).
+- **Geen new CDN-deps** — alles met de al-geladen `pdf-lib`. P2 (CDN-only, geen build-pipeline) blijft intact.
+
+### Architectonisch
+
+- **Nieuw principe `P-PoA-02`** in `docs/PRINCIPLES.md`: "Twee rapport-typen — claim (sign-time, bewijst CLAIM van eerste eigendom met owner+anchor) en match (verify-time, bewijst overeenkomst tussen ingeleverde PDF en embedded claim met verdict-%)."
+
+### Verified
+
+- **Backend pytest 44/44 groen** (27 oud + 7 hash_v2 + 10 nieuw `test_poa_report_v2.py`: `buildClaimV2`/`buildMatchReport`/`verdictBox` aanwezig, verdict-kleur-mapping correct per IDENTICAL/LAYOUT/PROBABLE/NO_MATCH, `window.PDFHorsePoaReport` exporteert nieuwe API, `app.js` integratie verifieerbaar, `VERSION` bumped naar `0.2.0`).
+- **Node snapshot-test 5/5 groen** (`scripts/test_poa_v2.js`): structuur-tests via `vm.runInContext` op de bronfile — `buildClaimV2`/`buildMatchReport`/`verdictBox` functies aanwezig, IDENTICAL groen-dominant, NO_MATCH rood-dominant. Runtime-test (echt PDF-bytes genereren) skipt elegant wanneer `pdf-lib` niet als npm-module bereikbaar is (CDN-only project — verwacht gedrag, structuur-tests dekken het API-contract).
+- **`node --check`** op `poa-report.js` + `app.js`.
+
+### Notes
+
+- HC55 deploy openstaand — moet handmatig door user.
+- UI-screenshot in `docs/screens/` openstaand.
+- Match-rapport gebruikt `verifyResult.score` voor het percentage; pagina-tabel toont winnende laag per pagina met `*`-marker.
+
 ## [v0.23.0-Diffie] — 2026-06-20
 
 > Codenaam **Whitfield Diffie** — uitvinder publieke-sleutel-cryptografie (Diffie-Hellman 1976), fundament onder elke hash-anchor-trust-keten. `Brotz` blijft gereserveerd voor v1.0.0.

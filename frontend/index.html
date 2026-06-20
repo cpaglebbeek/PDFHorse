@@ -1021,6 +1021,10 @@
           <span :class="hashing.verifyResult && hashing.verifyResult.conceptual && hashing.verifyResult.conceptual.ok ? 'text-emerald-700' : 'text-red-700'"
             x-text="hashing.verifyResult && hashing.verifyResult.conceptual ? (hashing.verifyResult.conceptual.ok ? 'match' : 'mismatch') : ''"></span>
         </div>
+        <div x-show="hashing.matchReportBytes" class="pt-2">
+          <button type="button" class="px-3 py-1.5 rounded bg-slate-900 text-white text-sm" @click="downloadMatchReport()">📄 Match-rapport (PDF)</button>
+        </div>
+
         <template x-if="hashing.verifyResult && hashing.verifyResult.pages.length">
           <div>
             <div class="text-slate-600 mb-1">Per pagina — scores per pHash-laag:</div>

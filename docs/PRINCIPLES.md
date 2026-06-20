@@ -99,6 +99,22 @@ De drempels komen uit PhotoVerify v8.3 (`Meta_PhotoVerify/src/utils/perceptualHa
 
 **Conflict-test:** Als een vierde pHash-laag wordt toegevoegd: blijft de "max wint per pagina"-regel, geen herweging — anders moeten alle drempels opnieuw gecalibreerd. Als drempels gewijzigd worden: dit principe updaten + minimaal smoke-test op een gerefereerde set PoA-PDFs (identiek, watermerk-versie, gerecomprimeerd, gecropped, geheel ander document).
 
+## P-PoA-02 — Twee rapport-typen: claim (sign-time) en match (verify-time)
+
+**Regel:** Een PoA-rapport heeft één van **twee** rollen, expliciet onderscheiden in de UI én in de PDF-titel:
+- **Claim-rapport** — uitgegeven door `runHash()`. Bewijst de **claim van eerste eigendom**: koppelt owner + bron-bestand + hashes + OTS-anchor aan een tijdstip. Verdict-box is groen: "CLAIM OF FIRST OWNERSHIP".
+- **Match-rapport** — uitgegeven door `runVerify()`. Bewijst de **overeenkomst** tussen een ingeleverde PDF en een embedded claim met een **verdict-%** (gekleurd: IDENTICAL/LAYOUT_MATCH groen, PROBABLE oranje, NO_MATCH rood). Toont per-laag/per-pagina evidence-comparison.
+
+**Waarom:** Eén rapport-type met "alles erin" mengt twee fundamenteel verschillende beweringen:
+1. *"Ik claim dat ik dit op tijd T heb gemaakt"* (sign-time, single-party, gericht aan toekomstige verifiers).
+2. *"Deze PDF die ik nu in mijn hand heb komt visueel/conceptueel overeen met die claim"* (verify-time, two-party, gericht aan de partij die het ontvangt).
+
+Een rechter, accountant of journalist die kijkt naar een PoA-PDF moet meteen kunnen zien welke vraag dit rapport beantwoordt — claim of match. Aparte rapport-typen met verschillend verdict-kleur (claim altijd groen-OK, match in 4 klassen) maken die functie visueel onomstreden. PhotoVerify hanteert dezelfde split (sign vs verify), en de patronen daar zijn in productie afgesteld.
+
+**Toepassing:** `frontend/js/poa-report.js#buildClaimV2(meta)` en `buildMatchReport(meta, verifyResult, currentFileInfo)`. Renderer-helper `verdictBox(verdict, scorePct, title, subtitle)` met expliciete kleur-mapping per verdict-klasse. Twee pagina's per rapport: p1 verdict + context, p2 evidence-detail. WinAnsi-safe via `_ascii()`. `frontend/js/app.js#runHash()` schrijft het claim-rapport in de PDF-bijlage `pdfhorse-poa.pdf` én in `hashing.poaBytes` voor losse download. `runVerify()` produceert `hashing.matchReportBytes` voor download via knop "Match-rapport (PDF)".
+
+**Conflict-test:** Een nieuw rapport-type toevoegen (bv. "audit-rapport" voor 3-partij scenario's) → eerst nadenken: is dit een derde fundamentele bewering, of een variant op claim/match? Variant → optie van bestaande type. Echt nieuwe bewering → nieuw type met eigen verdict-semantiek.
+
 ## Versiehistorie
 
 | Versie | Wijziging |
@@ -106,3 +122,4 @@ De drempels komen uit PhotoVerify v8.3 (`Meta_PhotoVerify/src/utils/perceptualHa
 | v0.0.1-Warnock | Principes verspreid in CLAUDE.md + ARCHITECTURE.md, niet als eigen doc |
 | v0.3.0-Putman | **`docs/PRINCIPLES.md` aangemaakt** met 8 principes P1-P8 |
 | v0.23.0-Diffie | **P-PoA-01 toegevoegd** — verdict-formule en drempels voor multi-layer pHash verify |
+| v0.24.0-Rivest | **P-PoA-02 toegevoegd** — claim-rapport (sign-time) vs match-rapport (verify-time) met aparte verdict-semantiek |

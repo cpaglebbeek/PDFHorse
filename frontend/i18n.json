@@ -158,7 +158,14 @@
     "Geen overeenkomst — dit is geen variant van het origineel.": "No match — this is not a variant of the original.",
     "Per pagina — scores per pHash-laag:": "Per page — scores per pHash layer:",
     "Pagina": "Page",
-    "Schema:": "Schema:"
+    "Schema:": "Schema:",
+    "📄 Match-rapport (PDF)": "📄 Match report (PDF)",
+    "PDFHorse Proof of Authenticity": "PDFHorse Proof of Authenticity",
+    "Volledige match — de huidige PDF is visueel identiek aan het origineel.": "Full match — the current PDF is visually identical to the original.",
+    "Layout-match — kleine edits, recompressie of watermerk; de inhoud is equivalent aan het origineel.": "Layout match — small edits, recompression or watermark; the content is equivalent to the original.",
+    "Mogelijke match — zwaar gerecomprimeerd, gecropped, of partiële match. Handmatige check aanbevolen.": "Possible match — heavily recompressed, cropped, or partial match. Manual check recommended.",
+    "Geen overeenkomst — deze PDF is geen variant van het origineel waar de claim aan refereert.": "No match — this PDF is not a variant of the original referenced by the claim.",
+    "Het OTS-bewijs hoort bij de hash van het ORIGINELE bestand, niet bij de huidige PDF.": "The OTS proof belongs to the hash of the ORIGINAL file, not the current PDF."
   },
   "attr": {
     "bv. 1-3, 5, 8-10": "e.g. 1-3, 5, 8-10",

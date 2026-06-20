@@ -185,7 +185,8 @@ function pdfHorseApp() {
       result: null,            // { file, conceptual, perceptual, anchor, ts }
       signedBytes: null,       // PDF met embedded payload + watermerk
       signedName: '',
-      poaBytes: null,          // los PoA-rapport
+      poaBytes: null,          // los PoA-rapport (claim, sign-time)
+      matchReportBytes: null,  // match-rapport (verify-time, v0.24)
       verifyResult: null,      // { file:{ok,...}, conceptual:{...}, pages:[...] }
     },
 
@@ -1301,7 +1302,7 @@ function pdfHorseApp() {
     async _hashSetFile(f) {
       this.hashing.error = ''; this.hashing.notice = '';
       this.hashing.result = null; this.hashing.signedBytes = null;
-      this.hashing.poaBytes = null; this.hashing.verifyResult = null;
+      this.hashing.poaBytes = null; this.hashing.matchReportBytes = null; this.hashing.verifyResult = null;
       if (!f.name.toLowerCase().endsWith('.pdf')) { this.hashing.error = 'Alleen PDF wordt geaccepteerd.'; return; }
       this.hashing.pdfFile = f;
       this.hashing.pdfBytes = new Uint8Array(await f.arrayBuffer());
@@ -1316,6 +1317,7 @@ function pdfHorseApp() {
 
       this.hashing.busy = true; this.hashing.error = ''; this.hashing.notice = '';
       this.hashing.result = null; this.hashing.signedBytes = null; this.hashing.poaBytes = null;
+      this.hashing.matchReportBytes = null;
       const base = (window.PDFHORSE_API_BASE || '/').replace(/\/?$/, '/');
       const original = this.hashing.pdfBytes;
       const origName = (this.hashing.pdfFile && this.hashing.pdfFile.name) || 'document.pdf';
@@ -1362,7 +1364,11 @@ function pdfHorseApp() {
         };
 
         this.hashing.progress = 'PoA-rapport genereren…';
-        const poaBytes = await Poa.build(meta);
+        // v0.24-Rivest: nieuw 2-pagina claim-v2 rapport voor poa-v2 envelopes,
+        // valt elegant terug op legacy 1-pagina rapport voor oudere meta.
+        const poaBytes = (meta.poa_schema === 'poa-v2' && Poa.buildClaimV2)
+          ? await Poa.buildClaimV2(meta)
+          : await Poa.build(meta);
 
         this.hashing.progress = 'payload inbedden…';
         const envelope = Payload.buildPlain('pdfhorse-poa.json',
@@ -1494,7 +1500,7 @@ function pdfHorseApp() {
         // "ok" = oude binaire view voor backwards compat (UI overlay leest verdict apart).
         const ok = (verdict === 'IDENTICAL' || verdict === 'LAYOUT_MATCH') && conceptOk;
 
-        this.hashing.verifyResult = {
+        const verifyResult = {
           ok: ok,
           schema: schemaV2 ? 'poa-v2' : 'poa-v1',
           score: avgScore,
@@ -1503,6 +1509,26 @@ function pdfHorseApp() {
           conceptual: conceptNow ? { ok: conceptOk, expected: meta.conceptual.sha256, actual: conceptNow.sha256 } : null,
           pages: pages,
         };
+        this.hashing.verifyResult = verifyResult;
+
+        // v0.24-Rivest: genereer match-rapport (separate PDF) zodat de gebruiker
+        // het verdict + evidence-comparison los kan downloaden / mailen / printen.
+        try {
+          const Poa = this._poaEngine();
+          if (Poa && Poa.buildMatchReport) {
+            const currentFileInfo = {
+              filename: (this.hashing.pdfFile && this.hashing.pdfFile.name) || 'document.pdf',
+              bytes: this.hashing.pdfBytes.length,
+              sha256: fileNow.sha256,
+              sha512: fileNow.sha512 || null,
+            };
+            this.hashing.matchReportBytes = await Poa.buildMatchReport(meta, verifyResult, currentFileInfo);
+          }
+        } catch (e) {
+          // niet-fataal: verificatie blijft staan, alleen rapport mislukt.
+          console && console.warn && console.warn('match-rapport generatie faalde:', e);
+        }
+
         this.hashing.notice = 'Verificatie afgerond.';
       } catch (e) {
         this.hashing.error = e.message || String(e);
@@ -1519,11 +1545,15 @@ function pdfHorseApp() {
       if (!this.hashing.poaBytes) return;
       this._downloadBlob(this.hashing.poaBytes, 'pdfhorse-poa.pdf', 'application/pdf');
     },
+    downloadMatchReport() {
+      if (!this.hashing.matchReportBytes) return;
+      this._downloadBlob(this.hashing.matchReportBytes, 'pdfhorse-match-report.pdf', 'application/pdf');
+    },
 
     hashingReset() {
       this.hashing.pdfFile = null; this.hashing.pdfBytes = null;
       this.hashing.result = null; this.hashing.signedBytes = null;
-      this.hashing.poaBytes = null; this.hashing.verifyResult = null;
+      this.hashing.poaBytes = null; this.hashing.matchReportBytes = null; this.hashing.verifyResult = null;
       this.hashing.error = ''; this.hashing.notice = ''; this.hashing.progress = '';
     },
 

@@ -3,6 +3,90 @@
 > Versie-historie. Formaat: [Keep a Changelog](https://keepachangelog.com/) op hoofdlijnen, met PDFHorse-eigen codenamen (thema: PDF-pioniers).
 > Bijgewerkt bij elke release. Datums = release naar `main`.
 
+## [v0.25.0-Shamir] — 2026-06-20
+
+> Codenaam **Adi Shamir** — de "S" in RSA (Rivest-Shamir-Adleman), uitvinder van **Shamir's Secret Sharing** (k-of-n threshold cryptography) en **Visual Cryptography**, mede-ontwerper van **Differential Cryptanalysis**. Passend bij eerste-eigenaar identity-bewijs via cryptografische signatures: identity binding is precies de "wie zegt dat dit van jou is?"-vraag die Shamir's werk over secret-binding adresseert. **ROOD** — meta-implicatie: van self-rapportage owner-veld naar cryptografisch verifieerbaar identity-bewijs.
+
+### Functioneel
+
+- **Identity binding (optioneel) via OpenPGP detached signature** — owner-info in de envelope is nu niet langer alleen self-rapportage. De gebruiker kan een keypair genereren of een bestaande private key importeren, en de envelope wordt cryptografisch ondertekend (Ed25519). De publieke sleutel komt in de envelope; de private sleutel blijft bij de gebruiker. Een verifier kan elke claim self-contained valideren zonder PDFHorse-server.
+- **Nieuw schema `poa-v3`** — bumpt automatisch van `poa-v2` zodra een signature aanwezig is. `poa-v2` envelopes blijven 100% werken (backwards-compat).
+- **Sign-modus accordion** "Identity binding (optioneel — sterker first-owner bewijs)" — 3 modi: `Geen` (default, gedrag identiek aan v0.24), `Genereer nieuwe sleutel` (force-download van private .asc vóór sign), `Importeer bestaande (.asc)` (file-input + passphrase + parse-knop). Beide non-none modi tonen de fingerprint na succes.
+- **Verify-modus identity-rij** — verdict-paneel toont `Identity: ✓ fingerprint XXXX XXXX XXXX XXXX` / `❌ ongeldig` / `— niet geclaimd`. Wanneer signature aanwezig maar ongeldig, **downgrade het verdict automatisch naar NO_MATCH** (en `ok=false`).
+- **Identity-secties in beide rapporten** — `buildClaimV2` (sign-time) krijgt een "Identity binding" sectie op pagina 1 die ofwel "Geen identity-binding — owner-info is self-rapportage" of "OK Identity verified" met fingerprint + algo + signed_at + pubkey-preview toont. `buildMatchReport` (verify-time) krijgt een "Identity" sectie op pagina 1 met een tabel (fingerprint claim ↔ verify-status ↔ signing-time) plus de uitleg-zin "De handtekening bewijst dat de eigenaar met fingerprint X de PoA-claim heeft geautoriseerd. Anchor-tijd + sig = sluitend first-owner bewijs."
+
+### Technisch
+
+- **Nieuwe file `frontend/js/identity.js`** (~200 LoC) — `window.PDFHorseIdentity` met:
+  - `async generateKey({ name, email, passphrase })` → `{ privateKeyArmored, publicKeyArmored, fingerprint }` op Ed25519 / Curve25519 (kleinere keys + sigs dan RSA-2048, ~600 char private armor).
+  - `async importKey(asciiArmored, passphrase?)` — parse + (optioneel) decrypt; returnt `{ privateKey, publicKeyArmored, fingerprint }`.
+  - `canonicalize(envelopeMeta)` — pure functie. Sorted-keys recursive JSON-serialisatie zonder het `signature`-veld → UTF-8 bytes via `TextEncoder`. RFC8785-light: deterministisch, geen number-edge-cases nodig in onze envelope.
+  - `async signEnvelope(envelopeMeta, privateKey, passphrase)` → `{ sig_armored, fingerprint, public_key_armored, algo: 'openpgp-ed25519', signed_at }`. Detached sig over `canonicalize(meta)`.
+  - `async verifyEnvelope(envelopeMeta)` → `{ valid, fingerprint, signed_at, error? }`. Leest `envelopeMeta.signature` + `signature.public_key_armored`, herberekent canonical bytes, verifieert.
+  - `formatFingerprint(fp)` → "XXXX XXXX XXXX XXXX" (eerste 16 hex chars in groepen van 4).
+- **`frontend/index.html`**:
+  - Nieuwe CDN-script-tag voor `openpgp@5.11.2/dist/openpgp.min.js` met SRI `sha384-GSfnO+LcQAKSCm1NYG2u/acMR+jBE5ML42eWq3lKjR0Dglq3Zp4dWI3K319/7zmD` + `crossorigin=anonymous` + `referrerpolicy=no-referrer`. Pinned op exacte versie 5.11.2.
+  - Script-tag voor `js/identity.js` na `js/poa-report.js`.
+  - Sign-modus accordion + verdict-paneel Identity-rij (template/x-if voor `present/valid/error` states).
+- **`frontend/js/app.js`**:
+  - State `hashing.identity = { mode, keyName, keyEmail, passphrase, importedAsc, generated, importedRef, downloaded, busy, error }`.
+  - Handlers `identityGenerateAndDownload()` (force-download + zet `downloaded=true`), `identityImportFile($event)` (leest .asc), `identityParseImported()` (decrypt + valideer), `identityShortFingerprint(fp)`, `identitySignReady()` (sign-knop-gate), `identityToggle($event)` (accordion-hook).
+  - `runHash()` checkt `id.mode`: bij `generate`/`import` → call `Id.signEnvelope(meta, priv, passphrase)` → `meta.signature = sigObj` → `meta.poa_schema = 'poa-v3'`. **Passphrase + private key armored worden direct na sign uit memory gewist** (`id.passphrase = ''`, `id.generated.privateKeyArmored = null`).
+  - `runVerify()` checkt `meta.signature`: zo ja → `Id.verifyEnvelope(meta)` → `identityResult = { present, valid, fingerprint, signed_at, error? }` in `verifyResult.identity`. **Verdict-downgrade** naar `NO_MATCH` wanneer `present && !valid`. Strip `meta.pdfhorse` wrapper-key vóór canonical re-compute (anders matcht sign-time canonical niet de verify-time canonical).
+  - `runHash()` `Poa.buildClaimV2` selector accepteert nu zowel `poa-v2` als `poa-v3`.
+  - `hashingReset()` reset ook de identity-state.
+- **`frontend/js/poa-report.js`**:
+  - `buildClaimV2` krijgt "Identity binding" sectie op pagina 1: ofwel "geen binding" of "OK Identity verified" + fingerprint (4-blok format) + algo + signed_at + pubkey-preview (80 chars).
+  - `buildMatchReport` krijgt "Identity" sectie op pagina 1: tabel (Fingerprint claim / Signing-time / Verify-status met groen OK / rood X / grijs —) + uitleg-zinnen + waarschuwing bij ongeldige sig.
+  - Engine `VERSION` `0.2.0` → `0.3.0`.
+- **`frontend/i18n.json`**: 18 nieuwe NL→EN entries voor identity-UI (accordion-header, modi, fingerprint-label, passphrase, parse-button, download-warning, verify-paneel labels, rapport-secties).
+- **Geen wijzigingen** aan hash-engine, payload-engine, watermark-engine. Identity is een orthogonale laag boven de bestaande PoA-flow.
+
+### Architectonisch
+
+- **Nieuw principe `P-PoA-03`** in `docs/PRINCIPLES.md`: "Identity binding via OpenPGP detached sig over canonical envelope-JSON (excluding signature-veld). Publieke sleutel embedded in envelope = self-contained verifieerbaar. Optioneel; geen sig = self-rapportage owner-info."
+- **`docs/PoARegistry-proposal.md`** (NIEUW, ~80 regels) — voorstel voor een losse iCt Horse dienst die hash+sig publiek registreert (Bitcoin-like first-owner-takes-it discovery laag bovenop PoA). **Out-of-scope voor PDFHorse**; ter evaluatie binnen `Meta_iCt_Horse_Diensten`.
+
+### Security Audit
+
+> Verplicht voor **ROOD** wijzigingen — RCA op functioneel + technisch + architectonisch + expliciet threat-model.
+
+**Threats addressed:**
+- **Identity-substitutie** — voor v0.25 kon iedereen "Christian Glebbeek" in het owner-veld van een claim invullen. Met `poa-v3` signature is dit cryptografisch gekoppeld aan het bezit van een private key die overeenkomt met de embedded public key + fingerprint.
+- **Claim-zonder-bewijs** — een PoA-rapport printen met willekeurige naam zonder enige verifieerbare backing. v0.25 levert een tweede laag bewijs: anchor-tijd + identity-sig samen = sluitend "deze bekende identity heeft dit document op deze tijd geclaimd".
+- **Envelope-tampering** — wijziging van `meta.file.sha256` of `meta.owner.name` ná sign breekt de signature (canonical bytes wijken af). Verify detecteert dit en downgrade het verdict naar `NO_MATCH`.
+
+**Threats NOT addressed (expliciet out-of-scope):**
+- **Private-key compromise** — als de gebruiker zijn `.asc` lekt kan een aanvaller nieuwe claims tekenen onder dezelfde fingerprint. Mitigatie: client-side force-download bij generate-modus, geen storage, geen sync, gebruiker krijgt expliciete waarschuwing "Bewaar deze .asc in HorseSafe". Geen revocation-mechanisme in PDFHorse zelf (zou registry vereisen — zie `docs/PoARegistry-proposal.md`).
+- **CA-vertrouwen / WoT** — er is geen Certificate Authority of Web-of-Trust. De fingerprint is een **bewering** van identiteit; de koppeling fingerprint↔persoon is buiten PDFHorse om (HorseSafe entry, LinkedIn-profielfoto, notaris-deponering, ...). Dit is een ontwerpkeuze, niet een bug: PoA blijft anoniem-bruikbaar.
+- **Pre-OTS forward-dating** — een snelle aanvaller die binnen Bitcoin's gemiddelde block-tijd (~10 min) een claim genereert en aanker-aanvraag doet vóór de echte eigenaar, kan een eerdere anchor-tijd claimen. **Bitcoin block-tijd is de fundamentele ondergrens**; PDFHorse heeft geen extra mitigatie. Identity-binding maakt dit aanvalsmodel duurder (aanvaller moet expliciet een sleutel tekenen en bewaren).
+- **Side-channel via passphrase prompt** — keylogger op de gebruikers-machine compromitteert de passphrase. Buiten PDFHorse-scope.
+
+**Crypto-keuzes:**
+- **Signatuur:** Ed25519 + SHA-512 (OpenPGP-default voor curve25519). Sneller dan RSA-2048 (~10×), kleinere keys (~600 char armored vs ~3 kB voor RSA-2048), kleinere signatures (~100 chars vs ~340 chars).
+- **Library:** OpenPGP.js v5.11.2 — peer-reviewed, RFC4880-compliant, gebruikt door ProtonMail. SRI-pinned op exacte versie.
+- **Canonicalization:** RFC8785-light (sorted-keys, geen signature-veld, UTF-8 bytes via TextEncoder). Onze envelope bevat geen NaN/Infinity/zwerf-precision floats → de "light" variant is voldoende deterministisch. Future-proofing: als ooit numbers worden toegevoegd die niet trivieel JSON-serializen, switch naar `json-canonicalize` lib.
+
+**Memory hygiëne:**
+- Passphrase + private key alleen in memory; gewist direct na `signEnvelope`.
+- **Nooit naar localStorage / sessionStorage** (regex-test in `test_identity.py` borgt dit).
+- **Nooit naar payload-envelope** — alleen `public_key_armored` + `sig_armored` + `fingerprint` + `algo` + `signed_at` gaan in `meta.signature`. Private key blijft 100% client-only.
+- Force-download van private key bij generate-modus: sign mag pas ná download (`hashing.identity.downloaded === true`). Voorkomt accidental-loss: de gebruiker moet expliciet kiezen om de key te bewaren.
+
+**Verified:**
+- Backend pytest **63/63 groen** (44 oud + 19 nieuwe in `test_identity.py`).
+- Node `scripts/test_identity_roundtrip.js`: structuur-tests groen. Runtime-roundtrip (6 tests) draait wanneer `openpgp` als npm-module beschikbaar is; skipt elegant met exit 0 in CDN-only setup (precedent: `test_poa_v2.js`).
+- **Geen deploy in deze release** — alles getest lokaal; HC55 deploy + UI-screenshot bewust geparkeerd (zie "Openstaand").
+
+### Openstaand
+
+- **HC55 deploy** — handmatige fase, separate sessie.
+- **UI-screenshot** in `docs/screens/` — wachten op deploy.
+- **PoARegistry-dienst** — uit-scope, in `docs/PoARegistry-proposal.md` als voorstel naar `Meta_iCt_Horse_Diensten`.
+- **Revocation** — OpenPGP heeft revocation-certificates, maar zonder registry-laag is er geen distributie-pad. Verkennen samen met PoARegistry.
+
+---
+
 ## [v0.24.0-Rivest] — 2026-06-20
 
 > Codenaam **Ronald Rivest** — co-uitvinder RSA (Rivest-Shamir-Adleman) en de "R" in RC2/RC4/RC5/RC6, MD2/MD4/MD5/MD6. Pionier in zowel public-key crypto als hash-functies — passend bij PoA dat op beide leunt. `Brotz` blijft gereserveerd voor v1.0.0.

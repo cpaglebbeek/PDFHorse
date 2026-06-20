@@ -188,6 +188,19 @@ function pdfHorseApp() {
       poaBytes: null,          // los PoA-rapport (claim, sign-time)
       matchReportBytes: null,  // match-rapport (verify-time, v0.24)
       verifyResult: null,      // { file:{ok,...}, conceptual:{...}, pages:[...] }
+      // v0.25-Shamir: identity binding via OpenPGP detached sig.
+      identity: {
+        mode: 'none',          // 'none' | 'generate' | 'import'
+        keyName: '',
+        keyEmail: '',
+        passphrase: '',
+        importedAsc: '',
+        generated: null,       // { privateKeyArmored, publicKeyArmored, fingerprint }
+        importedRef: null,     // { privateKey, publicKeyArmored, fingerprint }
+        downloaded: false,     // generate-modus: pas tekenen ná download van privkey
+        busy: false,
+        error: '',
+      },
     },
 
     init() {
@@ -1363,10 +1376,42 @@ function pdfHorseApp() {
           source: { filename: origName, bytes: original.length },
         };
 
+        // v0.25-Shamir: identity-binding via OpenPGP detached sig over canonical envelope.
+        // Schema bumpt naar poa-v3 zodra een handtekening wordt toegevoegd.
+        const id = this.hashing.identity;
+        if (id.mode === 'generate' || id.mode === 'import') {
+          const Id = this._identityEng();
+          if (!Id) throw new Error('OpenPGP-engine niet geladen.');
+          let privArmored = null;
+          if (id.mode === 'generate') {
+            if (!id.generated) throw new Error('Genereer eerst een sleutel.');
+            if (!id.downloaded) throw new Error('Download eerst de private key vóór tekenen.');
+            privArmored = id.generated.privateKeyArmored;
+          } else {
+            if (!id.importedRef || !id.importedRef.privateKey) {
+              throw new Error('Importeer + parse eerst een private key.');
+            }
+          }
+          this.hashing.progress = 'identity-signature plaatsen…';
+          meta.poa_schema = 'poa-v3';
+          const sigObj = (id.mode === 'generate')
+            ? await Id.signEnvelope(meta, privArmored, id.passphrase)
+            : await Id.signEnvelope(meta, id.importedRef.privateKey, '');
+          meta.signature = sigObj;
+          // Security: passphrase + private key uit memory zo kort mogelijk.
+          id.passphrase = '';
+          if (id.mode === 'generate') {
+            // Private key in armored vorm is al weg via download; wis state-kopie.
+            id.generated = { ...id.generated, privateKeyArmored: null };
+          }
+        }
+
         this.hashing.progress = 'PoA-rapport genereren…';
-        // v0.24-Rivest: nieuw 2-pagina claim-v2 rapport voor poa-v2 envelopes,
+        // v0.24-Rivest: nieuw 2-pagina claim-v2 rapport voor poa-v2+ envelopes,
         // valt elegant terug op legacy 1-pagina rapport voor oudere meta.
-        const poaBytes = (meta.poa_schema === 'poa-v2' && Poa.buildClaimV2)
+        // v0.25-Shamir: poa-v3 (met identity-signature) gebruikt dezelfde claim-v2
+        // renderer, met extra Identity-binding sectie.
+        const poaBytes = ((meta.poa_schema === 'poa-v2' || meta.poa_schema === 'poa-v3') && Poa.buildClaimV2)
           ? await Poa.buildClaimV2(meta)
           : await Poa.build(meta);
 
@@ -1436,9 +1481,18 @@ function pdfHorseApp() {
           } catch (e) { /* geen payload */ }
         }
         if (!meta || !meta.file) throw new Error('Geen PoA-payload gevonden in deze PDF.');
+        // v0.25-Shamir: outer marker (`pdfhorse: 'poa-v2'`) is een payload-wrapper key,
+        // niet onderdeel van de meta die getekend is. Strip 'm voor consistente
+        // identity-canonical bytes (sign-tijd zag deze key niet).
+        if (meta.pdfhorse) {
+          const cleaned = {};
+          Object.keys(meta).forEach(function (k) { if (k !== 'pdfhorse') cleaned[k] = meta[k]; });
+          meta = cleaned;
+        }
 
-        // Schema-detectie (poa-v1 = alleen 8x8 avg; poa-v2 = avg + dCT + dHash + elastic).
-        const schemaV2 = (meta.pdfhorse === 'poa-v2') || meta.poa_schema === 'poa-v2'
+        // Schema-detectie (poa-v1 = alleen 8x8 avg; poa-v2 = avg + dCT + dHash + elastic;
+        // poa-v3 = poa-v2 + identity-binding via OpenPGP detached sig).
+        const schemaV2 = (meta.pdfhorse === 'poa-v2') || meta.poa_schema === 'poa-v2' || meta.poa_schema === 'poa-v3'
           || !!(meta.perceptual_dct && meta.perceptual_dct.length);
 
         const fileNow = await H.fileHashes(this.hashing.pdfBytes);
@@ -1500,14 +1554,45 @@ function pdfHorseApp() {
         // "ok" = oude binaire view voor backwards compat (UI overlay leest verdict apart).
         const ok = (verdict === 'IDENTICAL' || verdict === 'LAYOUT_MATCH') && conceptOk;
 
+        // v0.25-Shamir: identity-binding verify wanneer envelope een signature heeft.
+        let identityResult = { present: false };
+        if (meta.signature) {
+          identityResult.present = true;
+          const Id = this._identityEng();
+          if (Id && Id.verifyEnvelope) {
+            try {
+              const v = await Id.verifyEnvelope(meta);
+              identityResult.valid = !!v.valid;
+              identityResult.fingerprint = v.fingerprint || (meta.signature && meta.signature.fingerprint) || null;
+              identityResult.signed_at = v.signed_at || (meta.signature && meta.signature.signed_at) || null;
+              if (!v.valid) identityResult.error = v.error || 'Onbekende verify-fout.';
+            } catch (e) {
+              identityResult.valid = false;
+              identityResult.error = e.message || String(e);
+            }
+          } else {
+            identityResult.valid = false;
+            identityResult.error = 'OpenPGP-engine niet geladen.';
+          }
+        }
+
+        // Verdict-downgrade: aanwezige maar ongeldige signature → NO_MATCH.
+        let finalVerdict = verdict;
+        let finalOk = ok;
+        if (identityResult.present && identityResult.valid === false) {
+          finalVerdict = 'NO_MATCH';
+          finalOk = false;
+        }
+
         const verifyResult = {
-          ok: ok,
-          schema: schemaV2 ? 'poa-v2' : 'poa-v1',
+          ok: finalOk,
+          schema: (meta.poa_schema === 'poa-v3') ? 'poa-v3' : (schemaV2 ? 'poa-v2' : 'poa-v1'),
           score: avgScore,
-          verdict: verdict,
+          verdict: finalVerdict,
           file: { ok: fileNow.sha256 === meta.file.sha256, expected: meta.file.sha256, actual: fileNow.sha256 },
           conceptual: conceptNow ? { ok: conceptOk, expected: meta.conceptual.sha256, actual: conceptNow.sha256 } : null,
           pages: pages,
+          identity: identityResult,
         };
         this.hashing.verifyResult = verifyResult;
 
@@ -1555,6 +1640,97 @@ function pdfHorseApp() {
       this.hashing.result = null; this.hashing.signedBytes = null;
       this.hashing.poaBytes = null; this.hashing.matchReportBytes = null; this.hashing.verifyResult = null;
       this.hashing.error = ''; this.hashing.notice = ''; this.hashing.progress = '';
+      // v0.25-Shamir: identity-state ook resetten (passphrase + privkey weg).
+      this.hashing.identity.mode = 'none';
+      this.hashing.identity.keyName = '';
+      this.hashing.identity.keyEmail = '';
+      this.hashing.identity.passphrase = '';
+      this.hashing.identity.importedAsc = '';
+      this.hashing.identity.generated = null;
+      this.hashing.identity.importedRef = null;
+      this.hashing.identity.downloaded = false;
+      this.hashing.identity.busy = false;
+      this.hashing.identity.error = '';
+    },
+
+    // ---------- v0.25-Shamir: identity binding ----------
+
+    _identityEng() { return window.PDFHorseIdentity || null; },
+
+    identityShortFingerprint(fp) {
+      const Id = this._identityEng();
+      if (Id && Id.formatFingerprint) return Id.formatFingerprint(fp);
+      return (fp || '').toString().substr(0, 16);
+    },
+
+    // Sign-knop alleen actief als modus 'none' OF wanneer in generate-mode de
+    // private key gedownload is, OF in import-mode een geldige importedRef bestaat.
+    identitySignReady() {
+      const id = this.hashing.identity;
+      if (id.mode === 'none') return true;
+      if (id.mode === 'generate') return !!id.generated && id.downloaded === true && (id.passphrase || '').length >= 8;
+      if (id.mode === 'import') return !!id.importedRef;
+      return true;
+    },
+
+    identityToggle(ev) {
+      // No-op; gereserveerd voor toekomstige analytics/lazy-load van openpgp.
+      // (OpenPGP.js wordt sync geladen via CDN; lazy-load zou een aparte iteratie zijn.)
+    },
+
+    async identityGenerateAndDownload() {
+      const Id = this._identityEng();
+      if (!Id) { this.hashing.identity.error = 'OpenPGP-engine niet geladen.'; return; }
+      const id = this.hashing.identity;
+      id.error = '';
+      if ((id.passphrase || '').length < 8) { id.error = 'Passphrase minimaal 8 tekens.'; return; }
+      id.busy = true;
+      try {
+        const k = await Id.generateKey({
+          name: id.keyName || 'PDFHorse PoA user',
+          email: id.keyEmail || 'noreply@example.invalid',
+          passphrase: id.passphrase,
+        });
+        id.generated = k;
+        // Force download — pas DAARNA mag tekenen.
+        const blob = new Blob([k.privateKeyArmored], { type: 'application/pgp-keys' });
+        const name = 'pdfhorse-identity-' + (k.fingerprint || 'key').substr(0, 16) + '.asc';
+        // Hergebruik _downloadBlob-achtige logica via een ArrayBuffer-pad.
+        const u8 = new TextEncoder().encode(k.privateKeyArmored);
+        this._downloadBlob(u8, name, 'application/pgp-keys');
+        id.downloaded = true;
+      } catch (e) {
+        id.error = e.message || String(e);
+      } finally {
+        id.busy = false;
+      }
+    },
+
+    async identityImportFile(ev) {
+      const f = ev.target.files && ev.target.files[0];
+      ev.target.value = '';
+      if (!f) return;
+      const txt = await f.text();
+      this.hashing.identity.importedAsc = txt;
+      this.hashing.identity.importedRef = null;
+      this.hashing.identity.error = '';
+    },
+
+    async identityParseImported() {
+      const Id = this._identityEng();
+      if (!Id) { this.hashing.identity.error = 'OpenPGP-engine niet geladen.'; return; }
+      const id = this.hashing.identity;
+      id.error = '';
+      id.busy = true;
+      try {
+        const ref = await Id.importKey(id.importedAsc, id.passphrase || '');
+        id.importedRef = ref;
+      } catch (e) {
+        id.error = e.message || String(e);
+        id.importedRef = null;
+      } finally {
+        id.busy = false;
+      }
     },
 
     // ---------- Convert ----------

@@ -396,6 +396,29 @@
       ]
     );
 
+    // v0.25-Shamir: Identity binding (optioneel)
+    r.section('Identity binding');
+    if (!meta.signature) {
+      r.text('Geen identity-binding - owner-info is self-rapportage.', {
+        size: BODY_SIZE, color: [0.45, 0.30, 0.05],
+      });
+    } else {
+      var sig = meta.signature;
+      var fpFmt = '-';
+      if (sig.fingerprint) {
+        var clean = String(sig.fingerprint).replace(/[^0-9A-Fa-f]/g, '').toUpperCase();
+        fpFmt = clean.substr(0, 16).match(/.{1,4}/g).join(' ');
+      }
+      r.text('OK Identity verified', { size: BODY_SIZE, bold: true, color: [0.05, 0.45, 0.20] });
+      r.text('Fingerprint: ' + fpFmt, { size: MONO_SIZE, mono: true });
+      r.text('Algo:        ' + (sig.algo || '-'), { size: BODY_SIZE });
+      r.text('Signed at:   ' + (sig.signed_at || '-'), { size: BODY_SIZE });
+      var pubArm = sig.public_key_armored || '';
+      var pubPreview = pubArm.replace(/\s+/g, ' ').substr(0, 80);
+      r.text('Publieke sleutel (preview, ' + pubArm.length + ' tekens):', { size: BODY_SIZE });
+      r.text(pubPreview + '...', { size: MONO_SIZE, mono: true });
+    }
+
     // Footer-tekst onderaan p1
     r.text('', { gap: 6 });
     r.text('Verifieer dit rapport door de begeleidende PDF in PDFHorse > tab "Hashing" > modus', { size: BODY_SIZE, color: [0.4, 0.4, 0.4] });
@@ -544,6 +567,41 @@
     r.text('Grootte:      ' + (cur.bytes ? (cur.bytes + ' bytes') : '-'), { size: BODY_SIZE });
     r.text('SHA-256:      ' + curHashPrefix + '...', { size: MONO_SIZE, mono: true });
 
+    // v0.25-Shamir: Identity-sectie in match-rapport.
+    r.section('Identity');
+    var idr = verifyResult && verifyResult.identity;
+    var fpExpected = (meta && meta.signature && meta.signature.fingerprint) || (idr && idr.fingerprint) || '-';
+    function _fmtFp(fp) {
+      if (!fp || fp === '-') return '-';
+      var c = String(fp).replace(/[^0-9A-Fa-f]/g, '').toUpperCase();
+      return c.substr(0, 16).match(/.{1,4}/g).join(' ');
+    }
+    var sigStatus = idr ? (idr.present ? (idr.valid ? 'OK' : 'X') : '-') : '-';
+    var sigTime = (meta && meta.signature && meta.signature.signed_at) || (idr && idr.signed_at) || '-';
+    r.table(
+      [
+        { label: 'Veld',            width: 140 },
+        { label: 'Waarde',          width: pageW - 2 * MARGIN - 140 - 80 },
+        { label: 'Verify',          width: 80 },
+      ],
+      [
+        [{ text: 'Fingerprint (claim)' }, { text: _fmtFp(fpExpected), mono: true }, { text: sigStatus,
+            color: (sigStatus === 'OK') ? [0.10, 0.45, 0.20] : (sigStatus === 'X') ? [0.75, 0.18, 0.18] : [0.40, 0.40, 0.40] }],
+        [{ text: 'Signing-time' }, { text: sigTime, mono: true }, { text: '' }],
+      ]
+    );
+    r.text('De handtekening bewijst dat de eigenaar met fingerprint X de PoA-claim heeft', { size: BODY_SIZE });
+    r.text('geautoriseerd. Anchor-tijd + sig = sluitend first-owner bewijs.', { size: BODY_SIZE });
+    if (idr && idr.present && !idr.valid) {
+      r.text('LET OP: signature aanwezig maar NIET geldig - verdict downgrade naar NO_MATCH.', {
+        size: BODY_SIZE, color: [0.75, 0.10, 0.10],
+      });
+    } else if (!idr || !idr.present) {
+      r.text('Let op: deze claim heeft GEEN identity-binding - owner-info is self-rapportage.', {
+        size: BODY_SIZE, color: [0.55, 0.32, 0.05],
+      });
+    }
+
     // ===== Pagina 2 — Evidence Comparison =====
     r.newPage();
     r.header('PDFHorse Match Report - Evidence', reportId, schema);
@@ -670,6 +728,6 @@
     build: build,
     buildClaimV2: buildClaimV2,
     buildMatchReport: buildMatchReport,
-    VERSION: '0.2.0',
+    VERSION: '0.3.0',
   };
 })();

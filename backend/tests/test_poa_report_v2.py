@@ -126,5 +126,5 @@ def test_poa_report_version_bumped() -> None:
     src = _src()
     m = re.search(r"VERSION\s*:\s*'([^']+)'", src)
     assert m, "VERSION-veld ontbreekt"
-    # v0.22 had 0.1.0; v0.24 → 0.2.0.
-    assert m.group(1) == "0.2.0", f"Verwacht poa-report VERSION='0.2.0', kreeg '{m.group(1)}'"
+    # v0.22 had 0.1.0; v0.24 → 0.2.0; v0.25 (Shamir, identity-binding) → 0.3.0.
+    assert m.group(1) == "0.3.0", f"Verwacht poa-report VERSION='0.3.0', kreeg '{m.group(1)}'"

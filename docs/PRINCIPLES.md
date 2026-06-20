@@ -115,6 +115,21 @@ Een rechter, accountant of journalist die kijkt naar een PoA-PDF moet meteen kun
 
 **Conflict-test:** Een nieuw rapport-type toevoegen (bv. "audit-rapport" voor 3-partij scenario's) → eerst nadenken: is dit een derde fundamentele bewering, of een variant op claim/match? Variant → optie van bestaande type. Echt nieuwe bewering → nieuw type met eigen verdict-semantiek.
 
+## P-PoA-03 — Identity binding via OpenPGP detached sig over canonical envelope-JSON
+
+**Regel:** Identity binding op een PoA-claim is een **OpenPGP detached signature** over de **canonical JSON-serialisatie van de envelope-meta** (sorted-keys, exclusief het `signature`-veld zelf), met de bijbehorende publieke sleutel **embedded in de envelope**. Identity binding is **optioneel**; afwezigheid betekent dat de owner-info als **self-rapportage** wordt gemarkeerd in zowel UI als rapport.
+
+**Waarom:** Zonder cryptografische binding is "First owner: Christian Glebbeek" een tekstveld dat iedereen kan invullen — een claim zonder bewijs. Een ander kan dezelfde tekst onder een eigen PDF zetten en even hard "ik ben de eigenaar" roepen. Met identity binding wordt het bezit van de claim cryptografisch gekoppeld aan het bezit van een private key die overeenkomt met de embedded publieke sleutel + fingerprint. Daarmee:
+- is de envelope **self-contained verifieerbaar** (geen externe Certificate Authority / Web-of-Trust / registry-server nodig — de publieke sleutel zit erin),
+- is de **koppeling fingerprint↔persoon** een aparte, expliciet door-de-gebruiker-te-borgen verantwoordelijkheid (HorseSafe entry, LinkedIn-profielfoto, notaris-deponering, ...) — dit blijft een ontwerpkeuze: PoA blijft anoniem-bruikbaar omdat de fingerprint zelf geen identiteit dwingt op te geven,
+- en is **tampering van de envelope na sign** detecteerbaar: elke wijziging breekt canonical bytes en de signature.
+
+Het is **detached** (niet inline in de payload-bytes) zodat de envelope-JSON menselijk leesbaar blijft. Het canonical-JSON formaat is **sorted-keys + signature-strip + UTF-8 bytes** (RFC8785-light): voldoende deterministisch voor onze envelope die geen number-edge-cases bevat. Ed25519 / Curve25519 i.p.v. RSA-2048 omdat het ~10× sneller is in browser, ~5× kleinere keys/sigs, en breed peer-reviewed in OpenPGP-context (gebruikt door ProtonMail e.v.a.).
+
+**Toepassing:** `frontend/js/identity.js` (`window.PDFHorseIdentity`) levert `generateKey`, `importKey`, `canonicalize`, `signEnvelope`, `verifyEnvelope`. `frontend/js/app.js#runHash()` bumpt `meta.poa_schema → 'poa-v3'` en zet `meta.signature = { sig_armored, fingerprint, public_key_armored, algo: 'openpgp-ed25519', signed_at }`. `runVerify()` herberekent canonical en verifieert; **verdict-downgrade naar `NO_MATCH`** bij `present && !valid`. `buildClaimV2` en `buildMatchReport` bevatten Identity-secties met fingerprint in 4-blok formaat. **Security:** passphrase + private key alleen in memory; force-download bij generate-modus; nooit naar localStorage/sessionStorage; **nooit naar payload-envelope**.
+
+**Conflict-test:** Een tweede sig-algoritme toevoegen (bv. ECDSA voor wallet-keys) → `algo`-veld in `meta.signature` is al voorbereid op meerdere strings; `verifyEnvelope` switch op `sig.algo`. Een externe registry toevoegen voor distributed first-owner-claim (Bitcoin-like) → buiten PDFHorse, separate dienst — zie `docs/PoARegistry-proposal.md`. Een Web-of-Trust laag toevoegen die fingerprints koppelt aan email-providers → buiten PDFHorse; bedraadt OpenPGP's bestaande WKD / keyserver mechanismen.
+
 ## Versiehistorie
 
 | Versie | Wijziging |
@@ -123,3 +138,4 @@ Een rechter, accountant of journalist die kijkt naar een PoA-PDF moet meteen kun
 | v0.3.0-Putman | **`docs/PRINCIPLES.md` aangemaakt** met 8 principes P1-P8 |
 | v0.23.0-Diffie | **P-PoA-01 toegevoegd** — verdict-formule en drempels voor multi-layer pHash verify |
 | v0.24.0-Rivest | **P-PoA-02 toegevoegd** — claim-rapport (sign-time) vs match-rapport (verify-time) met aparte verdict-semantiek |
+| v0.25.0-Shamir | **P-PoA-03 toegevoegd** — identity binding via OpenPGP detached sig over canonical envelope-JSON, met embedded public key voor self-contained verify |

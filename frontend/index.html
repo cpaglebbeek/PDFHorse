@@ -56,6 +56,12 @@
     integrity="sha384-l8f0VcPi/M1iHPv8egOnY/15TDwqgbOR1anMIJWvU6nLRgZVLTLSaNqi/TOoT5Fh"
     crossorigin="anonymous"
     referrerpolicy="no-referrer"></script>
+  <!-- OpenPGP.js v5.11.2 — identity binding voor PoA (Ed25519 detached sig over canonical envelope). -->
+  <script
+    src="https://unpkg.com/openpgp@5.11.2/dist/openpgp.min.js"
+    integrity="sha384-GSfnO+LcQAKSCm1NYG2u/acMR+jBE5ML42eWq3lKjR0Dglq3Zp4dWI3K319/7zmD"
+    crossorigin="anonymous"
+    referrerpolicy="no-referrer"></script>
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -927,9 +933,92 @@
           <label class="inline-flex items-center gap-2"><input type="checkbox" x-model="hashing.useWatermark" class="rounded border-slate-400" /> Zichtbaar watermerk</label>
         </div>
 
+        <!-- v0.25-Shamir: Identity binding (optioneel — sterker first-owner bewijs) -->
+        <details class="border border-slate-200 rounded bg-white" @toggle="identityToggle($event)">
+          <summary class="cursor-pointer px-3 py-2 text-sm font-medium select-none">
+            🔑 Identity binding (optioneel — sterker first-owner bewijs)
+          </summary>
+          <div class="px-3 pb-3 pt-1 text-sm space-y-3 border-t border-slate-200">
+            <p class="text-xs text-slate-600">
+              Zonder identity-binding is de owner-naam in de envelope <em>self-rapportage</em>: iedereen kan
+              "Christian Glebbeek" invullen. Met een OpenPGP-handtekening (Ed25519) over de canonical envelope
+              wordt het self-contained verifieerbaar identity-bewijs: de publieke sleutel komt in de envelope,
+              de private sleutel blijft bij jou.
+            </p>
+
+            <div class="flex flex-wrap gap-3">
+              <label class="inline-flex items-center gap-2"><input type="radio" name="identity-mode" value="none" x-model="hashing.identity.mode" /> Geen</label>
+              <label class="inline-flex items-center gap-2"><input type="radio" name="identity-mode" value="generate" x-model="hashing.identity.mode" /> Genereer nieuwe sleutel</label>
+              <label class="inline-flex items-center gap-2"><input type="radio" name="identity-mode" value="import" x-model="hashing.identity.mode" /> Importeer bestaande (.asc)</label>
+            </div>
+
+            <!-- Genereer -->
+            <div x-show="hashing.identity.mode === 'generate'" class="space-y-2 border border-slate-200 rounded p-3 bg-slate-50">
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <label class="block text-xs">
+                  <span class="text-slate-700">Naam (voor key-userid)</span>
+                  <input type="text" x-model="hashing.identity.keyName" placeholder="bv. Voornaam Achternaam"
+                    class="mt-1 w-full px-2 py-1.5 border border-slate-300 rounded text-sm focus:outline-none focus:border-slate-900" />
+                </label>
+                <label class="block text-xs">
+                  <span class="text-slate-700">E-mail (voor key-userid)</span>
+                  <input type="email" x-model="hashing.identity.keyEmail" placeholder="bv. naam@voorbeeld.nl"
+                    class="mt-1 w-full px-2 py-1.5 border border-slate-300 rounded text-sm focus:outline-none focus:border-slate-900" />
+                </label>
+              </div>
+              <label class="block text-xs">
+                <span class="text-slate-700">Passphrase (min. 8 tekens — beveiligt de private key)</span>
+                <input type="password" x-model="hashing.identity.passphrase" autocomplete="new-password"
+                  class="mt-1 w-full px-2 py-1.5 border border-slate-300 rounded text-sm focus:outline-none focus:border-slate-900" />
+              </label>
+              <div class="flex flex-wrap gap-2 items-center">
+                <button type="button" class="px-3 py-1.5 rounded bg-slate-900 text-white text-sm disabled:opacity-40"
+                  :disabled="hashing.identity.busy || (hashing.identity.passphrase || '').length < 8 || hashing.identity.downloaded"
+                  @click="identityGenerateAndDownload()">
+                  <span x-show="!hashing.identity.busy">🔐 Genereer + Download private key</span>
+                  <span x-show="hashing.identity.busy">Bezig…</span>
+                </button>
+                <span x-show="hashing.identity.generated" class="text-xs text-slate-600">
+                  Fingerprint: <span class="font-mono" x-text="hashing.identity.generated ? identityShortFingerprint(hashing.identity.generated.fingerprint) : ''"></span>
+                </span>
+              </div>
+              <p x-show="hashing.identity.downloaded" class="text-xs text-emerald-700">
+                Bewaar deze .asc in HorseSafe — zonder dit kun je later geen nieuwe PoA's met dezelfde identity tekenen.
+              </p>
+              <p x-show="hashing.identity.error" x-text="hashing.identity.error" class="text-xs text-red-700"></p>
+            </div>
+
+            <!-- Importeer -->
+            <div x-show="hashing.identity.mode === 'import'" class="space-y-2 border border-slate-200 rounded p-3 bg-slate-50">
+              <label class="block text-xs">
+                <span class="text-slate-700">Private key bestand (.asc)</span>
+                <input type="file" accept=".asc,application/pgp-keys,text/plain" @change="identityImportFile($event)"
+                  class="mt-1 w-full text-sm" />
+              </label>
+              <label class="block text-xs">
+                <span class="text-slate-700">Passphrase</span>
+                <input type="password" x-model="hashing.identity.passphrase" autocomplete="current-password"
+                  class="mt-1 w-full px-2 py-1.5 border border-slate-300 rounded text-sm focus:outline-none focus:border-slate-900" />
+              </label>
+              <div class="flex flex-wrap gap-2 items-center">
+                <button type="button" class="px-3 py-1.5 rounded bg-slate-900 text-white text-sm disabled:opacity-40"
+                  :disabled="hashing.identity.busy || !hashing.identity.importedAsc"
+                  @click="identityParseImported()">
+                  <span x-show="!hashing.identity.busy">🔑 Parse + valideer</span>
+                  <span x-show="hashing.identity.busy">Bezig…</span>
+                </button>
+                <span x-show="hashing.identity.importedRef" class="text-xs text-slate-600">
+                  Fingerprint: <span class="font-mono" x-text="hashing.identity.importedRef ? identityShortFingerprint(hashing.identity.importedRef.fingerprint) : ''"></span>
+                </span>
+              </div>
+              <p x-show="hashing.identity.error" x-text="hashing.identity.error" class="text-xs text-red-700"></p>
+            </div>
+          </div>
+        </details>
+
         <div class="flex flex-wrap items-center gap-3 text-sm">
           <button type="button" class="px-4 py-2 rounded bg-slate-900 text-white disabled:opacity-40"
-            :disabled="!hashing.pdfBytes || hashing.busy"
+            :disabled="!hashing.pdfBytes || hashing.busy || !identitySignReady()"
             @click="runHash()">
             <span x-show="!hashing.busy">Hash, anker &amp; PoA-rapport maken</span>
             <span x-show="hashing.busy">Bezig… <span x-text="hashing.progress"></span></span>
@@ -1020,6 +1109,19 @@
           <span class="text-slate-600">Conceptueel:</span>
           <span :class="hashing.verifyResult && hashing.verifyResult.conceptual && hashing.verifyResult.conceptual.ok ? 'text-emerald-700' : 'text-red-700'"
             x-text="hashing.verifyResult && hashing.verifyResult.conceptual ? (hashing.verifyResult.conceptual.ok ? 'match' : 'mismatch') : ''"></span>
+        </div>
+        <!-- v0.25-Shamir: identity-binding rij in verdict-paneel -->
+        <div x-show="hashing.verifyResult && hashing.verifyResult.identity">
+          <span class="text-slate-600">Identity:</span>
+          <template x-if="hashing.verifyResult && hashing.verifyResult.identity && !hashing.verifyResult.identity.present">
+            <span class="text-slate-500">— niet geclaimd</span>
+          </template>
+          <template x-if="hashing.verifyResult && hashing.verifyResult.identity && hashing.verifyResult.identity.present && hashing.verifyResult.identity.valid">
+            <span class="text-emerald-700">✓ fingerprint <span class="font-mono" x-text="identityShortFingerprint(hashing.verifyResult.identity.fingerprint)"></span></span>
+          </template>
+          <template x-if="hashing.verifyResult && hashing.verifyResult.identity && hashing.verifyResult.identity.present && !hashing.verifyResult.identity.valid">
+            <span class="text-red-700">❌ ongeldig <span class="text-xs text-red-500" x-text="hashing.verifyResult.identity.error ? '(' + hashing.verifyResult.identity.error + ')' : ''"></span></span>
+          </template>
         </div>
         <div x-show="hashing.matchReportBytes" class="pt-2">
           <button type="button" class="px-3 py-1.5 rounded bg-slate-900 text-white text-sm" @click="downloadMatchReport()">📄 Match-rapport (PDF)</button>
@@ -1145,6 +1247,8 @@
   <script src="js/hash.js"></script>
   <!-- PoA-rapport (window.PDFHorsePoaReport) — gebruikt door de Hashing-tab -->
   <script src="js/poa-report.js"></script>
+  <!-- Identity binding (window.PDFHorseIdentity) — gebruikt door de Hashing-tab, leunt op openpgp.min.js -->
+  <script src="js/identity.js"></script>
   <script src="js/app.js"></script>
   <!-- i18n overlay-vertaling (live SSOT: i18n.json); ?lang=en → Engels, default NL -->
   <script src="js/i18n.js"></script>

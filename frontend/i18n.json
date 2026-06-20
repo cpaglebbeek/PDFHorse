@@ -147,7 +147,18 @@
     "Verificatie MISLUKT ✗ — file-hash komt niet overeen": "Verification FAILED ✗ — file hash does not match",
     "match": "match",
     "mismatch": "mismatch",
-    "Pagina-pHashes (Hamming-afstand t.o.v. origineel):": "Page pHashes (Hamming distance vs. original):"
+    "Pagina-pHashes (Hamming-afstand t.o.v. origineel):": "Page pHashes (Hamming distance vs. original):",
+    "✓ Identiek": "✓ Identical",
+    "✓ Layout-equivalent": "✓ Layout-equivalent",
+    "⚠ Mogelijke match": "⚠ Possible match",
+    "✗ Geen match": "✗ No match",
+    "Volledige match — visueel identiek aan origineel.": "Full match — visually identical to the original.",
+    "Layout match — kleine edits, recompressie of watermerk; inhoud equivalent.": "Layout match — small edits, recompression or watermark; content equivalent.",
+    "Mogelijke match — zwaar gerecomprimeerd, gecropped, of partiële match. Handmatige check aanbevolen.": "Possible match — heavily recompressed, cropped, or partial match. Manual check recommended.",
+    "Geen overeenkomst — dit is geen variant van het origineel.": "No match — this is not a variant of the original.",
+    "Per pagina — scores per pHash-laag:": "Per page — scores per pHash layer:",
+    "Pagina": "Page",
+    "Schema:": "Schema:"
   },
   "attr": {
     "bv. 1-3, 5, 8-10": "e.g. 1-3, 5, 8-10",

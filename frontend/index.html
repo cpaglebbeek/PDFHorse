@@ -985,12 +985,33 @@
       </div>
 
       <!-- Resultaten Verify -->
-      <div x-show="hashing.verifyResult" class="mt-4 border rounded p-3 space-y-2 text-sm"
-        :class="hashing.verifyResult && hashing.verifyResult.ok ? 'border-emerald-300 bg-emerald-50' : 'border-red-300 bg-red-50'">
-        <div class="font-semibold" :class="hashing.verifyResult && hashing.verifyResult.ok ? 'text-emerald-900' : 'text-red-800'">
-          <span x-show="hashing.verifyResult && hashing.verifyResult.ok">Verificatie geslaagd ✓ (conceptueel + perceptueel match)</span>
-          <span x-show="hashing.verifyResult && !hashing.verifyResult.ok">Verificatie MISLUKT ✗ — inhoud lijkt afwijkend</span>
+      <div x-show="hashing.verifyResult" class="mt-4 border rounded p-3 space-y-3 text-sm"
+        :class="hashing.verifyResult && (hashing.verifyResult.verdict === 'IDENTICAL' || hashing.verifyResult.verdict === 'LAYOUT_MATCH') ? 'border-emerald-300 bg-emerald-50' : (hashing.verifyResult && hashing.verifyResult.verdict === 'PROBABLE' ? 'border-amber-300 bg-amber-50' : 'border-red-300 bg-red-50')">
+        <!-- Score-blok: groot percentage + verdict-badge -->
+        <div class="flex items-center gap-4">
+          <div class="text-4xl font-bold leading-none"
+               :class="hashing.verifyResult && hashing.verifyResult.verdict === 'IDENTICAL' ? 'text-emerald-700' : (hashing.verifyResult && hashing.verifyResult.verdict === 'LAYOUT_MATCH' ? 'text-emerald-600' : (hashing.verifyResult && hashing.verifyResult.verdict === 'PROBABLE' ? 'text-amber-700' : 'text-red-700'))"
+               x-text="hashing.verifyResult ? (Math.round(hashing.verifyResult.score * 1000) / 10) + '%' : ''"></div>
+          <div>
+            <div class="inline-block px-2 py-0.5 rounded font-semibold text-xs uppercase tracking-wide"
+                 :class="hashing.verifyResult && hashing.verifyResult.verdict === 'IDENTICAL' ? 'bg-emerald-600 text-white' : (hashing.verifyResult && hashing.verifyResult.verdict === 'LAYOUT_MATCH' ? 'bg-emerald-500 text-white' : (hashing.verifyResult && hashing.verifyResult.verdict === 'PROBABLE' ? 'bg-amber-500 text-white' : 'bg-red-600 text-white'))">
+              <span x-show="hashing.verifyResult && hashing.verifyResult.verdict === 'IDENTICAL'">✓ Identiek</span>
+              <span x-show="hashing.verifyResult && hashing.verifyResult.verdict === 'LAYOUT_MATCH'">✓ Layout-equivalent</span>
+              <span x-show="hashing.verifyResult && hashing.verifyResult.verdict === 'PROBABLE'">⚠ Mogelijke match</span>
+              <span x-show="hashing.verifyResult && hashing.verifyResult.verdict === 'NO_MATCH'">✗ Geen match</span>
+            </div>
+            <div class="text-xs text-slate-600 mt-1">
+              <span x-show="hashing.verifyResult && hashing.verifyResult.verdict === 'IDENTICAL'">Volledige match — visueel identiek aan origineel.</span>
+              <span x-show="hashing.verifyResult && hashing.verifyResult.verdict === 'LAYOUT_MATCH'">Layout match — kleine edits, recompressie of watermerk; inhoud equivalent.</span>
+              <span x-show="hashing.verifyResult && hashing.verifyResult.verdict === 'PROBABLE'">Mogelijke match — zwaar gerecomprimeerd, gecropped, of partiële match. Handmatige check aanbevolen.</span>
+              <span x-show="hashing.verifyResult && hashing.verifyResult.verdict === 'NO_MATCH'">Geen overeenkomst — dit is geen variant van het origineel.</span>
+            </div>
+            <div class="text-xs text-slate-500 mt-1" x-show="hashing.verifyResult && hashing.verifyResult.schema">
+              Schema: <span class="font-mono" x-text="hashing.verifyResult ? hashing.verifyResult.schema : ''"></span>
+            </div>
+          </div>
         </div>
+
         <div>
           <span class="text-slate-600">File-hash:</span>
           <span :class="hashing.verifyResult && hashing.verifyResult.file.ok ? 'text-emerald-700' : 'text-amber-700'" x-text="hashing.verifyResult && hashing.verifyResult.file.ok ? 'match' : 'mismatch (verwacht na PoA-flow — payload + watermerk wijzigen bytes)'"></span>
@@ -1002,12 +1023,29 @@
         </div>
         <template x-if="hashing.verifyResult && hashing.verifyResult.pages.length">
           <div>
-            <div class="text-slate-600 mb-1">Pagina-pHashes (Hamming-afstand t.o.v. origineel):</div>
-            <ul class="font-mono text-xs space-y-0.5">
-              <template x-for="p in hashing.verifyResult.pages" :key="p.page">
-                <li>p<span x-text="p.page"></span>: <span :class="p.hamming <= 5 ? 'text-emerald-700' : (p.hamming <= 15 ? 'text-amber-700' : 'text-red-700')" x-text="p.hamming + '/64'"></span> (<span x-text="p.actual"></span> vs <span x-text="p.expected"></span>)</li>
-              </template>
-            </ul>
+            <div class="text-slate-600 mb-1">Per pagina — scores per pHash-laag:</div>
+            <table class="text-xs w-full">
+              <thead class="text-slate-500">
+                <tr>
+                  <th class="text-left pr-2">Pagina</th>
+                  <th class="text-left pr-2">avg 8×8</th>
+                  <th class="text-left pr-2">dCT 16×16</th>
+                  <th class="text-left pr-2">dHash 16×16</th>
+                  <th class="text-left pr-2">max</th>
+                </tr>
+              </thead>
+              <tbody class="font-mono">
+                <template x-for="p in hashing.verifyResult.pages" :key="p.page">
+                  <tr>
+                    <td class="pr-2">p<span x-text="p.page"></span></td>
+                    <td class="pr-2"><span x-show="p.avg" :class="p.avg && p.avg.score >= 0.85 ? 'text-emerald-700' : (p.avg && p.avg.score >= 0.75 ? 'text-amber-700' : 'text-red-700')" x-text="p.avg ? (Math.round(p.avg.score * 1000) / 10) + '%' : '—'"></span></td>
+                    <td class="pr-2"><span x-show="p.dct" :class="p.dct && p.dct.score >= 0.85 ? 'text-emerald-700' : (p.dct && p.dct.score >= 0.75 ? 'text-amber-700' : 'text-red-700')" x-text="p.dct ? (Math.round(p.dct.score * 1000) / 10) + '%' : '—'"></span><span x-show="!p.dct" class="text-slate-400">—</span></td>
+                    <td class="pr-2"><span x-show="p.dhash" :class="p.dhash && p.dhash.score >= 0.85 ? 'text-emerald-700' : (p.dhash && p.dhash.score >= 0.75 ? 'text-amber-700' : 'text-red-700')" x-text="p.dhash ? (Math.round(p.dhash.score * 1000) / 10) + '%' : '—'"></span><span x-show="!p.dhash" class="text-slate-400">—</span></td>
+                    <td class="pr-2 font-semibold" :class="p.score >= 0.85 ? 'text-emerald-700' : (p.score >= 0.75 ? 'text-amber-700' : 'text-red-700')" x-text="(Math.round(p.score * 1000) / 10) + '%'"></td>
+                  </tr>
+                </template>
+              </tbody>
+            </table>
           </div>
         </template>
       </div>

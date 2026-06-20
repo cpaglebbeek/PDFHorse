@@ -82,9 +82,27 @@
 
 **Conflict-test:** Als tijd-pressure suggereert docs over te slaan: zet een TODO-comment in de feature + open ACTIONS-entry, niet "ik maak het later af" zonder spoor.
 
+## P-PoA-01 — Verdict via gemiddelde score over meest tolerante pHash-laag per pagina
+
+**Regel:** Een PoA-verify-uitslag is een gemiddelde van per-pagina scores, waarbij elke pagina-score = `max(score_avg, score_dct, score_dhash)`. Drempels: `≥ 0.98 → IDENTICAL`, `≥ 0.85 → LAYOUT_MATCH`, `≥ 0.75 → PROBABLE`, `< 0.75 → NO_MATCH`.
+
+**Waarom:** Eén pHash-laag (zoals het v0.22 8×8 avg-hash) is óf te ruw (screenshot-attack overleeft) óf te streng (cosmetische edits worden geweigerd). Drie complementaire lagen vangen verschillende edit-typen op:
+- **8×8 avg** — robuust voor lichte luminantie-shifts; backwards compat met v0.22 PoA-PDFs.
+- **16×16 dCT** — robuust voor recompressie, kleur-shifts, lichte filtering; gebruikt low-freq energie.
+- **16×16 dHash** — robuust voor uniforme helderheids-verschuivingen; vangt gradient-patronen op die dCT mist.
+
+De **meest tolerante laag** mag winnen per pagina, omdat een visueel-equivalente edit hoeft maar door één laag herkend te worden. Het **gemiddelde** over pagina's voorkomt dat één outlier-pagina (bv. blanco achterkant) de hele PDF kapot-scort.
+
+De drempels komen uit PhotoVerify v8.3 (`Meta_PhotoVerify/src/utils/perceptualHash.ts`), waar ze in productie zijn afgesteld voor JPEG-screenshots van originelen.
+
+**Toepassing:** `frontend/js/hash.js` levert `compareHashesElastic()` met 5×5 X/Y-shift-search (port van PhotoVerify). `frontend/js/app.js#runVerify()` berekent per pagina alle beschikbare lagen, kiest `max()`, gemiddeld over pagina's, mapt op verdict. `frontend/index.html` toont score als percentage + verdict-badge + uitleg-zin.
+
+**Conflict-test:** Als een vierde pHash-laag wordt toegevoegd: blijft de "max wint per pagina"-regel, geen herweging — anders moeten alle drempels opnieuw gecalibreerd. Als drempels gewijzigd worden: dit principe updaten + minimaal smoke-test op een gerefereerde set PoA-PDFs (identiek, watermerk-versie, gerecomprimeerd, gecropped, geheel ander document).
+
 ## Versiehistorie
 
 | Versie | Wijziging |
 |---|---|
 | v0.0.1-Warnock | Principes verspreid in CLAUDE.md + ARCHITECTURE.md, niet als eigen doc |
 | v0.3.0-Putman | **`docs/PRINCIPLES.md` aangemaakt** met 8 principes P1-P8 |
+| v0.23.0-Diffie | **P-PoA-01 toegevoegd** — verdict-formule en drempels voor multi-layer pHash verify |

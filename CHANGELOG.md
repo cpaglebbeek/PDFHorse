@@ -3,6 +3,48 @@
 > Versie-historie. Formaat: [Keep a Changelog](https://keepachangelog.com/) op hoofdlijnen, met PDFHorse-eigen codenamen (thema: PDF-pioniers).
 > Bijgewerkt bij elke release. Datums = release naar `main`.
 
+## [v0.23.0-Diffie] — 2026-06-20
+
+> Codenaam **Whitfield Diffie** — uitvinder publieke-sleutel-cryptografie (Diffie-Hellman 1976), fundament onder elke hash-anchor-trust-keten. `Brotz` blijft gereserveerd voor v1.0.0.
+
+### Functioneel
+
+- **Verdict met percentage** — verify-paneel toont nu een groot percentage (bv. `99.2%`) + verdict-badge (groen/oranje/rood) + uitleg-zin, in plaats van een binair ok/niet-ok.
+- **Vier verdict-klassen** (PhotoVerify-stijl drempels): `IDENTICAL` ≥ 98 % (volledige match), `LAYOUT_MATCH` ≥ 85 % (kleine edits/recompressie/watermerk), `PROBABLE` ≥ 75 % (gecropped of zwaar gerecomprimeerd — handmatige check aanbevolen), `NO_MATCH` < 75 %.
+- **Per pagina detail-tabel** — scores per pHash-laag (avg 8×8 / dCT 16×16 / dHash 16×16) + max-kolom.
+
+### Technisch
+
+- **`frontend/js/hash.js`**:
+  - `pagePerceptualHashesDct()` — 16×16 dCT-pHash (256 bit / 64 hex) per pagina. Pure-JS dCT-II (separabel rij→kolom, gepre-computed cosinus-tabel) over 32×32 grayscale → median-bit op 16×16 low-freq blok (DC[0,0] uit median uitgesloten).
+  - `pagePerceptualHashesDhash()` — 17×16 horizontale gradient dHash (256 bit / 64 hex) per pagina. Backup-laag.
+  - `compareHashesElastic(expectedHex, actualHex, bits=256, maxShift=2)` — port van `Meta_PhotoVerify/src/utils/perceptualHash.ts#compareHashesElastic` v8.3. 5×5 shift-search (−maxShift..+maxShift in X/Y), neemt minimale Hamming. Return `{ hamming, score }` met `score = 1 − hamming/bits`. Vierkant-fallback: bij niet-vierkant grid (sqrt(bits) niet integer) → gewone Hamming, geen shift.
+  - `pagePerceptualHashes()` (8×8 avg-hash) **blijft beschikbaar** voor backwards compat met v0.22 poa-v1 PDFs.
+  - Engine `VERSION` `0.1.0` → `0.2.0`.
+- **`frontend/js/app.js`**:
+  - `runHash()` berekent drie pHash-lagen tegelijk (avg + dCT + dHash) en schrijft ze als `meta.perceptual` / `meta.perceptual_dct` / `meta.perceptual_dhash`. Envelope-marker `pdfhorse: 'poa-v1'` → `'poa-v2'`, extra `meta.poa_schema: 'poa-v2'` veld.
+  - `runVerify()` detecteert envelope-versie (`poa-v1` of `poa-v2`). Voor poa-v2: per pagina elastic-compare op alle beschikbare lagen, per pagina `max(score_avg, score_dct, score_dhash)`. Eindscore = gemiddelde over pagina's. `verifyResult` krijgt `score` (0–1), `verdict` (`'IDENTICAL'|'LAYOUT_MATCH'|'PROBABLE'|'NO_MATCH'`), `schema` en per pagina sub-objecten `.avg`/`.dct`/`.dhash` met `{expected, actual, hamming, score}`. Backwards compat: v0.22 poa-v1 PDFs werken via avg-only-pad.
+- **`frontend/index.html`** Hashing-tab verify-paneel: groot score-percentage, verdict-badge, uitleg-zin, schema-marker, detail-tabel met kolommen avg / dCT / dHash / max.
+- **`frontend/i18n.json`**: 11 nieuwe NL→EN entries (verdict-labels + uitleg-zinnen + tabel-headers).
+- **Geen new deps** — dCT pure JS, geen FFT-library, geen `package.json`-aanpassing, geen extra CDN-script. P2 (CDN-only, geen build-pipeline) blijft intact.
+
+### Architectonisch
+
+- **Nieuw principe `P-PoA-01`** in `docs/PRINCIPLES.md`: "Verdict via gemiddelde score over meest tolerante pHash-laag per pagina; drempels 0.98/0.85/0.75."
+- Verdict-keten is monotoon: oude 8×8-only PDFs → score van avg-laag dicteert verdict (avg met maxShift=1 elastic), nieuwe PDFs → `max` over drie lagen → tolerantere uitslag bij visueel-equivalente edits.
+
+### Verified
+
+- **Backend pytest 34/34 groen** (27 oud + 7 nieuw `test_hash_v2.py`: bron-structuur-tests dat `pagePerceptualHashesDct`/`pagePerceptualHashesDhash`/`compareHashesElastic` aanwezig zijn én geëxporteerd via `window.PDFHorseHash`, dat de legacy 8×8 avg-hash behouden blijft, en dat de engine-VERSION bumped is naar `0.2.0`).
+- **Node-unit-tests 6/6 groen** (`scripts/test_hash_v2.js`): identieke 256-bit hex → score 1, 1-bit verschil → hamming ≤ 1, 16×16 1-pixel horizontale shift → score ≥ 0.95, random hex → score < 0.75, 64-bit avg met maxShift=1 → score 1, `_hexToBitArray` decodeert 1 hex char naar 4 bits MSB-first.
+- **`node --check`** op `hash.js` + `app.js`.
+
+### Notes
+
+- HC55 deploy openstaand — moet handmatig door user.
+- UI-screenshot in `docs/screens/` openstaand.
+- `compareHashesElastic` werkt ook op 64-bit avg-hash met `maxShift=1` (8×8 grid, 3×3 shift-bereik) — geeft v0.22 PoA-PDFs extra tolerantie tegen 1-pixel shifts ten opzichte van v0.22-verify-pad.
+
 ## [v0.22.0-Merkle] — 2026-06-18
 
 > Codenaam **Ralph Merkle** — uitvinder Merkle-trees, fundament onder hash-anchoring én Bitcoin's block-tree.

@@ -1325,7 +1325,14 @@ function pdfHorseApp() {
         const file = await H.fileHashes(original);
         if (!this.hashing.useSha512) delete file.sha512;
         const conceptual = this.hashing.useConceptual ? await H.conceptualHash(original) : null;
-        const perceptual = this.hashing.usePerceptual ? await H.pagePerceptualHashes(original) : null;
+        // v0.23-Diffie: drie pHash-lagen — 8x8 avg (compat v0.22), 16x16 dCT, 16x16 dHash.
+        let perceptual = null, perceptual_dct = null, perceptual_dhash = null;
+        if (this.hashing.usePerceptual) {
+          this.hashing.progress = 'perceptuele hashes (3 lagen)…';
+          perceptual = await H.pagePerceptualHashes(original);
+          perceptual_dct = await H.pagePerceptualHashesDct(original);
+          perceptual_dhash = await H.pagePerceptualHashesDhash(original);
+        }
 
         let anchor = null;
         if (this.hashing.useAnchor) {
@@ -1338,9 +1345,12 @@ function pdfHorseApp() {
         }
 
         const meta = {
+          poa_schema: 'poa-v2',
           file: file,
           conceptual: conceptual,
           perceptual: perceptual,
+          perceptual_dct: perceptual_dct,
+          perceptual_dhash: perceptual_dhash,
           anchor: anchor,
           ts: new Date().toISOString(),
           owner: {
@@ -1356,7 +1366,7 @@ function pdfHorseApp() {
 
         this.hashing.progress = 'payload inbedden…';
         const envelope = Payload.buildPlain('pdfhorse-poa.json',
-          new TextEncoder().encode(JSON.stringify({ pdfhorse: 'poa-v1', ...meta })));
+          new TextEncoder().encode(JSON.stringify({ pdfhorse: 'poa-v2', ...meta })));
         let outBytes = await Payload.attach(original, envelope);
 
         // Embed ook het rapport zelf als 2e bijlage — een doc kan twee bijlagen hebben.
@@ -1410,38 +1420,85 @@ function pdfHorseApp() {
         if (key) {
           const content = att[key].content || att[key];
           const obj = JSON.parse(new TextDecoder().decode(content instanceof Uint8Array ? content : new Uint8Array(content)));
-          meta = obj; // pdfhorse: 'poa-v1', ...
+          meta = obj; // pdfhorse: 'poa-v1' of 'poa-v2'
         } else {
           // backup: oude/andere flow met pdfhorse-payload.json
           try {
             const env = await Payload.extract(this.hashing.pdfBytes);
             const inner = JSON.parse(new TextDecoder().decode(H._u8FromB64(env.data)));
-            if (inner && inner.pdfhorse === 'poa-v1') meta = inner;
+            if (inner && (inner.pdfhorse === 'poa-v1' || inner.pdfhorse === 'poa-v2')) meta = inner;
           } catch (e) { /* geen payload */ }
         }
         if (!meta || !meta.file) throw new Error('Geen PoA-payload gevonden in deze PDF.');
 
-        // Belangrijk: file-hash herberekenen over de PDF WAAR de payload nog niet in zat — onmogelijk hier.
-        // We verifiëren daarom file-hash over de huidige PDF: bij niet-gewijzigd archief blijft de signed-PDF
-        // anders dan het origineel. Daarom slaan we de originele file-hash in payload op en accepteren we
-        // dat 'file mismatch' = na de PoA-flow is dat verwacht; conceptueel + perceptueel moeten wél matchen.
+        // Schema-detectie (poa-v1 = alleen 8x8 avg; poa-v2 = avg + dCT + dHash + elastic).
+        const schemaV2 = (meta.pdfhorse === 'poa-v2') || meta.poa_schema === 'poa-v2'
+          || !!(meta.perceptual_dct && meta.perceptual_dct.length);
+
         const fileNow = await H.fileHashes(this.hashing.pdfBytes);
         const conceptNow = meta.conceptual ? await H.conceptualHash(this.hashing.pdfBytes) : null;
-        const phNow = meta.perceptual ? await H.pagePerceptualHashes(this.hashing.pdfBytes) : null;
+        const phAvgNow = meta.perceptual ? await H.pagePerceptualHashes(this.hashing.pdfBytes) : null;
+        const phDctNow = (schemaV2 && meta.perceptual_dct) ? await H.pagePerceptualHashesDct(this.hashing.pdfBytes) : null;
+        const phDhashNow = (schemaV2 && meta.perceptual_dhash) ? await H.pagePerceptualHashesDhash(this.hashing.pdfBytes) : null;
 
+        // Per pagina: vergelijk alle beschikbare lagen elastic; eindscore = max over lagen.
         const pages = [];
-        if (phNow && meta.perceptual) {
-          for (let i = 0; i < Math.max(phNow.length, meta.perceptual.length); i++) {
-            const a = phNow[i] || '', e = meta.perceptual[i] || '';
-            pages.push({ page: i + 1, expected: e, actual: a, hamming: (a && e) ? H.hammingHex(a, e) : 64 });
+        const numPages = Math.max(
+          (phAvgNow || []).length, (meta.perceptual || []).length,
+          (phDctNow || []).length, (meta.perceptual_dct || []).length,
+          (phDhashNow || []).length, (meta.perceptual_dhash || []).length,
+        );
+        for (let i = 0; i < numPages; i++) {
+          const row = { page: i + 1 };
+          // avg (64 bit, vierkant 8x8 → maxShift=1)
+          if (phAvgNow && meta.perceptual) {
+            const a = phAvgNow[i] || '', e = meta.perceptual[i] || '';
+            const r = H.compareHashesElastic(e, a, 64, 1);
+            row.avg = { expected: e, actual: a, hamming: r.hamming, score: r.score };
           }
+          if (phDctNow && meta.perceptual_dct) {
+            const a = phDctNow[i] || '', e = meta.perceptual_dct[i] || '';
+            const r = H.compareHashesElastic(e, a, 256, 2);
+            row.dct = { expected: e, actual: a, hamming: r.hamming, score: r.score };
+          }
+          if (phDhashNow && meta.perceptual_dhash) {
+            const a = phDhashNow[i] || '', e = meta.perceptual_dhash[i] || '';
+            const r = H.compareHashesElastic(e, a, 256, 2);
+            row.dhash = { expected: e, actual: a, hamming: r.hamming, score: r.score };
+          }
+          // Meest tolerante laag wint
+          const scores = [row.avg, row.dct, row.dhash]
+            .filter(function (s) { return s; })
+            .map(function (s) { return s.score; });
+          row.score = scores.length ? Math.max.apply(null, scores) : 0;
+          // Backwards compat: behoud .hamming/.expected/.actual van avg-laag voor v1-only PDFs
+          if (row.avg) {
+            row.expected = row.avg.expected; row.actual = row.avg.actual; row.hamming = row.avg.hamming;
+          } else if (row.dct) {
+            row.expected = row.dct.expected; row.actual = row.dct.actual; row.hamming = row.dct.hamming;
+          }
+          pages.push(row);
         }
-        // Verdict: file-hash zal mismatchen na PoA-flow (bijlage + watermerk veranderen de PDF-bytes).
-        // Daarom is "ok" gebaseerd op conceptueel (identieke tekstlaag) + perceptueel (Hamming ≤ 5/64).
+
+        // Eindscore = gemiddelde over alle pagina's. Verdict via drempels.
+        const avgScore = pages.length
+          ? pages.reduce(function (acc, p) { return acc + p.score; }, 0) / pages.length
+          : (conceptNow && conceptNow.sha256 === meta.conceptual.sha256 ? 1 : 0);
+        let verdict = 'NO_MATCH';
+        if (avgScore >= 0.98) verdict = 'IDENTICAL';
+        else if (avgScore >= 0.85) verdict = 'LAYOUT_MATCH';
+        else if (avgScore >= 0.75) verdict = 'PROBABLE';
+
+        // Conceptueel blijft strikte tekstlaag-match; geeft extra signaal in detailtabel.
         const conceptOk = conceptNow ? conceptNow.sha256 === meta.conceptual.sha256 : true;
-        const pagesOk = pages.length === 0 || pages.every(function (p) { return p.hamming <= 5; });
+        // "ok" = oude binaire view voor backwards compat (UI overlay leest verdict apart).
+        const ok = (verdict === 'IDENTICAL' || verdict === 'LAYOUT_MATCH') && conceptOk;
+
         this.hashing.verifyResult = {
-          ok: conceptOk && pagesOk,
+          ok: ok,
+          schema: schemaV2 ? 'poa-v2' : 'poa-v1',
+          score: avgScore,
+          verdict: verdict,
           file: { ok: fileNow.sha256 === meta.file.sha256, expected: meta.file.sha256, actual: fileNow.sha256 },
           conceptual: conceptNow ? { ok: conceptOk, expected: meta.conceptual.sha256, actual: conceptNow.sha256 } : null,
           pages: pages,

@@ -1,0 +1,229 @@
+// GEGENEREERD door ModelArchDSL — niet met de hand bewerken.
+// Bron: archmodel/tobe.archdsl (ontwerp) + archmodel/asis.facts.json (code).
+set language archimate
+set title "PDFHorse — Conceptueel"
+set subtitle "Architectuurplaat conceptueel niveau (ArchiMate/Dragon1)"
+set purpose "PDF's samenvoegen, splitsen, invullen, ondertekenen, converteren, OCR'en en mailen zonder account en zonder permanente opslag; zoveel mogelijk in de browser."
+show legend true
+switch badges on
+set current state "As-is (code)"
+set target state "To-be (ontwerp)"
+
+Group laag_motivation "Motivatie" {
+    -width 1220
+    -height 440
+}
+Driver dr_privacy "PDF's bevatten gevoelige inhoud (contracten, medisch, financieel)" in laag_motivation {
+    -attr status = "ontwerp"
+}
+Driver dr_alternatief "Anoniem alternatief voor Adobe, Smallpdf en iLovePDF" in laag_motivation {
+    -attr status = "ontwerp"
+}
+Goal go_anoniem "PDF bewerken zonder account, tracking of opslag" in laag_motivation {
+    -attr status = "ontwerp"
+}
+Goal go_minimaal "Inhoud verlaat het apparaat alleen waar onvermijdelijk" in laag_motivation {
+    -attr status = "ontwerp"
+}
+Principle pr_client "P1 Client-first" in laag_motivation {
+    -attr status = "ontwerp"
+}
+Principle pr_cdn "P2 CDN-only, geen build-pipeline" in laag_motivation {
+    -attr status = "ontwerp"
+}
+Principle pr_stateless "P3 Stateless server, geen database" in laag_motivation {
+    -attr status = "ontwerp"
+}
+Principle pr_anoniem "P4 Geen account, geen tracking" in laag_motivation {
+    -attr status = "ontwerp"
+}
+Principle pr_mailonly "P5 Mail alleen naar opgegeven adres, geen archief" in laag_motivation {
+    -attr status = "ontwerp"
+}
+Principle pr_agpl "P6 AGPL-3.0 copyleft" in laag_motivation {
+    -attr status = "ontwerp"
+}
+Principle pr_limieten "P7 Limieten als deel van het ontwerp" in laag_motivation {
+    -attr status = "ontwerp"
+}
+Principle pr_docs "P8 Documentatie is onderdeel van de feature" in laag_motivation {
+    -attr status = "ontwerp"
+}
+Requirement rq_wissen "Server-uploads direct gewist (BackgroundTask rmtree)" in laag_motivation {
+    -attr status = "ontwerp"
+}
+Requirement rq_ratelimit "Mail: max 5 MB bijlage, 5 per uur per IP" in laag_motivation {
+    -attr status = "ontwerp"
+}
+Constraint cn_limieten "50 MB per PDF, 20 MB per office-bestand, 100 MB per sessie" in laag_motivation {
+    -attr status = "ontwerp"
+}
+Constraint cn_from "Afzender moet gelijk zijn aan SMTP-login (Hostinger weigert anders)" in laag_motivation {
+    -attr status = "ontwerp"
+}
+
+Group laag_business "Business" {
+    -width 1220
+    -height 700
+}
+BusinessActor ba_gebruiker "Anonieme gebruiker" in laag_business {
+    -attr status = "ontwerp"
+}
+BusinessActor ba_ontvanger "Ontvanger van de gemailde PDF" in laag_business {
+    -attr status = "ontwerp"
+}
+BusinessService bs_bewerken "PDF bewerken in de browser" in laag_business {
+    -attr status = "ontwerp"
+}
+BusinessService bs_converteren "Documenten en afbeeldingen naar PDF" in laag_business {
+    -attr status = "ontwerp"
+}
+BusinessService bs_ocr "Gescande PDF doorzoekbaar maken (NL+EN)" in laag_business {
+    -attr status = "ontwerp"
+}
+BusinessService bs_uitvoer "Resultaat downloaden, printen of mailen" in laag_business {
+    -attr status = "ontwerp"
+}
+BusinessService bs_watermerk "Onzichtbaar watermerk zetten en lezen" in laag_business {
+    -attr status = "ontwerp"
+}
+BusinessService bs_payload "Bestand (versleuteld) in een PDF inbedden" in laag_business {
+    -attr status = "ontwerp"
+}
+BusinessService bs_delen "Delen en meekijken" in laag_business {
+    -fill "#f0f9ff"
+    -stroke "#0284c7"
+    -attr status = "extern"
+}
+BusinessProcess bp_bestanden_kiezen "PDF's en .docx kiezen" in laag_business {
+    -attr status = "ontwerp"
+}
+BusinessProcess bp_volgorde "Volgorde bepalen" in laag_business {
+    -attr status = "ontwerp"
+}
+BusinessProcess bp_mergen "Samenvoegen tot één PDF" in laag_business {
+    -attr status = "ontwerp"
+}
+BusinessProcess bp_pdf_kiezen "PDF kiezen" in laag_business {
+    -attr status = "ontwerp"
+}
+BusinessProcess bp_invullen "Velden invullen (AUTO of klik)" in laag_business {
+    -attr status = "ontwerp"
+}
+BusinessProcess bp_ondertekenen "Handtekening plaatsen (bitmap, SVG of live)" in laag_business {
+    -attr status = "ontwerp"
+}
+BusinessProcess bp_downloaden "Downloaden of printen" in laag_business {
+    -attr status = "ontwerp"
+}
+BusinessProcess bp_office_kiezen "Office-document of afbeelding kiezen" in laag_business {
+    -attr status = "ontwerp"
+}
+BusinessProcess bp_converteren "Naar PDF converteren" in laag_business {
+    -attr status = "ontwerp"
+}
+BusinessProcess bp_mailen "PDF mailen naar ontvanger" in laag_business {
+    -attr status = "ontwerp"
+}
+BusinessProcess bp_scan_kiezen "Gescande PDF uploaden" in laag_business {
+    -attr status = "ontwerp"
+}
+BusinessProcess bp_ocr "OCR uitvoeren" in laag_business {
+    -attr status = "ontwerp"
+}
+BusinessProcess bp_sleutels "Sleutelpaar maken en downloaden (JWK)" in laag_business {
+    -attr status = "ontwerp"
+}
+BusinessProcess bp_inbedden "Bestand versleuteld inbedden" in laag_business {
+    -attr status = "ontwerp"
+}
+BusinessProcess bp_uitlezen "Payload uitlezen en ontsleutelen" in laag_business {
+    -attr status = "ontwerp"
+}
+BusinessProcess bp_watermerk_zetten "Watermerk zetten (tekst, SVG/PNG of document)" in laag_business {
+    -attr status = "ontwerp"
+}
+BusinessProcess bp_watermerk_lezen "Watermerk teruglezen" in laag_business {
+    -attr status = "ontwerp"
+}
+BusinessProcess bp_splitsen "Splitsen op paginabereiken" in laag_business {
+    -attr status = "ontwerp"
+}
+
+// Posities (deterministische raster-layout per ArchiMate-laag)
+pos laag_motivation 40, 40
+pos dr_privacy 60, 90
+pos dr_alternatief 260, 90
+pos go_anoniem 460, 90
+pos go_minimaal 660, 90
+pos pr_client 860, 90
+pos pr_cdn 1060, 90
+pos pr_stateless 60, 220
+pos pr_anoniem 260, 220
+pos pr_mailonly 460, 220
+pos pr_agpl 660, 220
+pos pr_limieten 860, 220
+pos pr_docs 1060, 220
+pos rq_wissen 60, 350
+pos rq_ratelimit 260, 350
+pos cn_limieten 460, 350
+pos cn_from 660, 350
+pos laag_business 40, 520
+pos ba_gebruiker 60, 570
+pos ba_ontvanger 260, 570
+pos bs_bewerken 460, 570
+pos bs_converteren 660, 570
+pos bs_ocr 860, 570
+pos bs_uitvoer 1060, 570
+pos bs_watermerk 60, 700
+pos bs_payload 260, 700
+pos bs_delen 460, 700
+pos bp_bestanden_kiezen 660, 700
+pos bp_volgorde 860, 700
+pos bp_mergen 1060, 700
+pos bp_pdf_kiezen 60, 830
+pos bp_invullen 260, 830
+pos bp_ondertekenen 460, 830
+pos bp_downloaden 660, 830
+pos bp_office_kiezen 860, 830
+pos bp_converteren 1060, 830
+pos bp_mailen 60, 960
+pos bp_scan_kiezen 260, 960
+pos bp_ocr 460, 960
+pos bp_sleutels 660, 960
+pos bp_inbedden 860, 960
+pos bp_uitlezen 1060, 960
+pos bp_watermerk_zetten 60, 1090
+pos bp_watermerk_lezen 260, 1090
+pos bp_splitsen 460, 1090
+
+// Relaties — Dragon1-compatibel: werkwoordvorm, of ongetypeerd waar Dragon1 het type afleidt
+dr_privacy influences go_minimaal "drijft aan"
+dr_alternatief influences go_anoniem "drijft aan"
+go_minimaal influences pr_client "leidt tot"
+go_anoniem influences pr_anoniem "leidt tot"
+pr_client influences pr_stateless "vereist"
+pr_anoniem influences pr_mailonly "vereist"
+pr_stateless influences rq_wissen "vereist"
+pr_limieten influences cn_limieten "legt vast"
+pr_limieten influences rq_ratelimit "legt vast"
+pr_agpl influences go_anoniem "maakt controleerbaar"
+pr_docs influences go_anoniem "borgt"
+ba_gebruiker -> bp_pdf_kiezen
+ba_gebruiker -> bp_bestanden_kiezen
+ba_gebruiker -> bp_office_kiezen
+ba_gebruiker -> bp_scan_kiezen
+ba_gebruiker -> bp_sleutels
+bp_mailen -> ba_ontvanger "mail met PDF-bijlage"
+bp_mergen realizes bs_bewerken
+bp_splitsen realizes bs_bewerken
+bp_invullen realizes bs_bewerken
+bp_ondertekenen realizes bs_bewerken
+bp_converteren realizes bs_converteren
+bp_ocr realizes bs_ocr
+bp_downloaden realizes bs_uitvoer
+bp_mailen realizes bs_uitvoer
+bp_watermerk_zetten realizes bs_watermerk
+bp_watermerk_lezen realizes bs_watermerk
+bp_inbedden realizes bs_payload
+bp_uitlezen realizes bs_payload

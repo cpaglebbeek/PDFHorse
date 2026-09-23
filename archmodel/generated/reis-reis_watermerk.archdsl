@@ -1,0 +1,89 @@
+// GEGENEREERD door ModelArchDSL — niet met de hand bewerken.
+// Bron: archmodel/tobe.archdsl (ontwerp) + archmodel/asis.facts.json (code).
+set language archimate
+set title "PDFHorse — Klantreis: watermerk zetten en teruglezen"
+set subtitle "Klantreis (stappen genummerd, afspeelbaar in het portaal)"
+set purpose "Onzichtbaar tekst-, beeld- of document-watermerk; lezen via metadata-payload en tekstlaag."
+show legend true
+switch badges on
+set current state "As-is (code)"
+set target state "To-be (ontwerp)"
+
+Group laag_business "Business" {
+    -width 1220
+    -height 310
+}
+BusinessActor ba_gebruiker "Anonieme gebruiker" in laag_business {
+    -attr status = "ontwerp"
+}
+BusinessProcess bp_pdf_kiezen "PDF kiezen" in laag_business {
+    -step 1
+    -attr status = "ontwerp"
+}
+BusinessProcess bp_watermerk_zetten "Watermerk zetten (tekst, SVG/PNG of document)" in laag_business {
+    -step 2
+    -attr status = "ontwerp"
+}
+BusinessProcess bp_downloaden "Downloaden of printen" in laag_business {
+    -step 3
+    -attr status = "ontwerp"
+}
+BusinessProcess bp_watermerk_lezen "Watermerk teruglezen" in laag_business {
+    -step 4
+    -attr status = "ontwerp"
+}
+BusinessService bs_uitvoer "Resultaat downloaden, printen of mailen" in laag_business {
+    -attr status = "ontwerp"
+}
+BusinessService bs_watermerk "Onzichtbaar watermerk zetten en lezen" in laag_business {
+    -attr status = "ontwerp"
+}
+
+Group laag_application "Applicatie" {
+    -width 620
+    -height 180
+}
+ApplicationComponent ac_bewerker "PDF-bewerker: merge, split, invullen, ondertekenen" in laag_application {
+    -stroke "#16a34a"
+    -attr status = "gebouwd"
+    -attr trace = "module:frontend/js"
+    -description "app.js met pdf-lib 1.17.1, PDF.js 4.0.379 en signature_pad 5.0.4. AUTO-veldherkenning ook op platte PDF's (v0.18.0)."
+}
+ApplicationComponent ac_outputbar "Output-bar: Download, Print, Mail" in laag_application {
+    -stroke "#16a34a"
+    -attr status = "gebouwd"
+    -attr trace = "module:frontend/js"
+}
+ApplicationComponent ac_watermark "Watermerk-engine (watermark.js)" in laag_application {
+    -stroke "#16a34a"
+    -attr status = "gebouwd"
+    -attr trace = "module:frontend/js"
+    -description "Tekst- en beeld-watermerk in achtergrondkleur, payload in PDF-metadata; document-modus via de payload-engine (v0.21.0)."
+}
+
+// Posities (deterministische raster-layout per ArchiMate-laag)
+pos laag_business 40, 40
+pos ba_gebruiker 60, 90
+pos bp_pdf_kiezen 260, 90
+pos bp_watermerk_zetten 460, 90
+pos bp_downloaden 660, 90
+pos bp_watermerk_lezen 860, 90
+pos bs_uitvoer 1060, 90
+pos bs_watermerk 60, 220
+pos laag_application 40, 390
+pos ac_bewerker 60, 440
+pos ac_outputbar 260, 440
+pos ac_watermark 460, 440
+
+// Relaties — Dragon1-compatibel: werkwoordvorm, of ongetypeerd waar Dragon1 het type afleidt
+ba_gebruiker -> bp_pdf_kiezen
+bp_downloaden realizes bs_uitvoer
+bp_watermerk_zetten realizes bs_watermerk
+bp_watermerk_lezen realizes bs_watermerk
+ac_bewerker serves bp_pdf_kiezen
+ac_outputbar serves bp_downloaden
+ac_watermark serves bp_watermerk_zetten
+ac_watermark serves bp_watermerk_lezen
+bp_pdf_kiezen -> bp_watermerk_zetten
+bp_watermerk_zetten -> bp_downloaden
+bp_downloaden -> bp_watermerk_lezen

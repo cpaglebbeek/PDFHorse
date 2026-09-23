@@ -1,0 +1,30 @@
+{
+  "tool": "ModelArchDSL",
+  "toolVersion": "0.1.0",
+  "engineSha256": "0bdabb3b46febb6190ec1e1698d285c5b140e15f4c7f07e7c22a85f2105dacae",
+  "tobeSha256": "f7b89615fc27759432e6f31d5b210fd2f059dc05093119b7b4725d7ae3a85959",
+  "factsSha256": "5ca85be3a6bcf2adeff2858a8c849838b2d08df45e1a0dfd78823c9f12124aa1",
+  "plates": {
+    "conceptueel.archdsl": "8c05922d286dfa6653584041580c3ea4b85739e0694d98d519f39227828834e9",
+    "logisch.archdsl": "6abe3fde2e8f272da6e2d60e1eb4c7d012dd89b2382c902e96f533f8cc7e497e",
+    "fysiek.archdsl": "56a4c16e32b94da2bde8852ceb45d854a8f2bdab4e6e7a5fe7adcfb00b78a34b",
+    "reis-reis_merge.archdsl": "19a10d03d0fb8e9627b4c9b81da766c51b46cd34c92aa973d83112cb5c57a90f",
+    "reis-reis_invullen.archdsl": "f10bf02c0447b980a1533696c9c915deb06e57c4e2f70843f3cab3b6046d13cc",
+    "reis-reis_converteren.archdsl": "fa920a34d4822b59b19749455cc364df2211917aa406940c407d897649ed257f",
+    "reis-reis_ocr.archdsl": "fc4e226227aac8f0330d40c471eeb85dc67ad7a29b5d169e9a369475cc24bf3a",
+    "reis-reis_payload.archdsl": "7cc4e1571500b13fe8b1c2d7fa6ab92d068d57e4c22a5163f3ca932f80b0442b",
+    "reis-reis_watermerk.archdsl": "7edf077632979e6f7fdfaecee6f95053b47eba189830af0da80a289a3bef9545"
+  },
+  "counts": {
+    "gebouwd": 26,
+    "deels": 0,
+    "gepland": 4,
+    "alleen_code": 0,
+    "ongetraceerd": 0,
+    "extern": 6,
+    "ontwerp": 42
+  },
+  "facts": 56,
+  "unclaimedFacts": 0,
+  "warnings": 0
+}

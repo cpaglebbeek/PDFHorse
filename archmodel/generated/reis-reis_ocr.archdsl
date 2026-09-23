@@ -1,0 +1,82 @@
+// GEGENEREERD door ModelArchDSL — niet met de hand bewerken.
+// Bron: archmodel/tobe.archdsl (ontwerp) + archmodel/asis.facts.json (code).
+set language archimate
+set title "PDFHorse — Klantreis: gescande PDF doorzoekbaar maken"
+set subtitle "Klantreis (stappen genummerd, afspeelbaar in het portaal)"
+set purpose "Tijdelijke upload, ocrmypdf nld+eng met --skip-text, direct gewist."
+show legend true
+switch badges on
+set current state "As-is (code)"
+set target state "To-be (ontwerp)"
+
+Group laag_business "Business" {
+    -width 1220
+    -height 180
+}
+BusinessActor ba_gebruiker "Anonieme gebruiker" in laag_business {
+    -attr status = "ontwerp"
+}
+BusinessProcess bp_scan_kiezen "Gescande PDF uploaden" in laag_business {
+    -step 1
+    -attr status = "ontwerp"
+}
+BusinessProcess bp_ocr "OCR uitvoeren" in laag_business {
+    -step 2
+    -attr status = "ontwerp"
+}
+BusinessProcess bp_downloaden "Downloaden of printen" in laag_business {
+    -step 3
+    -attr status = "ontwerp"
+}
+BusinessService bs_ocr "Gescande PDF doorzoekbaar maken (NL+EN)" in laag_business {
+    -attr status = "ontwerp"
+}
+BusinessService bs_uitvoer "Resultaat downloaden, printen of mailen" in laag_business {
+    -attr status = "ontwerp"
+}
+
+Group laag_application "Applicatie" {
+    -width 620
+    -height 180
+}
+ApplicationComponent ac_frontend "PDFHorse-frontend (Alpine.js, één index.html)" in laag_application {
+    -stroke "#16a34a"
+    -attr status = "gebouwd"
+    -attr trace = "module:frontend/js"
+    -description "Negen tabs; CDN-only zonder build (P2). Merge/split/invullen/ondertekenen/watermerk/payload volledig in de browser (P1)."
+}
+ApplicationInterface ai_ocr "OCR-API" in laag_application {
+    -stroke "#16a34a"
+    -attr status = "gebouwd"
+    -attr trace = "route:POST /api/ocr, config:MAX_OCR_BYTES"
+}
+ApplicationComponent ac_outputbar "Output-bar: Download, Print, Mail" in laag_application {
+    -stroke "#16a34a"
+    -attr status = "gebouwd"
+    -attr trace = "module:frontend/js"
+}
+
+// Posities (deterministische raster-layout per ArchiMate-laag)
+pos laag_business 40, 40
+pos ba_gebruiker 60, 90
+pos bp_scan_kiezen 260, 90
+pos bp_ocr 460, 90
+pos bp_downloaden 660, 90
+pos bs_ocr 860, 90
+pos bs_uitvoer 1060, 90
+pos laag_application 40, 260
+pos ac_frontend 60, 310
+pos ai_ocr 260, 310
+pos ac_outputbar 460, 310
+
+// Relaties — Dragon1-compatibel: werkwoordvorm, of ongetypeerd waar Dragon1 het type afleidt
+ba_gebruiker -> bp_scan_kiezen
+bp_ocr realizes bs_ocr
+bp_downloaden realizes bs_uitvoer
+ac_outputbar serves bp_downloaden
+ac_frontend serves bp_scan_kiezen
+ai_ocr serves bp_ocr
+ac_frontend composes ac_outputbar
+ac_frontend serves ai_ocr "POST"
+bp_scan_kiezen -> bp_ocr
+bp_ocr -> bp_downloaden

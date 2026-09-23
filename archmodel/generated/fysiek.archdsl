@@ -1,0 +1,107 @@
+// GEGENEREERD door ModelArchDSL — niet met de hand bewerken.
+// Bron: archmodel/tobe.archdsl (ontwerp) + archmodel/asis.facts.json (code).
+set language archimate
+set title "PDFHorse — Fysiek"
+set subtitle "Architectuurplaat fysiek niveau (ArchiMate/Dragon1)"
+set purpose "PDF's samenvoegen, splitsen, invullen, ondertekenen, converteren, OCR'en en mailen zonder account en zonder permanente opslag; zoveel mogelijk in de browser."
+show legend true
+switch badges on
+set current state "As-is (code)"
+set target state "To-be (ontwerp)"
+
+Group laag_technology "Technologie" {
+    -width 1220
+    -height 310
+}
+Node nd_hc55 "HC55 157.180.29.184 (Hetzner, EU)" in laag_technology {
+    -fill "#f0f9ff"
+    -stroke "#0284c7"
+    -attr status = "extern"
+}
+Node nd_hostinger "Hostinger (smtp.hostinger.com)" in laag_technology {
+    -fill "#f0f9ff"
+    -stroke "#0284c7"
+    -attr status = "extern"
+}
+Node nd_icthorse "icthorse.nl/PDFHorse/ (reverse-proxy via Hostinger)" in laag_technology {
+    -fill "#fff7ed"
+    -stroke "#ea580c"
+    -state target
+    -attr status = "gepland"
+    -description "README: gepland; nu LIVE op horsecloud55.ddns.net/PDFHorse/."
+}
+SystemSoftware ss_uvicorn "uvicorn :3963 (pdfhorse.service, 2 workers)" in laag_technology {
+    -stroke "#16a34a"
+    -attr status = "gebouwd"
+    -attr trace = "unit:pdfhorse.service, dep:pip:uvicorn, dep:pip:fastapi, dep:pip:python-multipart, config:APP_HOST, config:APP_PORT"
+}
+SystemSoftware ss_soffice "LibreOffice headless (soffice)" in laag_technology {
+    -stroke "#16a34a"
+    -attr status = "gebouwd"
+    -attr trace = "config:SOFFICE_*"
+}
+SystemSoftware ss_ocrmypdf "ocrmypdf 16.5.0 + Tesseract nld+eng" in laag_technology {
+    -stroke "#16a34a"
+    -attr status = "gebouwd"
+    -attr trace = "dep:pip:ocrmypdf, dep:pip:pikepdf, config:OCRMYPDF_BIN, config:OCR_*"
+    -description "pikepdf<9 vastgepind omdat ocrmypdf 16.5.0 de oude Pdf.check-API verwacht."
+}
+SystemSoftware ss_slowapi "slowapi (geïnstalleerd, niet gebruikt op /api/mail)" in laag_technology {
+    -stroke "#16a34a"
+    -attr status = "gebouwd"
+    -attr trace = "dep:pip:slowapi"
+}
+SystemSoftware ss_test "Testgereedschap (pytest + httpx)" in laag_technology {
+    -stroke "#16a34a"
+    -attr status = "gebouwd"
+    -attr trace = "dep:pip:pytest, dep:pip:httpx"
+}
+SystemSoftware ss_cleanup "Opruimjob /tmp/pdfhorse (ouder dan 30 min)" in laag_technology {
+    -fill "#fff7ed"
+    -stroke "#ea580c"
+    -state target
+    -attr status = "gepland"
+    -description "ARCHITECTURE Limieten + ACTIONS open; deploy/cleanup.cron staat nog op TBD."
+}
+TechnologyInterface ti_nginx_static "nginx /PDFHorse/ statisch (/var/www/pdfhorse/frontend)" in laag_technology {
+    -stroke "#16a34a"
+    -attr status = "gebouwd"
+    -attr trace = "nginx:/PDFHorse/, nginx:/PDFHorse, nginx:*html$, nginx:*webp)$"
+}
+TechnologyInterface ti_nginx_api "nginx /PDFHorse/api/ naar :3963 (access_log off)" in laag_technology {
+    -stroke "#16a34a"
+    -attr status = "gebouwd"
+    -attr trace = "nginx:/PDFHorse/api/"
+}
+TechnologyService ts_smtp "Hostinger SMTP :587 STARTTLS (login info@icthorse.nl)" in laag_technology {
+    -stroke "#16a34a"
+    -attr status = "gebouwd"
+    -attr trace = "config:SMTP_*"
+}
+
+// Posities (deterministische raster-layout per ArchiMate-laag)
+pos laag_technology 40, 40
+pos nd_hc55 60, 90
+pos nd_hostinger 260, 90
+pos nd_icthorse 460, 90
+pos ss_uvicorn 660, 90
+pos ss_soffice 860, 90
+pos ss_ocrmypdf 1060, 90
+pos ss_slowapi 60, 220
+pos ss_test 260, 220
+pos ss_cleanup 460, 220
+pos ti_nginx_static 660, 220
+pos ti_nginx_api 860, 220
+pos ts_smtp 1060, 220
+
+// Relaties — Dragon1-compatibel: werkwoordvorm, of ongetypeerd waar Dragon1 het type afleidt
+ts_smtp associates nd_hostinger "draait op"
+nd_hc55 -> ss_uvicorn "host"
+nd_hc55 -> ss_soffice "host"
+nd_hc55 -> ss_ocrmypdf "host"
+nd_hc55 -> ti_nginx_static "host"
+nd_hc55 -> ss_cleanup "host"
+ss_slowapi associates ss_uvicorn "geïnstalleerd, ongebruikt"
+ti_nginx_api serves ss_uvicorn "proxy"
+ti_nginx_static composes ti_nginx_api
+nd_icthorse serves ti_nginx_static "to-be"

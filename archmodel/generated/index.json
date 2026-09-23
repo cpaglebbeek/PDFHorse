@@ -1,0 +1,1917 @@
+{
+  "plates": [
+    {
+      "file": "conceptueel.archdsl",
+      "kind": "niveau",
+      "level": "conceptueel",
+      "label": "Conceptueel",
+      "elements": 43,
+      "relations": 29,
+      "sha256": "8c05922d286dfa6653584041580c3ea4b85739e0694d98d519f39227828834e9"
+    },
+    {
+      "file": "logisch.archdsl",
+      "kind": "niveau",
+      "level": "logisch",
+      "label": "Logisch",
+      "elements": 23,
+      "relations": 24,
+      "sha256": "6abe3fde2e8f272da6e2d60e1eb4c7d012dd89b2382c902e96f533f8cc7e497e"
+    },
+    {
+      "file": "fysiek.archdsl",
+      "kind": "niveau",
+      "level": "fysiek",
+      "label": "Fysiek",
+      "elements": 12,
+      "relations": 10,
+      "sha256": "56a4c16e32b94da2bde8852ceb45d854a8f2bdab4e6e7a5fe7adcfb00b78a34b"
+    },
+    {
+      "file": "reis-reis_merge.archdsl",
+      "kind": "klantreis",
+      "journey": "reis_merge",
+      "label": "Klantreis: PDF's en .docx samenvoegen",
+      "steps": [
+        "bp_bestanden_kiezen",
+        "bp_volgorde",
+        "bp_mergen",
+        "bp_downloaden"
+      ],
+      "actor": "ba_gebruiker",
+      "elements": 10,
+      "relations": 11,
+      "sha256": "19a10d03d0fb8e9627b4c9b81da766c51b46cd34c92aa973d83112cb5c57a90f"
+    },
+    {
+      "file": "reis-reis_invullen.archdsl",
+      "kind": "klantreis",
+      "journey": "reis_invullen",
+      "label": "Klantreis: formulier invullen en ondertekenen",
+      "steps": [
+        "bp_pdf_kiezen",
+        "bp_invullen",
+        "bp_ondertekenen",
+        "bp_downloaden"
+      ],
+      "actor": "ba_gebruiker",
+      "elements": 10,
+      "relations": 12,
+      "sha256": "f10bf02c0447b980a1533696c9c915deb06e57c4e2f70843f3cab3b6046d13cc"
+    },
+    {
+      "file": "reis-reis_converteren.archdsl",
+      "kind": "klantreis",
+      "journey": "reis_converteren",
+      "label": "Klantreis: converteren en mailen",
+      "steps": [
+        "bp_office_kiezen",
+        "bp_converteren",
+        "bp_mailen"
+      ],
+      "actor": "ba_gebruiker",
+      "elements": 12,
+      "relations": 15,
+      "sha256": "fa920a34d4822b59b19749455cc364df2211917aa406940c407d897649ed257f"
+    },
+    {
+      "file": "reis-reis_ocr.archdsl",
+      "kind": "klantreis",
+      "journey": "reis_ocr",
+      "label": "Klantreis: gescande PDF doorzoekbaar maken",
+      "steps": [
+        "bp_scan_kiezen",
+        "bp_ocr",
+        "bp_downloaden"
+      ],
+      "actor": "ba_gebruiker",
+      "elements": 9,
+      "relations": 10,
+      "sha256": "fc4e226227aac8f0330d40c471eeb85dc67ad7a29b5d169e9a369475cc24bf3a"
+    },
+    {
+      "file": "reis-reis_payload.archdsl",
+      "kind": "klantreis",
+      "journey": "reis_payload",
+      "label": "Klantreis: bestand versleuteld meesturen in een PDF",
+      "steps": [
+        "bp_sleutels",
+        "bp_inbedden",
+        "bp_uitlezen"
+      ],
+      "actor": "ba_gebruiker",
+      "elements": 6,
+      "relations": 8,
+      "sha256": "7cc4e1571500b13fe8b1c2d7fa6ab92d068d57e4c22a5163f3ca932f80b0442b"
+    },
+    {
+      "file": "reis-reis_watermerk.archdsl",
+      "kind": "klantreis",
+      "journey": "reis_watermerk",
+      "label": "Klantreis: watermerk zetten en teruglezen",
+      "steps": [
+        "bp_pdf_kiezen",
+        "bp_watermerk_zetten",
+        "bp_downloaden",
+        "bp_watermerk_lezen"
+      ],
+      "actor": "ba_gebruiker",
+      "elements": 10,
+      "relations": 11,
+      "sha256": "7edf077632979e6f7fdfaecee6f95053b47eba189830af0da80a289a3bef9545"
+    }
+  ],
+  "repo": "PDFHorse",
+  "title": "PDFHorse",
+  "purpose": "PDF's samenvoegen, splitsen, invullen, ondertekenen, converteren, OCR'en en mailen zonder account en zonder permanente opslag; zoveel mogelijk in de browser.",
+  "tool": {
+    "name": "ModelArchDSL",
+    "version": "0.1.0",
+    "engineSha256": "0bdabb3b46febb6190ec1e1698d285c5b140e15f4c7f07e7c22a85f2105dacae"
+  },
+  "status": {
+    "gebouwd": {
+      "label": "Gebouwd",
+      "stroke": "#16a34a"
+    },
+    "deels": {
+      "label": "Deels gebouwd",
+      "stroke": "#ca8a04",
+      "fill": "#fefce8"
+    },
+    "gepland": {
+      "label": "Gepland (to-be)",
+      "stroke": "#ea580c",
+      "fill": "#fff7ed",
+      "state": "target"
+    },
+    "alleen_code": {
+      "label": "Alleen in code",
+      "stroke": "#7c3aed",
+      "fill": "#f5f3ff",
+      "state": "current"
+    },
+    "ongetraceerd": {
+      "label": "Niet traceerbaar",
+      "stroke": "#64748b"
+    },
+    "extern": {
+      "label": "Extern (andere repo)",
+      "stroke": "#0284c7",
+      "fill": "#f0f9ff"
+    },
+    "ontwerp": {
+      "label": "Ontwerp",
+      "stroke": ""
+    }
+  },
+  "counts": {
+    "gebouwd": 26,
+    "deels": 0,
+    "gepland": 4,
+    "alleen_code": 0,
+    "ongetraceerd": 0,
+    "extern": 6,
+    "ontwerp": 42
+  },
+  "facts": 56,
+  "unclaimedFacts": 0,
+  "warnings": [],
+  "elements": [
+    {
+      "id": "ac_backend",
+      "type": "ApplicationComponent",
+      "label": "PDFHorse-backend (FastAPI, stateless)",
+      "layer": "application",
+      "levels": [
+        "logisch"
+      ],
+      "status": "gebouwd",
+      "trace": [
+        "module:backend",
+        "config:ALLOWED_ORIGIN",
+        "config:PDFHORSE_DEV"
+      ],
+      "missing": [],
+      "auto": false,
+      "facts": [
+        {
+          "id": "config:ALLOWED_ORIGIN",
+          "sources": [
+            "backend/main.py:52"
+          ]
+        },
+        {
+          "id": "config:PDFHORSE_DEV",
+          "sources": [
+            "backend/main.py:131"
+          ]
+        },
+        {
+          "id": "module:backend",
+          "sources": [
+            "backend/__init__.py"
+          ]
+        }
+      ],
+      "factCount": 3,
+      "description": "Alleen voor wat niet in de browser kan: office-conversie, OCR en mail (P1, P3). CORS strikt op ALLOWED_ORIGIN."
+    },
+    {
+      "id": "ac_bewerker",
+      "type": "ApplicationComponent",
+      "label": "PDF-bewerker: merge, split, invullen, ondertekenen",
+      "layer": "application",
+      "levels": [
+        "logisch"
+      ],
+      "status": "gebouwd",
+      "trace": [
+        "module:frontend/js"
+      ],
+      "missing": [],
+      "auto": false,
+      "facts": [
+        {
+          "id": "module:frontend/js",
+          "sources": [
+            "frontend/js/app.js"
+          ]
+        }
+      ],
+      "factCount": 1,
+      "description": "app.js met pdf-lib 1.17.1, PDF.js 4.0.379 en signature_pad 5.0.4. AUTO-veldherkenning ook op platte PDF's (v0.18.0)."
+    },
+    {
+      "id": "ac_frontend",
+      "type": "ApplicationComponent",
+      "label": "PDFHorse-frontend (Alpine.js, één index.html)",
+      "layer": "application",
+      "levels": [
+        "logisch"
+      ],
+      "status": "gebouwd",
+      "trace": [
+        "module:frontend/js"
+      ],
+      "missing": [],
+      "auto": false,
+      "facts": [
+        {
+          "id": "module:frontend/js",
+          "sources": [
+            "frontend/js/app.js"
+          ]
+        }
+      ],
+      "factCount": 1,
+      "description": "Negen tabs; CDN-only zonder build (P2). Merge/split/invullen/ondertekenen/watermerk/payload volledig in de browser (P1)."
+    },
+    {
+      "id": "ac_i18n",
+      "type": "ApplicationComponent",
+      "label": "Taallaag NL/EN (i18n.js + i18n.json)",
+      "layer": "application",
+      "levels": [
+        "logisch"
+      ],
+      "status": "gebouwd",
+      "trace": [
+        "module:frontend/js"
+      ],
+      "missing": [],
+      "auto": false,
+      "facts": [
+        {
+          "id": "module:frontend/js",
+          "sources": [
+            "frontend/js/app.js"
+          ]
+        }
+      ],
+      "factCount": 1,
+      "description": ""
+    },
+    {
+      "id": "ac_outputbar",
+      "type": "ApplicationComponent",
+      "label": "Output-bar: Download, Print, Mail",
+      "layer": "application",
+      "levels": [
+        "logisch"
+      ],
+      "status": "gebouwd",
+      "trace": [
+        "module:frontend/js"
+      ],
+      "missing": [],
+      "auto": false,
+      "facts": [
+        {
+          "id": "module:frontend/js",
+          "sources": [
+            "frontend/js/app.js"
+          ]
+        }
+      ],
+      "factCount": 1,
+      "description": ""
+    },
+    {
+      "id": "ac_payload",
+      "type": "ApplicationComponent",
+      "label": "Payload-engine (payload.js, AES-GCM + RSA-OAEP)",
+      "layer": "application",
+      "levels": [
+        "logisch"
+      ],
+      "status": "gebouwd",
+      "trace": [
+        "module:frontend/js"
+      ],
+      "missing": [],
+      "auto": false,
+      "facts": [
+        {
+          "id": "module:frontend/js",
+          "sources": [
+            "frontend/js/app.js"
+          ]
+        }
+      ],
+      "factCount": 1,
+      "description": "Embedded-file bijlage pdfhorse-payload.json; hybride versleuteling via WebCrypto."
+    },
+    {
+      "id": "ac_ratelimit",
+      "type": "ApplicationComponent",
+      "label": "Rate-limit in-process bucket per IP",
+      "layer": "application",
+      "levels": [
+        "logisch"
+      ],
+      "status": "gebouwd",
+      "trace": [
+        "config:MAIL_RATE_*"
+      ],
+      "missing": [],
+      "auto": false,
+      "facts": [
+        {
+          "id": "config:MAIL_RATE_PER_HOUR",
+          "sources": [
+            "backend/main.py:86"
+          ]
+        },
+        {
+          "id": "config:MAIL_RATE_WINDOW_S",
+          "sources": [
+            "backend/main.py:87"
+          ]
+        }
+      ],
+      "factCount": 2,
+      "description": "Vervangt slowapi-decorator wegens ForwardRef-conflict (Python 3.14 + FastAPI + Annotated)."
+    },
+    {
+      "id": "ac_scripts",
+      "type": "ApplicationComponent",
+      "label": "Hulpscripts: schermafdrukken en live-verificatie (Playwright)",
+      "layer": "application",
+      "levels": [
+        "logisch"
+      ],
+      "status": "gebouwd",
+      "trace": [
+        "module:scripts"
+      ],
+      "missing": [],
+      "auto": false,
+      "facts": [
+        {
+          "id": "module:scripts",
+          "sources": [
+            "scripts/take_screens.py"
+          ]
+        }
+      ],
+      "factCount": 1,
+      "description": ""
+    },
+    {
+      "id": "ac_watermark",
+      "type": "ApplicationComponent",
+      "label": "Watermerk-engine (watermark.js)",
+      "layer": "application",
+      "levels": [
+        "logisch"
+      ],
+      "status": "gebouwd",
+      "trace": [
+        "module:frontend/js"
+      ],
+      "missing": [],
+      "auto": false,
+      "facts": [
+        {
+          "id": "module:frontend/js",
+          "sources": [
+            "frontend/js/app.js"
+          ]
+        }
+      ],
+      "factCount": 1,
+      "description": "Tekst- en beeld-watermerk in achtergrondkleur, payload in PDF-metadata; document-modus via de payload-engine (v0.21.0)."
+    },
+    {
+      "id": "ai_convert",
+      "type": "ApplicationInterface",
+      "label": "Conversie-API docx/xlsx/odt/rtf naar PDF",
+      "layer": "application",
+      "levels": [
+        "logisch"
+      ],
+      "status": "gebouwd",
+      "trace": [
+        "route:POST /api/convert/*",
+        "config:MAX_DOCX_BYTES",
+        "config:MAX_XLSX_BYTES",
+        "config:MAX_ODT_BYTES",
+        "config:MAX_RTF_BYTES"
+      ],
+      "missing": [],
+      "auto": false,
+      "facts": [
+        {
+          "id": "config:MAX_DOCX_BYTES",
+          "sources": [
+            "backend/main.py:55"
+          ]
+        },
+        {
+          "id": "config:MAX_ODT_BYTES",
+          "sources": [
+            "backend/main.py:57"
+          ]
+        },
+        {
+          "id": "config:MAX_RTF_BYTES",
+          "sources": [
+            "backend/main.py:58"
+          ]
+        },
+        {
+          "id": "config:MAX_XLSX_BYTES",
+          "sources": [
+            "backend/main.py:56"
+          ]
+        },
+        {
+          "id": "route:POST /api/convert/docx-to-pdf",
+          "sources": [
+            "backend/main.py:249"
+          ]
+        },
+        {
+          "id": "route:POST /api/convert/odt-to-pdf",
+          "sources": [
+            "backend/main.py:261"
+          ]
+        },
+        {
+          "id": "route:POST /api/convert/rtf-to-pdf",
+          "sources": [
+            "backend/main.py:267"
+          ]
+        },
+        {
+          "id": "route:POST /api/convert/xlsx-to-pdf",
+          "sources": [
+            "backend/main.py:255"
+          ]
+        }
+      ],
+      "factCount": 8,
+      "description": ""
+    },
+    {
+      "id": "ai_info",
+      "type": "ApplicationInterface",
+      "label": "Health- en limieten-API",
+      "layer": "application",
+      "levels": [
+        "logisch"
+      ],
+      "status": "gebouwd",
+      "trace": [
+        "route:GET /api/health",
+        "route:GET /api/limits"
+      ],
+      "missing": [],
+      "auto": false,
+      "facts": [
+        {
+          "id": "route:GET /api/health",
+          "sources": [
+            "backend/main.py:143"
+          ]
+        },
+        {
+          "id": "route:GET /api/limits",
+          "sources": [
+            "backend/main.py:153"
+          ]
+        }
+      ],
+      "factCount": 2,
+      "description": ""
+    },
+    {
+      "id": "ai_mail",
+      "type": "ApplicationInterface",
+      "label": "Mail-API",
+      "layer": "application",
+      "levels": [
+        "logisch"
+      ],
+      "status": "gebouwd",
+      "trace": [
+        "route:POST /api/mail",
+        "config:MAIL_FROM",
+        "config:MAIL_REPLY_TO",
+        "config:MAX_MAIL_*"
+      ],
+      "missing": [],
+      "auto": false,
+      "facts": [
+        {
+          "id": "config:MAIL_FROM",
+          "sources": [
+            "backend/main.py:81"
+          ]
+        },
+        {
+          "id": "config:MAIL_REPLY_TO",
+          "sources": [
+            "backend/main.py:82"
+          ]
+        },
+        {
+          "id": "config:MAX_MAIL_ATTACHMENT_BYTES",
+          "sources": [
+            "backend/main.py:83"
+          ]
+        },
+        {
+          "id": "config:MAX_MAIL_BODY_LEN",
+          "sources": [
+            "backend/main.py:85"
+          ]
+        },
+        {
+          "id": "config:MAX_MAIL_SUBJECT_LEN",
+          "sources": [
+            "backend/main.py:84"
+          ]
+        },
+        {
+          "id": "route:POST /api/mail",
+          "sources": [
+            "backend/main.py:414"
+          ]
+        }
+      ],
+      "factCount": 6,
+      "description": ""
+    },
+    {
+      "id": "ai_ocr",
+      "type": "ApplicationInterface",
+      "label": "OCR-API",
+      "layer": "application",
+      "levels": [
+        "logisch"
+      ],
+      "status": "gebouwd",
+      "trace": [
+        "route:POST /api/ocr",
+        "config:MAX_OCR_BYTES"
+      ],
+      "missing": [],
+      "auto": false,
+      "facts": [
+        {
+          "id": "config:MAX_OCR_BYTES",
+          "sources": [
+            "backend/main.py:59"
+          ]
+        },
+        {
+          "id": "route:POST /api/ocr",
+          "sources": [
+            "backend/main.py:283"
+          ]
+        }
+      ],
+      "factCount": 2,
+      "description": ""
+    },
+    {
+      "id": "ar_env",
+      "type": "Artifact",
+      "label": "Instellingen /opt/pdfhorse/.env (mode 600)",
+      "layer": "application",
+      "levels": [
+        "logisch"
+      ],
+      "status": "gebouwd",
+      "trace": [
+        "config:MAX_UPLOAD_SIZE_BYTES",
+        "config:MAX_SESSION_TOTAL_BYTES"
+      ],
+      "missing": [],
+      "auto": false,
+      "facts": [
+        {
+          "id": "config:MAX_SESSION_TOTAL_BYTES",
+          "sources": [
+            "backend/main.py:54"
+          ]
+        },
+        {
+          "id": "config:MAX_UPLOAD_SIZE_BYTES",
+          "sources": [
+            "backend/main.py:53"
+          ]
+        }
+      ],
+      "factCount": 2,
+      "description": ""
+    },
+    {
+      "id": "do_payload",
+      "type": "DataObject",
+      "label": "Payload-envelope pdfhorse-payload.json",
+      "layer": "application",
+      "levels": [
+        "logisch"
+      ],
+      "status": "gebouwd",
+      "trace": [
+        "module:frontend/js"
+      ],
+      "missing": [],
+      "auto": false,
+      "facts": [
+        {
+          "id": "module:frontend/js",
+          "sources": [
+            "frontend/js/app.js"
+          ]
+        }
+      ],
+      "factCount": 1,
+      "description": ""
+    },
+    {
+      "id": "do_pdf",
+      "type": "DataObject",
+      "label": "PDF en bewerkingsstaat (alleen in browsergeheugen)",
+      "layer": "application",
+      "levels": [
+        "logisch"
+      ],
+      "status": "gebouwd",
+      "trace": [
+        "module:frontend/js"
+      ],
+      "missing": [],
+      "auto": false,
+      "facts": [
+        {
+          "id": "module:frontend/js",
+          "sources": [
+            "frontend/js/app.js"
+          ]
+        }
+      ],
+      "factCount": 1,
+      "description": ""
+    },
+    {
+      "id": "do_sleutel",
+      "type": "DataObject",
+      "label": "Sleutelpaar als JWK (alleen bij de gebruiker)",
+      "layer": "application",
+      "levels": [
+        "logisch"
+      ],
+      "status": "gebouwd",
+      "trace": [
+        "module:frontend/js"
+      ],
+      "missing": [],
+      "auto": false,
+      "facts": [
+        {
+          "id": "module:frontend/js",
+          "sources": [
+            "frontend/js/app.js"
+          ]
+        }
+      ],
+      "factCount": 1,
+      "description": ""
+    },
+    {
+      "id": "do_tmp",
+      "type": "DataObject",
+      "label": "Tijdelijke upload /tmp/pdfhorse/<uuid>",
+      "layer": "application",
+      "levels": [
+        "logisch"
+      ],
+      "status": "gebouwd",
+      "trace": [
+        "config:TMP_DIR",
+        "config:SESSION_TIMEOUT_S"
+      ],
+      "missing": [],
+      "auto": false,
+      "facts": [
+        {
+          "id": "config:SESSION_TIMEOUT_S",
+          "sources": [
+            "backend/main.py:60"
+          ]
+        },
+        {
+          "id": "config:TMP_DIR",
+          "sources": [
+            "backend/main.py:61"
+          ]
+        }
+      ],
+      "factCount": 2,
+      "description": ""
+    },
+    {
+      "id": "ss_ocrmypdf",
+      "type": "SystemSoftware",
+      "label": "ocrmypdf 16.5.0 + Tesseract nld+eng",
+      "layer": "technology",
+      "levels": [
+        "fysiek"
+      ],
+      "status": "gebouwd",
+      "trace": [
+        "dep:pip:ocrmypdf",
+        "dep:pip:pikepdf",
+        "config:OCRMYPDF_BIN",
+        "config:OCR_*"
+      ],
+      "missing": [],
+      "auto": false,
+      "facts": [
+        {
+          "id": "config:OCRMYPDF_BIN",
+          "sources": [
+            "backend/main.py:64"
+          ]
+        },
+        {
+          "id": "config:OCR_LANGUAGES",
+          "sources": [
+            "backend/main.py:65"
+          ]
+        },
+        {
+          "id": "config:OCR_TIMEOUT_S",
+          "sources": [
+            "backend/main.py:66"
+          ]
+        },
+        {
+          "id": "dep:pip:ocrmypdf",
+          "sources": [
+            "backend/requirements.txt:5"
+          ]
+        },
+        {
+          "id": "dep:pip:pikepdf",
+          "sources": [
+            "backend/requirements.txt:6"
+          ]
+        }
+      ],
+      "factCount": 5,
+      "description": "pikepdf<9 vastgepind omdat ocrmypdf 16.5.0 de oude Pdf.check-API verwacht."
+    },
+    {
+      "id": "ss_slowapi",
+      "type": "SystemSoftware",
+      "label": "slowapi (geïnstalleerd, niet gebruikt op /api/mail)",
+      "layer": "technology",
+      "levels": [
+        "fysiek"
+      ],
+      "status": "gebouwd",
+      "trace": [
+        "dep:pip:slowapi"
+      ],
+      "missing": [],
+      "auto": false,
+      "facts": [
+        {
+          "id": "dep:pip:slowapi",
+          "sources": [
+            "backend/requirements.txt:4"
+          ]
+        }
+      ],
+      "factCount": 1,
+      "description": ""
+    },
+    {
+      "id": "ss_soffice",
+      "type": "SystemSoftware",
+      "label": "LibreOffice headless (soffice)",
+      "layer": "technology",
+      "levels": [
+        "fysiek"
+      ],
+      "status": "gebouwd",
+      "trace": [
+        "config:SOFFICE_*"
+      ],
+      "missing": [],
+      "auto": false,
+      "facts": [
+        {
+          "id": "config:SOFFICE_BIN",
+          "sources": [
+            "backend/main.py:62"
+          ]
+        },
+        {
+          "id": "config:SOFFICE_TIMEOUT_S",
+          "sources": [
+            "backend/main.py:63"
+          ]
+        }
+      ],
+      "factCount": 2,
+      "description": ""
+    },
+    {
+      "id": "ss_test",
+      "type": "SystemSoftware",
+      "label": "Testgereedschap (pytest + httpx)",
+      "layer": "technology",
+      "levels": [
+        "fysiek"
+      ],
+      "status": "gebouwd",
+      "trace": [
+        "dep:pip:pytest",
+        "dep:pip:httpx"
+      ],
+      "missing": [],
+      "auto": false,
+      "facts": [
+        {
+          "id": "dep:pip:httpx",
+          "sources": [
+            "backend/requirements.txt:12"
+          ]
+        },
+        {
+          "id": "dep:pip:pytest",
+          "sources": [
+            "backend/requirements.txt:11"
+          ]
+        }
+      ],
+      "factCount": 2,
+      "description": ""
+    },
+    {
+      "id": "ss_uvicorn",
+      "type": "SystemSoftware",
+      "label": "uvicorn :3963 (pdfhorse.service, 2 workers)",
+      "layer": "technology",
+      "levels": [
+        "fysiek"
+      ],
+      "status": "gebouwd",
+      "trace": [
+        "unit:pdfhorse.service",
+        "dep:pip:uvicorn",
+        "dep:pip:fastapi",
+        "dep:pip:python-multipart",
+        "config:APP_HOST",
+        "config:APP_PORT"
+      ],
+      "missing": [],
+      "auto": false,
+      "facts": [
+        {
+          "id": "config:APP_HOST",
+          "sources": [
+            "backend/main.py:50"
+          ]
+        },
+        {
+          "id": "config:APP_PORT",
+          "sources": [
+            "backend/main.py:51"
+          ]
+        },
+        {
+          "id": "dep:pip:fastapi",
+          "sources": [
+            "backend/requirements.txt:1"
+          ]
+        },
+        {
+          "id": "dep:pip:python-multipart",
+          "sources": [
+            "backend/requirements.txt:3"
+          ]
+        },
+        {
+          "id": "dep:pip:uvicorn",
+          "sources": [
+            "backend/requirements.txt:2"
+          ]
+        },
+        {
+          "id": "unit:pdfhorse.service",
+          "sources": [
+            "deploy/pdfhorse.service"
+          ]
+        }
+      ],
+      "factCount": 6,
+      "description": ""
+    },
+    {
+      "id": "ti_nginx_api",
+      "type": "TechnologyInterface",
+      "label": "nginx /PDFHorse/api/ naar :3963 (access_log off)",
+      "layer": "technology",
+      "levels": [
+        "fysiek"
+      ],
+      "status": "gebouwd",
+      "trace": [
+        "nginx:/PDFHorse/api/"
+      ],
+      "missing": [],
+      "auto": false,
+      "facts": [
+        {
+          "id": "nginx:/PDFHorse/api/",
+          "sources": [
+            "deploy/nginx-pdfhorse.conf:30"
+          ]
+        }
+      ],
+      "factCount": 1,
+      "description": ""
+    },
+    {
+      "id": "ti_nginx_static",
+      "type": "TechnologyInterface",
+      "label": "nginx /PDFHorse/ statisch (/var/www/pdfhorse/frontend)",
+      "layer": "technology",
+      "levels": [
+        "fysiek"
+      ],
+      "status": "gebouwd",
+      "trace": [
+        "nginx:/PDFHorse/",
+        "nginx:/PDFHorse",
+        "nginx:*html$",
+        "nginx:*webp)$"
+      ],
+      "missing": [],
+      "auto": false,
+      "facts": [
+        {
+          "id": "nginx:/PDFHorse",
+          "sources": [
+            "deploy/nginx-pdfhorse.conf:52"
+          ]
+        },
+        {
+          "id": "nginx:/PDFHorse/",
+          "sources": [
+            "deploy/nginx-pdfhorse.conf:11"
+          ]
+        },
+        {
+          "id": "nginx:\\.(css|js|svg|png|webp)$",
+          "sources": [
+            "deploy/nginx-pdfhorse.conf:22"
+          ]
+        },
+        {
+          "id": "nginx:\\.html$",
+          "sources": [
+            "deploy/nginx-pdfhorse.conf:17"
+          ]
+        }
+      ],
+      "factCount": 4,
+      "description": ""
+    },
+    {
+      "id": "ts_smtp",
+      "type": "TechnologyService",
+      "label": "Hostinger SMTP :587 STARTTLS (login info@icthorse.nl)",
+      "layer": "technology",
+      "levels": [
+        "fysiek"
+      ],
+      "status": "gebouwd",
+      "trace": [
+        "config:SMTP_*"
+      ],
+      "missing": [],
+      "auto": false,
+      "facts": [
+        {
+          "id": "config:SMTP_HOST",
+          "sources": [
+            "backend/main.py:71"
+          ]
+        },
+        {
+          "id": "config:SMTP_PASSWORD",
+          "sources": [
+            "backend/main.py:74"
+          ]
+        },
+        {
+          "id": "config:SMTP_PORT",
+          "sources": [
+            "backend/main.py:72"
+          ]
+        },
+        {
+          "id": "config:SMTP_TIMEOUT_S",
+          "sources": [
+            "backend/main.py:76"
+          ]
+        },
+        {
+          "id": "config:SMTP_USER",
+          "sources": [
+            "backend/main.py:73"
+          ]
+        },
+        {
+          "id": "config:SMTP_USE_SSL",
+          "sources": [
+            "backend/main.py:75"
+          ]
+        }
+      ],
+      "factCount": 6,
+      "description": ""
+    },
+    {
+      "id": "ac_pades",
+      "type": "ApplicationComponent",
+      "label": "PAdES digitale handtekening (X.509)",
+      "layer": "application",
+      "levels": [
+        "logisch"
+      ],
+      "status": "gepland",
+      "trace": [],
+      "missing": [],
+      "auto": false,
+      "facts": [],
+      "factCount": 0,
+      "description": "ACTIONS 'Later (v1.0.0-Brotz)': apart traject, niet MVP."
+    },
+    {
+      "id": "ac_pwa",
+      "type": "ApplicationComponent",
+      "label": "PWA / offline-modus (Service Worker)",
+      "layer": "application",
+      "levels": [
+        "logisch"
+      ],
+      "status": "gepland",
+      "trace": [],
+      "missing": [],
+      "auto": false,
+      "facts": [],
+      "factCount": 0,
+      "description": "ACTIONS 'Later (v1.0.0-Brotz)'."
+    },
+    {
+      "id": "nd_icthorse",
+      "type": "Node",
+      "label": "icthorse.nl/PDFHorse/ (reverse-proxy via Hostinger)",
+      "layer": "technology",
+      "levels": [
+        "fysiek"
+      ],
+      "status": "gepland",
+      "trace": [],
+      "missing": [],
+      "auto": false,
+      "facts": [],
+      "factCount": 0,
+      "description": "README: gepland; nu LIVE op horsecloud55.ddns.net/PDFHorse/."
+    },
+    {
+      "id": "ss_cleanup",
+      "type": "SystemSoftware",
+      "label": "Opruimjob /tmp/pdfhorse (ouder dan 30 min)",
+      "layer": "technology",
+      "levels": [
+        "fysiek"
+      ],
+      "status": "gepland",
+      "trace": [],
+      "missing": [],
+      "auto": false,
+      "facts": [],
+      "factCount": 0,
+      "description": "ARCHITECTURE Limieten + ACTIONS open; deploy/cleanup.cron staat nog op TBD."
+    },
+    {
+      "id": "ac_cdn",
+      "type": "ApplicationComponent",
+      "label": "CDN-bibliotheken (Tailwind, Alpine, pdf-lib, PDF.js, signature_pad, ImageTracer)",
+      "layer": "application",
+      "levels": [
+        "logisch"
+      ],
+      "status": "extern",
+      "trace": [],
+      "missing": [],
+      "auto": false,
+      "facts": [],
+      "factCount": 0,
+      "description": ""
+    },
+    {
+      "id": "ac_clipboard",
+      "type": "ApplicationComponent",
+      "label": "iCt Horse clipboard-artefact (icthorse.nl/clipboard)",
+      "layer": "application",
+      "levels": [
+        "logisch"
+      ],
+      "status": "extern",
+      "trace": [],
+      "missing": [],
+      "auto": false,
+      "facts": [],
+      "factCount": 0,
+      "description": ""
+    },
+    {
+      "id": "ac_donate",
+      "type": "ApplicationComponent",
+      "label": "iCt Horse donate-artefact (bunq.me-link + QR)",
+      "layer": "application",
+      "levels": [
+        "logisch"
+      ],
+      "status": "extern",
+      "trace": [],
+      "missing": [],
+      "auto": false,
+      "facts": [],
+      "factCount": 0,
+      "description": ""
+    },
+    {
+      "id": "bs_delen",
+      "type": "BusinessService",
+      "label": "Delen en meekijken",
+      "layer": "business",
+      "levels": [
+        "conceptueel"
+      ],
+      "status": "extern",
+      "trace": [],
+      "missing": [],
+      "auto": false,
+      "facts": [],
+      "factCount": 0,
+      "description": ""
+    },
+    {
+      "id": "nd_hc55",
+      "type": "Node",
+      "label": "HC55 157.180.29.184 (Hetzner, EU)",
+      "layer": "technology",
+      "levels": [
+        "fysiek"
+      ],
+      "status": "extern",
+      "trace": [],
+      "missing": [],
+      "auto": false,
+      "facts": [],
+      "factCount": 0,
+      "description": ""
+    },
+    {
+      "id": "nd_hostinger",
+      "type": "Node",
+      "label": "Hostinger (smtp.hostinger.com)",
+      "layer": "technology",
+      "levels": [
+        "fysiek"
+      ],
+      "status": "extern",
+      "trace": [],
+      "missing": [],
+      "auto": false,
+      "facts": [],
+      "factCount": 0,
+      "description": ""
+    },
+    {
+      "id": "ba_gebruiker",
+      "type": "BusinessActor",
+      "label": "Anonieme gebruiker",
+      "layer": "business",
+      "levels": [
+        "conceptueel"
+      ],
+      "status": "ontwerp",
+      "trace": [],
+      "missing": [],
+      "auto": false,
+      "facts": [],
+      "factCount": 0,
+      "description": ""
+    },
+    {
+      "id": "ba_ontvanger",
+      "type": "BusinessActor",
+      "label": "Ontvanger van de gemailde PDF",
+      "layer": "business",
+      "levels": [
+        "conceptueel"
+      ],
+      "status": "ontwerp",
+      "trace": [],
+      "missing": [],
+      "auto": false,
+      "facts": [],
+      "factCount": 0,
+      "description": ""
+    },
+    {
+      "id": "bp_bestanden_kiezen",
+      "type": "BusinessProcess",
+      "label": "PDF's en .docx kiezen",
+      "layer": "business",
+      "levels": [
+        "conceptueel"
+      ],
+      "status": "ontwerp",
+      "trace": [],
+      "missing": [],
+      "auto": false,
+      "facts": [],
+      "factCount": 0,
+      "description": ""
+    },
+    {
+      "id": "bp_converteren",
+      "type": "BusinessProcess",
+      "label": "Naar PDF converteren",
+      "layer": "business",
+      "levels": [
+        "conceptueel"
+      ],
+      "status": "ontwerp",
+      "trace": [],
+      "missing": [],
+      "auto": false,
+      "facts": [],
+      "factCount": 0,
+      "description": ""
+    },
+    {
+      "id": "bp_downloaden",
+      "type": "BusinessProcess",
+      "label": "Downloaden of printen",
+      "layer": "business",
+      "levels": [
+        "conceptueel"
+      ],
+      "status": "ontwerp",
+      "trace": [],
+      "missing": [],
+      "auto": false,
+      "facts": [],
+      "factCount": 0,
+      "description": ""
+    },
+    {
+      "id": "bp_inbedden",
+      "type": "BusinessProcess",
+      "label": "Bestand versleuteld inbedden",
+      "layer": "business",
+      "levels": [
+        "conceptueel"
+      ],
+      "status": "ontwerp",
+      "trace": [],
+      "missing": [],
+      "auto": false,
+      "facts": [],
+      "factCount": 0,
+      "description": ""
+    },
+    {
+      "id": "bp_invullen",
+      "type": "BusinessProcess",
+      "label": "Velden invullen (AUTO of klik)",
+      "layer": "business",
+      "levels": [
+        "conceptueel"
+      ],
+      "status": "ontwerp",
+      "trace": [],
+      "missing": [],
+      "auto": false,
+      "facts": [],
+      "factCount": 0,
+      "description": ""
+    },
+    {
+      "id": "bp_mailen",
+      "type": "BusinessProcess",
+      "label": "PDF mailen naar ontvanger",
+      "layer": "business",
+      "levels": [
+        "conceptueel"
+      ],
+      "status": "ontwerp",
+      "trace": [],
+      "missing": [],
+      "auto": false,
+      "facts": [],
+      "factCount": 0,
+      "description": ""
+    },
+    {
+      "id": "bp_mergen",
+      "type": "BusinessProcess",
+      "label": "Samenvoegen tot één PDF",
+      "layer": "business",
+      "levels": [
+        "conceptueel"
+      ],
+      "status": "ontwerp",
+      "trace": [],
+      "missing": [],
+      "auto": false,
+      "facts": [],
+      "factCount": 0,
+      "description": ""
+    },
+    {
+      "id": "bp_ocr",
+      "type": "BusinessProcess",
+      "label": "OCR uitvoeren",
+      "layer": "business",
+      "levels": [
+        "conceptueel"
+      ],
+      "status": "ontwerp",
+      "trace": [],
+      "missing": [],
+      "auto": false,
+      "facts": [],
+      "factCount": 0,
+      "description": ""
+    },
+    {
+      "id": "bp_office_kiezen",
+      "type": "BusinessProcess",
+      "label": "Office-document of afbeelding kiezen",
+      "layer": "business",
+      "levels": [
+        "conceptueel"
+      ],
+      "status": "ontwerp",
+      "trace": [],
+      "missing": [],
+      "auto": false,
+      "facts": [],
+      "factCount": 0,
+      "description": ""
+    },
+    {
+      "id": "bp_ondertekenen",
+      "type": "BusinessProcess",
+      "label": "Handtekening plaatsen (bitmap, SVG of live)",
+      "layer": "business",
+      "levels": [
+        "conceptueel"
+      ],
+      "status": "ontwerp",
+      "trace": [],
+      "missing": [],
+      "auto": false,
+      "facts": [],
+      "factCount": 0,
+      "description": ""
+    },
+    {
+      "id": "bp_pdf_kiezen",
+      "type": "BusinessProcess",
+      "label": "PDF kiezen",
+      "layer": "business",
+      "levels": [
+        "conceptueel"
+      ],
+      "status": "ontwerp",
+      "trace": [],
+      "missing": [],
+      "auto": false,
+      "facts": [],
+      "factCount": 0,
+      "description": ""
+    },
+    {
+      "id": "bp_scan_kiezen",
+      "type": "BusinessProcess",
+      "label": "Gescande PDF uploaden",
+      "layer": "business",
+      "levels": [
+        "conceptueel"
+      ],
+      "status": "ontwerp",
+      "trace": [],
+      "missing": [],
+      "auto": false,
+      "facts": [],
+      "factCount": 0,
+      "description": ""
+    },
+    {
+      "id": "bp_sleutels",
+      "type": "BusinessProcess",
+      "label": "Sleutelpaar maken en downloaden (JWK)",
+      "layer": "business",
+      "levels": [
+        "conceptueel"
+      ],
+      "status": "ontwerp",
+      "trace": [],
+      "missing": [],
+      "auto": false,
+      "facts": [],
+      "factCount": 0,
+      "description": ""
+    },
+    {
+      "id": "bp_splitsen",
+      "type": "BusinessProcess",
+      "label": "Splitsen op paginabereiken",
+      "layer": "business",
+      "levels": [
+        "conceptueel"
+      ],
+      "status": "ontwerp",
+      "trace": [],
+      "missing": [],
+      "auto": false,
+      "facts": [],
+      "factCount": 0,
+      "description": ""
+    },
+    {
+      "id": "bp_uitlezen",
+      "type": "BusinessProcess",
+      "label": "Payload uitlezen en ontsleutelen",
+      "layer": "business",
+      "levels": [
+        "conceptueel"
+      ],
+      "status": "ontwerp",
+      "trace": [],
+      "missing": [],
+      "auto": false,
+      "facts": [],
+      "factCount": 0,
+      "description": ""
+    },
+    {
+      "id": "bp_volgorde",
+      "type": "BusinessProcess",
+      "label": "Volgorde bepalen",
+      "layer": "business",
+      "levels": [
+        "conceptueel"
+      ],
+      "status": "ontwerp",
+      "trace": [],
+      "missing": [],
+      "auto": false,
+      "facts": [],
+      "factCount": 0,
+      "description": ""
+    },
+    {
+      "id": "bp_watermerk_lezen",
+      "type": "BusinessProcess",
+      "label": "Watermerk teruglezen",
+      "layer": "business",
+      "levels": [
+        "conceptueel"
+      ],
+      "status": "ontwerp",
+      "trace": [],
+      "missing": [],
+      "auto": false,
+      "facts": [],
+      "factCount": 0,
+      "description": ""
+    },
+    {
+      "id": "bp_watermerk_zetten",
+      "type": "BusinessProcess",
+      "label": "Watermerk zetten (tekst, SVG/PNG of document)",
+      "layer": "business",
+      "levels": [
+        "conceptueel"
+      ],
+      "status": "ontwerp",
+      "trace": [],
+      "missing": [],
+      "auto": false,
+      "facts": [],
+      "factCount": 0,
+      "description": ""
+    },
+    {
+      "id": "bs_bewerken",
+      "type": "BusinessService",
+      "label": "PDF bewerken in de browser",
+      "layer": "business",
+      "levels": [
+        "conceptueel"
+      ],
+      "status": "ontwerp",
+      "trace": [],
+      "missing": [],
+      "auto": false,
+      "facts": [],
+      "factCount": 0,
+      "description": ""
+    },
+    {
+      "id": "bs_converteren",
+      "type": "BusinessService",
+      "label": "Documenten en afbeeldingen naar PDF",
+      "layer": "business",
+      "levels": [
+        "conceptueel"
+      ],
+      "status": "ontwerp",
+      "trace": [],
+      "missing": [],
+      "auto": false,
+      "facts": [],
+      "factCount": 0,
+      "description": ""
+    },
+    {
+      "id": "bs_ocr",
+      "type": "BusinessService",
+      "label": "Gescande PDF doorzoekbaar maken (NL+EN)",
+      "layer": "business",
+      "levels": [
+        "conceptueel"
+      ],
+      "status": "ontwerp",
+      "trace": [],
+      "missing": [],
+      "auto": false,
+      "facts": [],
+      "factCount": 0,
+      "description": ""
+    },
+    {
+      "id": "bs_payload",
+      "type": "BusinessService",
+      "label": "Bestand (versleuteld) in een PDF inbedden",
+      "layer": "business",
+      "levels": [
+        "conceptueel"
+      ],
+      "status": "ontwerp",
+      "trace": [],
+      "missing": [],
+      "auto": false,
+      "facts": [],
+      "factCount": 0,
+      "description": ""
+    },
+    {
+      "id": "bs_uitvoer",
+      "type": "BusinessService",
+      "label": "Resultaat downloaden, printen of mailen",
+      "layer": "business",
+      "levels": [
+        "conceptueel"
+      ],
+      "status": "ontwerp",
+      "trace": [],
+      "missing": [],
+      "auto": false,
+      "facts": [],
+      "factCount": 0,
+      "description": ""
+    },
+    {
+      "id": "bs_watermerk",
+      "type": "BusinessService",
+      "label": "Onzichtbaar watermerk zetten en lezen",
+      "layer": "business",
+      "levels": [
+        "conceptueel"
+      ],
+      "status": "ontwerp",
+      "trace": [],
+      "missing": [],
+      "auto": false,
+      "facts": [],
+      "factCount": 0,
+      "description": ""
+    },
+    {
+      "id": "cn_from",
+      "type": "Constraint",
+      "label": "Afzender moet gelijk zijn aan SMTP-login (Hostinger weigert anders)",
+      "layer": "motivation",
+      "levels": [
+        "conceptueel"
+      ],
+      "status": "ontwerp",
+      "trace": [],
+      "missing": [],
+      "auto": false,
+      "facts": [],
+      "factCount": 0,
+      "description": ""
+    },
+    {
+      "id": "cn_limieten",
+      "type": "Constraint",
+      "label": "50 MB per PDF, 20 MB per office-bestand, 100 MB per sessie",
+      "layer": "motivation",
+      "levels": [
+        "conceptueel"
+      ],
+      "status": "ontwerp",
+      "trace": [],
+      "missing": [],
+      "auto": false,
+      "facts": [],
+      "factCount": 0,
+      "description": ""
+    },
+    {
+      "id": "dr_alternatief",
+      "type": "Driver",
+      "label": "Anoniem alternatief voor Adobe, Smallpdf en iLovePDF",
+      "layer": "motivation",
+      "levels": [
+        "conceptueel"
+      ],
+      "status": "ontwerp",
+      "trace": [],
+      "missing": [],
+      "auto": false,
+      "facts": [],
+      "factCount": 0,
+      "description": ""
+    },
+    {
+      "id": "dr_privacy",
+      "type": "Driver",
+      "label": "PDF's bevatten gevoelige inhoud (contracten, medisch, financieel)",
+      "layer": "motivation",
+      "levels": [
+        "conceptueel"
+      ],
+      "status": "ontwerp",
+      "trace": [],
+      "missing": [],
+      "auto": false,
+      "facts": [],
+      "factCount": 0,
+      "description": ""
+    },
+    {
+      "id": "go_anoniem",
+      "type": "Goal",
+      "label": "PDF bewerken zonder account, tracking of opslag",
+      "layer": "motivation",
+      "levels": [
+        "conceptueel"
+      ],
+      "status": "ontwerp",
+      "trace": [],
+      "missing": [],
+      "auto": false,
+      "facts": [],
+      "factCount": 0,
+      "description": ""
+    },
+    {
+      "id": "go_minimaal",
+      "type": "Goal",
+      "label": "Inhoud verlaat het apparaat alleen waar onvermijdelijk",
+      "layer": "motivation",
+      "levels": [
+        "conceptueel"
+      ],
+      "status": "ontwerp",
+      "trace": [],
+      "missing": [],
+      "auto": false,
+      "facts": [],
+      "factCount": 0,
+      "description": ""
+    },
+    {
+      "id": "pr_agpl",
+      "type": "Principle",
+      "label": "P6 AGPL-3.0 copyleft",
+      "layer": "motivation",
+      "levels": [
+        "conceptueel"
+      ],
+      "status": "ontwerp",
+      "trace": [],
+      "missing": [],
+      "auto": false,
+      "facts": [],
+      "factCount": 0,
+      "description": ""
+    },
+    {
+      "id": "pr_anoniem",
+      "type": "Principle",
+      "label": "P4 Geen account, geen tracking",
+      "layer": "motivation",
+      "levels": [
+        "conceptueel"
+      ],
+      "status": "ontwerp",
+      "trace": [],
+      "missing": [],
+      "auto": false,
+      "facts": [],
+      "factCount": 0,
+      "description": ""
+    },
+    {
+      "id": "pr_cdn",
+      "type": "Principle",
+      "label": "P2 CDN-only, geen build-pipeline",
+      "layer": "motivation",
+      "levels": [
+        "conceptueel"
+      ],
+      "status": "ontwerp",
+      "trace": [],
+      "missing": [],
+      "auto": false,
+      "facts": [],
+      "factCount": 0,
+      "description": ""
+    },
+    {
+      "id": "pr_client",
+      "type": "Principle",
+      "label": "P1 Client-first",
+      "layer": "motivation",
+      "levels": [
+        "conceptueel"
+      ],
+      "status": "ontwerp",
+      "trace": [],
+      "missing": [],
+      "auto": false,
+      "facts": [],
+      "factCount": 0,
+      "description": ""
+    },
+    {
+      "id": "pr_docs",
+      "type": "Principle",
+      "label": "P8 Documentatie is onderdeel van de feature",
+      "layer": "motivation",
+      "levels": [
+        "conceptueel"
+      ],
+      "status": "ontwerp",
+      "trace": [],
+      "missing": [],
+      "auto": false,
+      "facts": [],
+      "factCount": 0,
+      "description": ""
+    },
+    {
+      "id": "pr_limieten",
+      "type": "Principle",
+      "label": "P7 Limieten als deel van het ontwerp",
+      "layer": "motivation",
+      "levels": [
+        "conceptueel"
+      ],
+      "status": "ontwerp",
+      "trace": [],
+      "missing": [],
+      "auto": false,
+      "facts": [],
+      "factCount": 0,
+      "description": ""
+    },
+    {
+      "id": "pr_mailonly",
+      "type": "Principle",
+      "label": "P5 Mail alleen naar opgegeven adres, geen archief",
+      "layer": "motivation",
+      "levels": [
+        "conceptueel"
+      ],
+      "status": "ontwerp",
+      "trace": [],
+      "missing": [],
+      "auto": false,
+      "facts": [],
+      "factCount": 0,
+      "description": ""
+    },
+    {
+      "id": "pr_stateless",
+      "type": "Principle",
+      "label": "P3 Stateless server, geen database",
+      "layer": "motivation",
+      "levels": [
+        "conceptueel"
+      ],
+      "status": "ontwerp",
+      "trace": [],
+      "missing": [],
+      "auto": false,
+      "facts": [],
+      "factCount": 0,
+      "description": ""
+    },
+    {
+      "id": "rq_ratelimit",
+      "type": "Requirement",
+      "label": "Mail: max 5 MB bijlage, 5 per uur per IP",
+      "layer": "motivation",
+      "levels": [
+        "conceptueel"
+      ],
+      "status": "ontwerp",
+      "trace": [],
+      "missing": [],
+      "auto": false,
+      "facts": [],
+      "factCount": 0,
+      "description": ""
+    },
+    {
+      "id": "rq_wissen",
+      "type": "Requirement",
+      "label": "Server-uploads direct gewist (BackgroundTask rmtree)",
+      "layer": "motivation",
+      "levels": [
+        "conceptueel"
+      ],
+      "status": "ontwerp",
+      "trace": [],
+      "missing": [],
+      "auto": false,
+      "facts": [],
+      "factCount": 0,
+      "description": ""
+    }
+  ]
+}

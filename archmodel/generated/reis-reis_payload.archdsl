@@ -1,0 +1,64 @@
+// GEGENEREERD door ModelArchDSL — niet met de hand bewerken.
+// Bron: archmodel/tobe.archdsl (ontwerp) + archmodel/asis.facts.json (code).
+set language archimate
+set title "PDFHorse — Klantreis: bestand versleuteld meesturen in een PDF"
+set subtitle "Klantreis (stappen genummerd, afspeelbaar in het portaal)"
+set purpose "Tab Geavanceerd: sleutels verlaten het apparaat alleen als de gebruiker ze downloadt."
+show legend true
+switch badges on
+set current state "As-is (code)"
+set target state "To-be (ontwerp)"
+
+Group laag_business "Business" {
+    -width 1020
+    -height 180
+}
+BusinessActor ba_gebruiker "Anonieme gebruiker" in laag_business {
+    -attr status = "ontwerp"
+}
+BusinessProcess bp_sleutels "Sleutelpaar maken en downloaden (JWK)" in laag_business {
+    -step 1
+    -attr status = "ontwerp"
+}
+BusinessProcess bp_inbedden "Bestand versleuteld inbedden" in laag_business {
+    -step 2
+    -attr status = "ontwerp"
+}
+BusinessProcess bp_uitlezen "Payload uitlezen en ontsleutelen" in laag_business {
+    -step 3
+    -attr status = "ontwerp"
+}
+BusinessService bs_payload "Bestand (versleuteld) in een PDF inbedden" in laag_business {
+    -attr status = "ontwerp"
+}
+
+Group laag_application "Applicatie" {
+    -width 400
+    -height 180
+}
+ApplicationComponent ac_payload "Payload-engine (payload.js, AES-GCM + RSA-OAEP)" in laag_application {
+    -stroke "#16a34a"
+    -attr status = "gebouwd"
+    -attr trace = "module:frontend/js"
+    -description "Embedded-file bijlage pdfhorse-payload.json; hybride versleuteling via WebCrypto."
+}
+
+// Posities (deterministische raster-layout per ArchiMate-laag)
+pos laag_business 40, 40
+pos ba_gebruiker 60, 90
+pos bp_sleutels 260, 90
+pos bp_inbedden 460, 90
+pos bp_uitlezen 660, 90
+pos bs_payload 860, 90
+pos laag_application 40, 260
+pos ac_payload 60, 310
+
+// Relaties — Dragon1-compatibel: werkwoordvorm, of ongetypeerd waar Dragon1 het type afleidt
+ba_gebruiker -> bp_sleutels
+bp_inbedden realizes bs_payload
+bp_uitlezen realizes bs_payload
+ac_payload serves bp_sleutels
+ac_payload serves bp_inbedden
+ac_payload serves bp_uitlezen
+bp_sleutels -> bp_inbedden
+bp_inbedden -> bp_uitlezen

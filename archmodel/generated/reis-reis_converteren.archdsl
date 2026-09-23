@@ -1,0 +1,104 @@
+// GEGENEREERD door ModelArchDSL — niet met de hand bewerken.
+// Bron: archmodel/tobe.archdsl (ontwerp) + archmodel/asis.facts.json (code).
+set language archimate
+set title "PDFHorse — Klantreis: converteren en mailen"
+set subtitle "Klantreis (stappen genummerd, afspeelbaar in het portaal)"
+set purpose "Office via LibreOffice op de server, afbeeldingen in de browser; mail via Hostinger zonder archief."
+show legend true
+switch badges on
+set current state "As-is (code)"
+set target state "To-be (ontwerp)"
+
+Group laag_business "Business" {
+    -width 1220
+    -height 310
+}
+BusinessActor ba_gebruiker "Anonieme gebruiker" in laag_business {
+    -attr status = "ontwerp"
+}
+BusinessProcess bp_office_kiezen "Office-document of afbeelding kiezen" in laag_business {
+    -step 1
+    -attr status = "ontwerp"
+}
+BusinessProcess bp_converteren "Naar PDF converteren" in laag_business {
+    -step 2
+    -attr status = "ontwerp"
+}
+BusinessProcess bp_mailen "PDF mailen naar ontvanger" in laag_business {
+    -step 3
+    -attr status = "ontwerp"
+}
+BusinessActor ba_ontvanger "Ontvanger van de gemailde PDF" in laag_business {
+    -attr status = "ontwerp"
+}
+BusinessService bs_converteren "Documenten en afbeeldingen naar PDF" in laag_business {
+    -attr status = "ontwerp"
+}
+BusinessService bs_uitvoer "Resultaat downloaden, printen of mailen" in laag_business {
+    -attr status = "ontwerp"
+}
+
+Group laag_application "Applicatie" {
+    -width 1020
+    -height 180
+}
+ApplicationComponent ac_frontend "PDFHorse-frontend (Alpine.js, één index.html)" in laag_application {
+    -stroke "#16a34a"
+    -attr status = "gebouwd"
+    -attr trace = "module:frontend/js"
+    -description "Negen tabs; CDN-only zonder build (P2). Merge/split/invullen/ondertekenen/watermerk/payload volledig in de browser (P1)."
+}
+ApplicationComponent ac_bewerker "PDF-bewerker: merge, split, invullen, ondertekenen" in laag_application {
+    -stroke "#16a34a"
+    -attr status = "gebouwd"
+    -attr trace = "module:frontend/js"
+    -description "app.js met pdf-lib 1.17.1, PDF.js 4.0.379 en signature_pad 5.0.4. AUTO-veldherkenning ook op platte PDF's (v0.18.0)."
+}
+ApplicationInterface ai_convert "Conversie-API docx/xlsx/odt/rtf naar PDF" in laag_application {
+    -stroke "#16a34a"
+    -attr status = "gebouwd"
+    -attr trace = "route:POST /api/convert/*, config:MAX_DOCX_BYTES, config:MAX_XLSX_BYTES, config:MAX_ODT_BYTES, config:MAX_RTF_BYTES"
+}
+ApplicationComponent ac_outputbar "Output-bar: Download, Print, Mail" in laag_application {
+    -stroke "#16a34a"
+    -attr status = "gebouwd"
+    -attr trace = "module:frontend/js"
+}
+ApplicationInterface ai_mail "Mail-API" in laag_application {
+    -stroke "#16a34a"
+    -attr status = "gebouwd"
+    -attr trace = "route:POST /api/mail, config:MAIL_FROM, config:MAIL_REPLY_TO, config:MAX_MAIL_*"
+}
+
+// Posities (deterministische raster-layout per ArchiMate-laag)
+pos laag_business 40, 40
+pos ba_gebruiker 60, 90
+pos bp_office_kiezen 260, 90
+pos bp_converteren 460, 90
+pos bp_mailen 660, 90
+pos ba_ontvanger 860, 90
+pos bs_converteren 1060, 90
+pos bs_uitvoer 60, 220
+pos laag_application 40, 390
+pos ac_frontend 60, 440
+pos ac_bewerker 260, 440
+pos ai_convert 460, 440
+pos ac_outputbar 660, 440
+pos ai_mail 860, 440
+
+// Relaties — Dragon1-compatibel: werkwoordvorm, of ongetypeerd waar Dragon1 het type afleidt
+ba_gebruiker -> bp_office_kiezen
+bp_mailen -> ba_ontvanger "mail met PDF-bijlage"
+bp_converteren realizes bs_converteren
+bp_mailen realizes bs_uitvoer
+ac_frontend serves bp_office_kiezen
+ai_convert serves bp_converteren "office"
+ac_bewerker serves bp_converteren "png/jpg in de browser"
+ac_outputbar serves bp_mailen
+ai_mail serves bp_mailen
+ac_frontend composes ac_bewerker
+ac_frontend composes ac_outputbar
+ac_outputbar serves ai_mail "POST"
+ac_frontend serves ai_convert "POST"
+bp_office_kiezen -> bp_converteren
+bp_converteren -> bp_mailen

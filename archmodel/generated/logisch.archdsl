@@ -1,0 +1,192 @@
+// GEGENEREERD door ModelArchDSL — niet met de hand bewerken.
+// Bron: archmodel/tobe.archdsl (ontwerp) + archmodel/asis.facts.json (code).
+set language archimate
+set title "PDFHorse — Logisch"
+set subtitle "Architectuurplaat logisch niveau (ArchiMate/Dragon1)"
+set purpose "PDF's samenvoegen, splitsen, invullen, ondertekenen, converteren, OCR'en en mailen zonder account en zonder permanente opslag; zoveel mogelijk in de browser."
+show legend true
+switch badges on
+set current state "As-is (code)"
+set target state "To-be (ontwerp)"
+
+Group laag_application "Applicatie" {
+    -width 1220
+    -height 570
+}
+ApplicationComponent ac_frontend "PDFHorse-frontend (Alpine.js, één index.html)" in laag_application {
+    -stroke "#16a34a"
+    -attr status = "gebouwd"
+    -attr trace = "module:frontend/js"
+    -description "Negen tabs; CDN-only zonder build (P2). Merge/split/invullen/ondertekenen/watermerk/payload volledig in de browser (P1)."
+}
+ApplicationComponent ac_bewerker "PDF-bewerker: merge, split, invullen, ondertekenen" in laag_application {
+    -stroke "#16a34a"
+    -attr status = "gebouwd"
+    -attr trace = "module:frontend/js"
+    -description "app.js met pdf-lib 1.17.1, PDF.js 4.0.379 en signature_pad 5.0.4. AUTO-veldherkenning ook op platte PDF's (v0.18.0)."
+}
+ApplicationComponent ac_outputbar "Output-bar: Download, Print, Mail" in laag_application {
+    -stroke "#16a34a"
+    -attr status = "gebouwd"
+    -attr trace = "module:frontend/js"
+}
+ApplicationComponent ac_watermark "Watermerk-engine (watermark.js)" in laag_application {
+    -stroke "#16a34a"
+    -attr status = "gebouwd"
+    -attr trace = "module:frontend/js"
+    -description "Tekst- en beeld-watermerk in achtergrondkleur, payload in PDF-metadata; document-modus via de payload-engine (v0.21.0)."
+}
+ApplicationComponent ac_payload "Payload-engine (payload.js, AES-GCM + RSA-OAEP)" in laag_application {
+    -stroke "#16a34a"
+    -attr status = "gebouwd"
+    -attr trace = "module:frontend/js"
+    -description "Embedded-file bijlage pdfhorse-payload.json; hybride versleuteling via WebCrypto."
+}
+ApplicationComponent ac_i18n "Taallaag NL/EN (i18n.js + i18n.json)" in laag_application {
+    -stroke "#16a34a"
+    -attr status = "gebouwd"
+    -attr trace = "module:frontend/js"
+}
+ApplicationComponent ac_backend "PDFHorse-backend (FastAPI, stateless)" in laag_application {
+    -stroke "#16a34a"
+    -attr status = "gebouwd"
+    -attr trace = "module:backend, config:ALLOWED_ORIGIN, config:PDFHORSE_DEV"
+    -description "Alleen voor wat niet in de browser kan: office-conversie, OCR en mail (P1, P3). CORS strikt op ALLOWED_ORIGIN."
+}
+ApplicationInterface ai_info "Health- en limieten-API" in laag_application {
+    -stroke "#16a34a"
+    -attr status = "gebouwd"
+    -attr trace = "route:GET /api/health, route:GET /api/limits"
+}
+ApplicationInterface ai_convert "Conversie-API docx/xlsx/odt/rtf naar PDF" in laag_application {
+    -stroke "#16a34a"
+    -attr status = "gebouwd"
+    -attr trace = "route:POST /api/convert/*, config:MAX_DOCX_BYTES, config:MAX_XLSX_BYTES, config:MAX_ODT_BYTES, config:MAX_RTF_BYTES"
+}
+ApplicationInterface ai_ocr "OCR-API" in laag_application {
+    -stroke "#16a34a"
+    -attr status = "gebouwd"
+    -attr trace = "route:POST /api/ocr, config:MAX_OCR_BYTES"
+}
+ApplicationInterface ai_mail "Mail-API" in laag_application {
+    -stroke "#16a34a"
+    -attr status = "gebouwd"
+    -attr trace = "route:POST /api/mail, config:MAIL_FROM, config:MAIL_REPLY_TO, config:MAX_MAIL_*"
+}
+ApplicationComponent ac_ratelimit "Rate-limit in-process bucket per IP" in laag_application {
+    -stroke "#16a34a"
+    -attr status = "gebouwd"
+    -attr trace = "config:MAIL_RATE_*"
+    -description "Vervangt slowapi-decorator wegens ForwardRef-conflict (Python 3.14 + FastAPI + Annotated)."
+}
+ApplicationComponent ac_scripts "Hulpscripts: schermafdrukken en live-verificatie (Playwright)" in laag_application {
+    -stroke "#16a34a"
+    -attr status = "gebouwd"
+    -attr trace = "module:scripts"
+}
+DataObject do_pdf "PDF en bewerkingsstaat (alleen in browsergeheugen)" in laag_application {
+    -stroke "#16a34a"
+    -attr status = "gebouwd"
+    -attr trace = "module:frontend/js"
+}
+DataObject do_payload "Payload-envelope pdfhorse-payload.json" in laag_application {
+    -stroke "#16a34a"
+    -attr status = "gebouwd"
+    -attr trace = "module:frontend/js"
+}
+DataObject do_sleutel "Sleutelpaar als JWK (alleen bij de gebruiker)" in laag_application {
+    -stroke "#16a34a"
+    -attr status = "gebouwd"
+    -attr trace = "module:frontend/js"
+}
+DataObject do_tmp "Tijdelijke upload /tmp/pdfhorse/<uuid>" in laag_application {
+    -stroke "#16a34a"
+    -attr status = "gebouwd"
+    -attr trace = "config:TMP_DIR, config:SESSION_TIMEOUT_S"
+}
+ApplicationComponent ac_cdn "CDN-bibliotheken (Tailwind, Alpine, pdf-lib, PDF.js, signature_pad, ImageTracer)" in laag_application {
+    -fill "#f0f9ff"
+    -stroke "#0284c7"
+    -attr status = "extern"
+}
+ApplicationComponent ac_clipboard "iCt Horse clipboard-artefact (icthorse.nl/clipboard)" in laag_application {
+    -fill "#f0f9ff"
+    -stroke "#0284c7"
+    -attr status = "extern"
+}
+ApplicationComponent ac_donate "iCt Horse donate-artefact (bunq.me-link + QR)" in laag_application {
+    -fill "#f0f9ff"
+    -stroke "#0284c7"
+    -attr status = "extern"
+}
+ApplicationComponent ac_pades "PAdES digitale handtekening (X.509)" in laag_application {
+    -fill "#fff7ed"
+    -stroke "#ea580c"
+    -state target
+    -attr status = "gepland"
+    -description "ACTIONS 'Later (v1.0.0-Brotz)': apart traject, niet MVP."
+}
+ApplicationComponent ac_pwa "PWA / offline-modus (Service Worker)" in laag_application {
+    -fill "#fff7ed"
+    -stroke "#ea580c"
+    -state target
+    -attr status = "gepland"
+    -description "ACTIONS 'Later (v1.0.0-Brotz)'."
+}
+Artifact ar_env "Instellingen /opt/pdfhorse/.env (mode 600)" in laag_application {
+    -stroke "#16a34a"
+    -attr status = "gebouwd"
+    -attr trace = "config:MAX_UPLOAD_SIZE_BYTES, config:MAX_SESSION_TOTAL_BYTES"
+}
+
+// Posities (deterministische raster-layout per ArchiMate-laag)
+pos laag_application 40, 40
+pos ac_frontend 60, 90
+pos ac_bewerker 260, 90
+pos ac_outputbar 460, 90
+pos ac_watermark 660, 90
+pos ac_payload 860, 90
+pos ac_i18n 1060, 90
+pos ac_backend 60, 220
+pos ai_info 260, 220
+pos ai_convert 460, 220
+pos ai_ocr 660, 220
+pos ai_mail 860, 220
+pos ac_ratelimit 1060, 220
+pos ac_scripts 60, 350
+pos do_pdf 260, 350
+pos do_payload 460, 350
+pos do_sleutel 660, 350
+pos do_tmp 860, 350
+pos ac_cdn 1060, 350
+pos ac_clipboard 60, 480
+pos ac_donate 260, 480
+pos ac_pades 460, 480
+pos ac_pwa 660, 480
+pos ar_env 860, 480
+
+// Relaties — Dragon1-compatibel: werkwoordvorm, of ongetypeerd waar Dragon1 het type afleidt
+ac_frontend composes ac_bewerker
+ac_frontend composes ac_outputbar
+ac_frontend composes ac_watermark
+ac_frontend composes ac_payload
+ac_frontend composes ac_i18n
+ac_frontend composes ac_pwa "to-be"
+ac_watermark serves ac_payload "document-modus"
+ac_cdn serves ac_frontend "bibliotheken"
+ac_clipboard serves ac_frontend "tab Delen & meekijken"
+ac_donate serves ac_outputbar "donatie-teaser"
+ac_frontend serves ai_info "leest"
+ac_outputbar serves ai_mail "POST"
+ac_frontend serves ai_convert "POST"
+ac_frontend serves ai_ocr "POST"
+ac_backend composes ai_info
+ac_backend composes ai_convert
+ac_backend composes ai_ocr
+ac_backend composes ai_mail
+ac_ratelimit serves ai_mail "5/uur/IP"
+ac_bewerker accesses do_pdf "bewerkt"
+ac_payload accesses do_payload "schrijft en leest"
+ac_payload accesses do_sleutel "maakt en gebruikt"
+ai_convert accesses do_tmp "schrijft en wist"
+ai_ocr accesses do_tmp "schrijft en wist"

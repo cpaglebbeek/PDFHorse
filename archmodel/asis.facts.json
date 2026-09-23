@@ -1,0 +1,473 @@
+{
+  "schema": 1,
+  "extractor": "ModelArchDSL/extract",
+  "facts": [
+    {
+      "id": "config:ALLOWED_ORIGIN",
+      "kind": "config",
+      "label": "ALLOWED_ORIGIN",
+      "sources": [
+        "backend/main.py:52"
+      ]
+    },
+    {
+      "id": "config:APP_HOST",
+      "kind": "config",
+      "label": "APP_HOST",
+      "sources": [
+        "backend/main.py:50"
+      ]
+    },
+    {
+      "id": "config:APP_PORT",
+      "kind": "config",
+      "label": "APP_PORT",
+      "sources": [
+        "backend/main.py:51"
+      ]
+    },
+    {
+      "id": "config:MAIL_FROM",
+      "kind": "config",
+      "label": "MAIL_FROM",
+      "sources": [
+        "backend/main.py:81"
+      ]
+    },
+    {
+      "id": "config:MAIL_RATE_PER_HOUR",
+      "kind": "config",
+      "label": "MAIL_RATE_PER_HOUR",
+      "sources": [
+        "backend/main.py:86"
+      ]
+    },
+    {
+      "id": "config:MAIL_RATE_WINDOW_S",
+      "kind": "config",
+      "label": "MAIL_RATE_WINDOW_S",
+      "sources": [
+        "backend/main.py:87"
+      ]
+    },
+    {
+      "id": "config:MAIL_REPLY_TO",
+      "kind": "config",
+      "label": "MAIL_REPLY_TO",
+      "sources": [
+        "backend/main.py:82"
+      ]
+    },
+    {
+      "id": "config:MAX_DOCX_BYTES",
+      "kind": "config",
+      "label": "MAX_DOCX_BYTES",
+      "sources": [
+        "backend/main.py:55"
+      ]
+    },
+    {
+      "id": "config:MAX_MAIL_ATTACHMENT_BYTES",
+      "kind": "config",
+      "label": "MAX_MAIL_ATTACHMENT_BYTES",
+      "sources": [
+        "backend/main.py:83"
+      ]
+    },
+    {
+      "id": "config:MAX_MAIL_BODY_LEN",
+      "kind": "config",
+      "label": "MAX_MAIL_BODY_LEN",
+      "sources": [
+        "backend/main.py:85"
+      ]
+    },
+    {
+      "id": "config:MAX_MAIL_SUBJECT_LEN",
+      "kind": "config",
+      "label": "MAX_MAIL_SUBJECT_LEN",
+      "sources": [
+        "backend/main.py:84"
+      ]
+    },
+    {
+      "id": "config:MAX_OCR_BYTES",
+      "kind": "config",
+      "label": "MAX_OCR_BYTES",
+      "sources": [
+        "backend/main.py:59"
+      ]
+    },
+    {
+      "id": "config:MAX_ODT_BYTES",
+      "kind": "config",
+      "label": "MAX_ODT_BYTES",
+      "sources": [
+        "backend/main.py:57"
+      ]
+    },
+    {
+      "id": "config:MAX_RTF_BYTES",
+      "kind": "config",
+      "label": "MAX_RTF_BYTES",
+      "sources": [
+        "backend/main.py:58"
+      ]
+    },
+    {
+      "id": "config:MAX_SESSION_TOTAL_BYTES",
+      "kind": "config",
+      "label": "MAX_SESSION_TOTAL_BYTES",
+      "sources": [
+        "backend/main.py:54"
+      ]
+    },
+    {
+      "id": "config:MAX_UPLOAD_SIZE_BYTES",
+      "kind": "config",
+      "label": "MAX_UPLOAD_SIZE_BYTES",
+      "sources": [
+        "backend/main.py:53"
+      ]
+    },
+    {
+      "id": "config:MAX_XLSX_BYTES",
+      "kind": "config",
+      "label": "MAX_XLSX_BYTES",
+      "sources": [
+        "backend/main.py:56"
+      ]
+    },
+    {
+      "id": "config:OCRMYPDF_BIN",
+      "kind": "config",
+      "label": "OCRMYPDF_BIN",
+      "sources": [
+        "backend/main.py:64"
+      ]
+    },
+    {
+      "id": "config:OCR_LANGUAGES",
+      "kind": "config",
+      "label": "OCR_LANGUAGES",
+      "sources": [
+        "backend/main.py:65"
+      ]
+    },
+    {
+      "id": "config:OCR_TIMEOUT_S",
+      "kind": "config",
+      "label": "OCR_TIMEOUT_S",
+      "sources": [
+        "backend/main.py:66"
+      ]
+    },
+    {
+      "id": "config:PDFHORSE_DEV",
+      "kind": "config",
+      "label": "PDFHORSE_DEV",
+      "sources": [
+        "backend/main.py:131"
+      ]
+    },
+    {
+      "id": "config:SESSION_TIMEOUT_S",
+      "kind": "config",
+      "label": "SESSION_TIMEOUT_S",
+      "sources": [
+        "backend/main.py:60"
+      ]
+    },
+    {
+      "id": "config:SMTP_HOST",
+      "kind": "config",
+      "label": "SMTP_HOST",
+      "sources": [
+        "backend/main.py:71"
+      ]
+    },
+    {
+      "id": "config:SMTP_PASSWORD",
+      "kind": "config",
+      "label": "SMTP_PASSWORD",
+      "sources": [
+        "backend/main.py:74"
+      ]
+    },
+    {
+      "id": "config:SMTP_PORT",
+      "kind": "config",
+      "label": "SMTP_PORT",
+      "sources": [
+        "backend/main.py:72"
+      ]
+    },
+    {
+      "id": "config:SMTP_TIMEOUT_S",
+      "kind": "config",
+      "label": "SMTP_TIMEOUT_S",
+      "sources": [
+        "backend/main.py:76"
+      ]
+    },
+    {
+      "id": "config:SMTP_USER",
+      "kind": "config",
+      "label": "SMTP_USER",
+      "sources": [
+        "backend/main.py:73"
+      ]
+    },
+    {
+      "id": "config:SMTP_USE_SSL",
+      "kind": "config",
+      "label": "SMTP_USE_SSL",
+      "sources": [
+        "backend/main.py:75"
+      ]
+    },
+    {
+      "id": "config:SOFFICE_BIN",
+      "kind": "config",
+      "label": "SOFFICE_BIN",
+      "sources": [
+        "backend/main.py:62"
+      ]
+    },
+    {
+      "id": "config:SOFFICE_TIMEOUT_S",
+      "kind": "config",
+      "label": "SOFFICE_TIMEOUT_S",
+      "sources": [
+        "backend/main.py:63"
+      ]
+    },
+    {
+      "id": "config:TMP_DIR",
+      "kind": "config",
+      "label": "TMP_DIR",
+      "sources": [
+        "backend/main.py:61"
+      ]
+    },
+    {
+      "id": "dep:pip:fastapi",
+      "kind": "dep",
+      "label": "fastapi",
+      "sources": [
+        "backend/requirements.txt:1"
+      ],
+      "eco": "pip"
+    },
+    {
+      "id": "dep:pip:httpx",
+      "kind": "dep",
+      "label": "httpx",
+      "sources": [
+        "backend/requirements.txt:12"
+      ],
+      "eco": "pip"
+    },
+    {
+      "id": "dep:pip:ocrmypdf",
+      "kind": "dep",
+      "label": "ocrmypdf",
+      "sources": [
+        "backend/requirements.txt:5"
+      ],
+      "eco": "pip"
+    },
+    {
+      "id": "dep:pip:pikepdf",
+      "kind": "dep",
+      "label": "pikepdf",
+      "sources": [
+        "backend/requirements.txt:6"
+      ],
+      "eco": "pip"
+    },
+    {
+      "id": "dep:pip:pytest",
+      "kind": "dep",
+      "label": "pytest",
+      "sources": [
+        "backend/requirements.txt:11"
+      ],
+      "eco": "pip"
+    },
+    {
+      "id": "dep:pip:python-multipart",
+      "kind": "dep",
+      "label": "python-multipart",
+      "sources": [
+        "backend/requirements.txt:3"
+      ],
+      "eco": "pip"
+    },
+    {
+      "id": "dep:pip:slowapi",
+      "kind": "dep",
+      "label": "slowapi",
+      "sources": [
+        "backend/requirements.txt:4"
+      ],
+      "eco": "pip"
+    },
+    {
+      "id": "dep:pip:uvicorn",
+      "kind": "dep",
+      "label": "uvicorn",
+      "sources": [
+        "backend/requirements.txt:2"
+      ],
+      "eco": "pip"
+    },
+    {
+      "id": "module:backend",
+      "kind": "module",
+      "label": "backend",
+      "sources": [
+        "backend/__init__.py"
+      ],
+      "files": 2
+    },
+    {
+      "id": "module:frontend/js",
+      "kind": "module",
+      "label": "frontend/js",
+      "sources": [
+        "frontend/js/app.js"
+      ],
+      "files": 4
+    },
+    {
+      "id": "module:scripts",
+      "kind": "module",
+      "label": "scripts",
+      "sources": [
+        "scripts/take_screens.py"
+      ],
+      "files": 2
+    },
+    {
+      "id": "nginx:/PDFHorse",
+      "kind": "nginx",
+      "label": "location /PDFHorse",
+      "sources": [
+        "deploy/nginx-pdfhorse.conf:52"
+      ]
+    },
+    {
+      "id": "nginx:/PDFHorse/",
+      "kind": "nginx",
+      "label": "location /PDFHorse/",
+      "sources": [
+        "deploy/nginx-pdfhorse.conf:11"
+      ]
+    },
+    {
+      "id": "nginx:/PDFHorse/api/",
+      "kind": "nginx",
+      "label": "location /PDFHorse/api/",
+      "sources": [
+        "deploy/nginx-pdfhorse.conf:30"
+      ]
+    },
+    {
+      "id": "nginx:\\.(css|js|svg|png|webp)$",
+      "kind": "nginx",
+      "label": "location \\.(css|js|svg|png|webp)$",
+      "sources": [
+        "deploy/nginx-pdfhorse.conf:22"
+      ]
+    },
+    {
+      "id": "nginx:\\.html$",
+      "kind": "nginx",
+      "label": "location \\.html$",
+      "sources": [
+        "deploy/nginx-pdfhorse.conf:17"
+      ]
+    },
+    {
+      "id": "route:GET /api/health",
+      "kind": "route",
+      "label": "GET /api/health",
+      "sources": [
+        "backend/main.py:143"
+      ],
+      "module": "module:backend"
+    },
+    {
+      "id": "route:GET /api/limits",
+      "kind": "route",
+      "label": "GET /api/limits",
+      "sources": [
+        "backend/main.py:153"
+      ],
+      "module": "module:backend"
+    },
+    {
+      "id": "route:POST /api/convert/docx-to-pdf",
+      "kind": "route",
+      "label": "POST /api/convert/docx-to-pdf",
+      "sources": [
+        "backend/main.py:249"
+      ],
+      "module": "module:backend"
+    },
+    {
+      "id": "route:POST /api/convert/odt-to-pdf",
+      "kind": "route",
+      "label": "POST /api/convert/odt-to-pdf",
+      "sources": [
+        "backend/main.py:261"
+      ],
+      "module": "module:backend"
+    },
+    {
+      "id": "route:POST /api/convert/rtf-to-pdf",
+      "kind": "route",
+      "label": "POST /api/convert/rtf-to-pdf",
+      "sources": [
+        "backend/main.py:267"
+      ],
+      "module": "module:backend"
+    },
+    {
+      "id": "route:POST /api/convert/xlsx-to-pdf",
+      "kind": "route",
+      "label": "POST /api/convert/xlsx-to-pdf",
+      "sources": [
+        "backend/main.py:255"
+      ],
+      "module": "module:backend"
+    },
+    {
+      "id": "route:POST /api/mail",
+      "kind": "route",
+      "label": "POST /api/mail",
+      "sources": [
+        "backend/main.py:414"
+      ],
+      "module": "module:backend"
+    },
+    {
+      "id": "route:POST /api/ocr",
+      "kind": "route",
+      "label": "POST /api/ocr",
+      "sources": [
+        "backend/main.py:283"
+      ],
+      "module": "module:backend"
+    },
+    {
+      "id": "unit:pdfhorse.service",
+      "kind": "unit",
+      "label": "pdfhorse.service",
+      "sources": [
+        "deploy/pdfhorse.service"
+      ]
+    }
+  ]
+}

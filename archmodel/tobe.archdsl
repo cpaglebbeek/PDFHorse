@@ -1,0 +1,36 @@
+// PDFHorse — architectuurontwerp (to-be) in ArchDSL.
+// Dit bestand is de bron van het ONTWERP. De platen in generated/ worden hieruit
+// plus de gemeten code (asis.facts.json) gegenereerd met /ModelArchDSL update.
+//
+// Conventies (ArchPortal/docs/DSL_CONVENTIES.md):
+//   -view conceptueel|logisch|fysiek   niveau (standaard: afgeleid van de ArchiMate-laag)
+//   -attr trace = "route:* /api/*, module:server"   koppeling met code (globs op feit-id's)
+//   -attr status = "gepland"           expliciet gepland element zonder trace
+//   Viewpoint reis_x "Klantreis: ..." { -attr journey = "true"  -attr steps = "a b c"  -attr actor = "klant" }
+//
+// SKELET: automatisch voorgesteld uit de modules in de code. Vul conceptueel niveau,
+// klantreizen en relaties aan; verwijder wat niet klopt.
+
+set title "PDFHorse"
+set purpose "TODO: doel van het systeem in één zin"
+
+// ---- Conceptueel ----
+BusinessActor gebruiker "Gebruiker"
+
+// ---- Logisch (voorstel uit modules) ----
+ApplicationComponent comp_backend "backend" {
+    -attr trace = "module:backend"
+}
+ApplicationComponent comp_frontend_js "frontend/js" {
+    -attr trace = "module:frontend/js"
+}
+ApplicationComponent comp_scripts "scripts" {
+    -attr trace = "module:scripts"
+}
+
+// ---- Klantreizen ----
+// Viewpoint reis_voorbeeld "Klantreis: voorbeeld" {
+//     -attr journey = "true"
+//     -attr actor = "gebruiker"
+//     -attr steps = "stap_1 stap_2"
+// }

@@ -14,18 +14,18 @@
       "kind": "niveau",
       "level": "logisch",
       "label": "Logisch",
-      "elements": 23,
-      "relations": 24,
-      "sha256": "6abe3fde2e8f272da6e2d60e1eb4c7d012dd89b2382c902e96f533f8cc7e497e"
+      "elements": 24,
+      "relations": 25,
+      "sha256": "b4f01a99e95460f8916790d4d99bfc27e1046ed8ee3c0ebddce815ab32220194"
     },
     {
       "file": "fysiek.archdsl",
       "kind": "niveau",
       "level": "fysiek",
       "label": "Fysiek",
-      "elements": 12,
+      "elements": 14,
       "relations": 10,
-      "sha256": "56a4c16e32b94da2bde8852ceb45d854a8f2bdab4e6e7a5fe7adcfb00b78a34b"
+      "sha256": "0048ab94f20383f09cb7a4fbb29492ef8bd4030acfb0aa6da8204b19c3e9d9f5"
     },
     {
       "file": "reis-reis_merge.archdsl",
@@ -169,13 +169,13 @@
     "gebouwd": 26,
     "deels": 0,
     "gepland": 4,
-    "alleen_code": 0,
+    "alleen_code": 2,
     "ongetraceerd": 0,
     "extern": 6,
     "ontwerp": 42
   },
-  "facts": 56,
-  "unclaimedFacts": 0,
+  "facts": 62,
+  "unclaimedFacts": 6,
   "warnings": [],
   "elements": [
     {
@@ -198,13 +198,13 @@
         {
           "id": "config:ALLOWED_ORIGIN",
           "sources": [
-            "backend/main.py:52"
+            "backend/main.py:55"
           ]
         },
         {
           "id": "config:PDFHORSE_DEV",
           "sources": [
-            "backend/main.py:131"
+            "backend/main.py:159"
           ]
         },
         {
@@ -360,13 +360,13 @@
         {
           "id": "config:MAIL_RATE_PER_HOUR",
           "sources": [
-            "backend/main.py:86"
+            "backend/main.py:89"
           ]
         },
         {
           "id": "config:MAIL_RATE_WINDOW_S",
           "sources": [
-            "backend/main.py:87"
+            "backend/main.py:90"
           ]
         }
       ],
@@ -445,49 +445,49 @@
         {
           "id": "config:MAX_DOCX_BYTES",
           "sources": [
-            "backend/main.py:55"
+            "backend/main.py:58"
           ]
         },
         {
           "id": "config:MAX_ODT_BYTES",
           "sources": [
-            "backend/main.py:57"
+            "backend/main.py:60"
           ]
         },
         {
           "id": "config:MAX_RTF_BYTES",
           "sources": [
-            "backend/main.py:58"
+            "backend/main.py:61"
           ]
         },
         {
           "id": "config:MAX_XLSX_BYTES",
           "sources": [
-            "backend/main.py:56"
+            "backend/main.py:59"
           ]
         },
         {
           "id": "route:POST /api/convert/docx-to-pdf",
           "sources": [
-            "backend/main.py:249"
+            "backend/main.py:277"
           ]
         },
         {
           "id": "route:POST /api/convert/odt-to-pdf",
           "sources": [
-            "backend/main.py:261"
+            "backend/main.py:289"
           ]
         },
         {
           "id": "route:POST /api/convert/rtf-to-pdf",
           "sources": [
-            "backend/main.py:267"
+            "backend/main.py:295"
           ]
         },
         {
           "id": "route:POST /api/convert/xlsx-to-pdf",
           "sources": [
-            "backend/main.py:255"
+            "backend/main.py:283"
           ]
         }
       ],
@@ -513,13 +513,13 @@
         {
           "id": "route:GET /api/health",
           "sources": [
-            "backend/main.py:143"
+            "backend/main.py:171"
           ]
         },
         {
           "id": "route:GET /api/limits",
           "sources": [
-            "backend/main.py:153"
+            "backend/main.py:181"
           ]
         }
       ],
@@ -547,37 +547,37 @@
         {
           "id": "config:MAIL_FROM",
           "sources": [
-            "backend/main.py:81"
+            "backend/main.py:84"
           ]
         },
         {
           "id": "config:MAIL_REPLY_TO",
           "sources": [
-            "backend/main.py:82"
+            "backend/main.py:85"
           ]
         },
         {
           "id": "config:MAX_MAIL_ATTACHMENT_BYTES",
           "sources": [
-            "backend/main.py:83"
+            "backend/main.py:86"
           ]
         },
         {
           "id": "config:MAX_MAIL_BODY_LEN",
           "sources": [
-            "backend/main.py:85"
+            "backend/main.py:88"
           ]
         },
         {
           "id": "config:MAX_MAIL_SUBJECT_LEN",
           "sources": [
-            "backend/main.py:84"
+            "backend/main.py:87"
           ]
         },
         {
           "id": "route:POST /api/mail",
           "sources": [
-            "backend/main.py:414"
+            "backend/main.py:442"
           ]
         }
       ],
@@ -603,13 +603,13 @@
         {
           "id": "config:MAX_OCR_BYTES",
           "sources": [
-            "backend/main.py:59"
+            "backend/main.py:62"
           ]
         },
         {
           "id": "route:POST /api/ocr",
           "sources": [
-            "backend/main.py:283"
+            "backend/main.py:311"
           ]
         }
       ],
@@ -635,13 +635,13 @@
         {
           "id": "config:MAX_SESSION_TOTAL_BYTES",
           "sources": [
-            "backend/main.py:54"
+            "backend/main.py:57"
           ]
         },
         {
           "id": "config:MAX_UPLOAD_SIZE_BYTES",
           "sources": [
-            "backend/main.py:53"
+            "backend/main.py:56"
           ]
         }
       ],
@@ -742,13 +742,13 @@
         {
           "id": "config:SESSION_TIMEOUT_S",
           "sources": [
-            "backend/main.py:60"
+            "backend/main.py:63"
           ]
         },
         {
           "id": "config:TMP_DIR",
           "sources": [
-            "backend/main.py:61"
+            "backend/main.py:64"
           ]
         }
       ],
@@ -776,19 +776,19 @@
         {
           "id": "config:OCRMYPDF_BIN",
           "sources": [
-            "backend/main.py:64"
+            "backend/main.py:67"
           ]
         },
         {
           "id": "config:OCR_LANGUAGES",
           "sources": [
-            "backend/main.py:65"
+            "backend/main.py:68"
           ]
         },
         {
           "id": "config:OCR_TIMEOUT_S",
           "sources": [
-            "backend/main.py:66"
+            "backend/main.py:69"
           ]
         },
         {
@@ -850,13 +850,13 @@
         {
           "id": "config:SOFFICE_BIN",
           "sources": [
-            "backend/main.py:62"
+            "backend/main.py:65"
           ]
         },
         {
           "id": "config:SOFFICE_TIMEOUT_S",
           "sources": [
-            "backend/main.py:63"
+            "backend/main.py:66"
           ]
         }
       ],
@@ -918,13 +918,13 @@
         {
           "id": "config:APP_HOST",
           "sources": [
-            "backend/main.py:50"
+            "backend/main.py:53"
           ]
         },
         {
           "id": "config:APP_PORT",
           "sources": [
-            "backend/main.py:51"
+            "backend/main.py:54"
           ]
         },
         {
@@ -1044,37 +1044,37 @@
         {
           "id": "config:SMTP_HOST",
           "sources": [
-            "backend/main.py:71"
+            "backend/main.py:74"
           ]
         },
         {
           "id": "config:SMTP_PASSWORD",
           "sources": [
-            "backend/main.py:74"
+            "backend/main.py:77"
           ]
         },
         {
           "id": "config:SMTP_PORT",
           "sources": [
-            "backend/main.py:72"
+            "backend/main.py:75"
           ]
         },
         {
           "id": "config:SMTP_TIMEOUT_S",
           "sources": [
-            "backend/main.py:76"
+            "backend/main.py:79"
           ]
         },
         {
           "id": "config:SMTP_USER",
           "sources": [
-            "backend/main.py:73"
+            "backend/main.py:76"
           ]
         },
         {
           "id": "config:SMTP_USE_SSL",
           "sources": [
-            "backend/main.py:75"
+            "backend/main.py:78"
           ]
         }
       ],
@@ -1144,6 +1144,77 @@
       "facts": [],
       "factCount": 0,
       "description": "ARCHITECTURE Limieten + ACTIONS open; deploy/cleanup.cron staat nog op TBD."
+    },
+    {
+      "id": "auto_api_api_anchor",
+      "type": "ApplicationInterface",
+      "label": "Routes /api/anchor/* (1)",
+      "layer": "application",
+      "levels": [
+        "logisch",
+        "fysiek"
+      ],
+      "status": "alleen_code",
+      "trace": [],
+      "missing": [],
+      "auto": true,
+      "facts": [
+        {
+          "id": "route:POST /api/anchor",
+          "sources": [
+            "backend/main.py:555"
+          ]
+        }
+      ],
+      "factCount": 1,
+      "description": ""
+    },
+    {
+      "id": "auto_config",
+      "type": "Artifact",
+      "label": "Configuratie (omgeving) (5)",
+      "layer": "application",
+      "levels": [
+        "fysiek"
+      ],
+      "status": "alleen_code",
+      "trace": [],
+      "missing": [],
+      "auto": true,
+      "facts": [
+        {
+          "id": "config:ANCHOR_RATE_PER_HOUR",
+          "sources": [
+            "backend/main.py:99"
+          ]
+        },
+        {
+          "id": "config:ANCHOR_RATE_WINDOW_S",
+          "sources": [
+            "backend/main.py:100"
+          ]
+        },
+        {
+          "id": "config:OTS_CALENDAR_URL",
+          "sources": [
+            "backend/main.py:96"
+          ]
+        },
+        {
+          "id": "config:OTS_TIMEOUT_S",
+          "sources": [
+            "backend/main.py:97"
+          ]
+        },
+        {
+          "id": "config:PDFHORSE_ANCHOR_STUB",
+          "sources": [
+            "backend/main.py:98"
+          ]
+        }
+      ],
+      "factCount": 5,
+      "description": ""
     },
     {
       "id": "ac_cdn",

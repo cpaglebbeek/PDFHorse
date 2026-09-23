@@ -7,7 +7,23 @@
       "kind": "config",
       "label": "ALLOWED_ORIGIN",
       "sources": [
-        "backend/main.py:52"
+        "backend/main.py:55"
+      ]
+    },
+    {
+      "id": "config:ANCHOR_RATE_PER_HOUR",
+      "kind": "config",
+      "label": "ANCHOR_RATE_PER_HOUR",
+      "sources": [
+        "backend/main.py:99"
+      ]
+    },
+    {
+      "id": "config:ANCHOR_RATE_WINDOW_S",
+      "kind": "config",
+      "label": "ANCHOR_RATE_WINDOW_S",
+      "sources": [
+        "backend/main.py:100"
       ]
     },
     {
@@ -15,7 +31,7 @@
       "kind": "config",
       "label": "APP_HOST",
       "sources": [
-        "backend/main.py:50"
+        "backend/main.py:53"
       ]
     },
     {
@@ -23,7 +39,7 @@
       "kind": "config",
       "label": "APP_PORT",
       "sources": [
-        "backend/main.py:51"
+        "backend/main.py:54"
       ]
     },
     {
@@ -31,7 +47,7 @@
       "kind": "config",
       "label": "MAIL_FROM",
       "sources": [
-        "backend/main.py:81"
+        "backend/main.py:84"
       ]
     },
     {
@@ -39,7 +55,7 @@
       "kind": "config",
       "label": "MAIL_RATE_PER_HOUR",
       "sources": [
-        "backend/main.py:86"
+        "backend/main.py:89"
       ]
     },
     {
@@ -47,7 +63,7 @@
       "kind": "config",
       "label": "MAIL_RATE_WINDOW_S",
       "sources": [
-        "backend/main.py:87"
+        "backend/main.py:90"
       ]
     },
     {
@@ -55,7 +71,7 @@
       "kind": "config",
       "label": "MAIL_REPLY_TO",
       "sources": [
-        "backend/main.py:82"
+        "backend/main.py:85"
       ]
     },
     {
@@ -63,7 +79,7 @@
       "kind": "config",
       "label": "MAX_DOCX_BYTES",
       "sources": [
-        "backend/main.py:55"
+        "backend/main.py:58"
       ]
     },
     {
@@ -71,7 +87,7 @@
       "kind": "config",
       "label": "MAX_MAIL_ATTACHMENT_BYTES",
       "sources": [
-        "backend/main.py:83"
+        "backend/main.py:86"
       ]
     },
     {
@@ -79,7 +95,7 @@
       "kind": "config",
       "label": "MAX_MAIL_BODY_LEN",
       "sources": [
-        "backend/main.py:85"
+        "backend/main.py:88"
       ]
     },
     {
@@ -87,7 +103,7 @@
       "kind": "config",
       "label": "MAX_MAIL_SUBJECT_LEN",
       "sources": [
-        "backend/main.py:84"
+        "backend/main.py:87"
       ]
     },
     {
@@ -95,7 +111,7 @@
       "kind": "config",
       "label": "MAX_OCR_BYTES",
       "sources": [
-        "backend/main.py:59"
+        "backend/main.py:62"
       ]
     },
     {
@@ -103,7 +119,7 @@
       "kind": "config",
       "label": "MAX_ODT_BYTES",
       "sources": [
-        "backend/main.py:57"
+        "backend/main.py:60"
       ]
     },
     {
@@ -111,7 +127,7 @@
       "kind": "config",
       "label": "MAX_RTF_BYTES",
       "sources": [
-        "backend/main.py:58"
+        "backend/main.py:61"
       ]
     },
     {
@@ -119,7 +135,7 @@
       "kind": "config",
       "label": "MAX_SESSION_TOTAL_BYTES",
       "sources": [
-        "backend/main.py:54"
+        "backend/main.py:57"
       ]
     },
     {
@@ -127,7 +143,7 @@
       "kind": "config",
       "label": "MAX_UPLOAD_SIZE_BYTES",
       "sources": [
-        "backend/main.py:53"
+        "backend/main.py:56"
       ]
     },
     {
@@ -135,7 +151,7 @@
       "kind": "config",
       "label": "MAX_XLSX_BYTES",
       "sources": [
-        "backend/main.py:56"
+        "backend/main.py:59"
       ]
     },
     {
@@ -143,7 +159,7 @@
       "kind": "config",
       "label": "OCRMYPDF_BIN",
       "sources": [
-        "backend/main.py:64"
+        "backend/main.py:67"
       ]
     },
     {
@@ -151,7 +167,7 @@
       "kind": "config",
       "label": "OCR_LANGUAGES",
       "sources": [
-        "backend/main.py:65"
+        "backend/main.py:68"
       ]
     },
     {
@@ -159,7 +175,31 @@
       "kind": "config",
       "label": "OCR_TIMEOUT_S",
       "sources": [
-        "backend/main.py:66"
+        "backend/main.py:69"
+      ]
+    },
+    {
+      "id": "config:OTS_CALENDAR_URL",
+      "kind": "config",
+      "label": "OTS_CALENDAR_URL",
+      "sources": [
+        "backend/main.py:96"
+      ]
+    },
+    {
+      "id": "config:OTS_TIMEOUT_S",
+      "kind": "config",
+      "label": "OTS_TIMEOUT_S",
+      "sources": [
+        "backend/main.py:97"
+      ]
+    },
+    {
+      "id": "config:PDFHORSE_ANCHOR_STUB",
+      "kind": "config",
+      "label": "PDFHORSE_ANCHOR_STUB",
+      "sources": [
+        "backend/main.py:98"
       ]
     },
     {
@@ -167,7 +207,7 @@
       "kind": "config",
       "label": "PDFHORSE_DEV",
       "sources": [
-        "backend/main.py:131"
+        "backend/main.py:159"
       ]
     },
     {
@@ -175,7 +215,7 @@
       "kind": "config",
       "label": "SESSION_TIMEOUT_S",
       "sources": [
-        "backend/main.py:60"
+        "backend/main.py:63"
       ]
     },
     {
@@ -183,7 +223,7 @@
       "kind": "config",
       "label": "SMTP_HOST",
       "sources": [
-        "backend/main.py:71"
+        "backend/main.py:74"
       ]
     },
     {
@@ -191,7 +231,7 @@
       "kind": "config",
       "label": "SMTP_PASSWORD",
       "sources": [
-        "backend/main.py:74"
+        "backend/main.py:77"
       ]
     },
     {
@@ -199,7 +239,7 @@
       "kind": "config",
       "label": "SMTP_PORT",
       "sources": [
-        "backend/main.py:72"
+        "backend/main.py:75"
       ]
     },
     {
@@ -207,7 +247,7 @@
       "kind": "config",
       "label": "SMTP_TIMEOUT_S",
       "sources": [
-        "backend/main.py:76"
+        "backend/main.py:79"
       ]
     },
     {
@@ -215,7 +255,7 @@
       "kind": "config",
       "label": "SMTP_USER",
       "sources": [
-        "backend/main.py:73"
+        "backend/main.py:76"
       ]
     },
     {
@@ -223,7 +263,7 @@
       "kind": "config",
       "label": "SMTP_USE_SSL",
       "sources": [
-        "backend/main.py:75"
+        "backend/main.py:78"
       ]
     },
     {
@@ -231,7 +271,7 @@
       "kind": "config",
       "label": "SOFFICE_BIN",
       "sources": [
-        "backend/main.py:62"
+        "backend/main.py:65"
       ]
     },
     {
@@ -239,7 +279,7 @@
       "kind": "config",
       "label": "SOFFICE_TIMEOUT_S",
       "sources": [
-        "backend/main.py:63"
+        "backend/main.py:66"
       ]
     },
     {
@@ -247,7 +287,7 @@
       "kind": "config",
       "label": "TMP_DIR",
       "sources": [
-        "backend/main.py:61"
+        "backend/main.py:64"
       ]
     },
     {
@@ -338,7 +378,7 @@
       "sources": [
         "frontend/js/app.js"
       ],
-      "files": 4
+      "files": 7
     },
     {
       "id": "module:scripts",
@@ -347,7 +387,7 @@
       "sources": [
         "scripts/take_screens.py"
       ],
-      "files": 2
+      "files": 5
     },
     {
       "id": "nginx:/PDFHorse",
@@ -394,7 +434,7 @@
       "kind": "route",
       "label": "GET /api/health",
       "sources": [
-        "backend/main.py:143"
+        "backend/main.py:171"
       ],
       "module": "module:backend"
     },
@@ -403,7 +443,16 @@
       "kind": "route",
       "label": "GET /api/limits",
       "sources": [
-        "backend/main.py:153"
+        "backend/main.py:181"
+      ],
+      "module": "module:backend"
+    },
+    {
+      "id": "route:POST /api/anchor",
+      "kind": "route",
+      "label": "POST /api/anchor",
+      "sources": [
+        "backend/main.py:555"
       ],
       "module": "module:backend"
     },
@@ -412,7 +461,7 @@
       "kind": "route",
       "label": "POST /api/convert/docx-to-pdf",
       "sources": [
-        "backend/main.py:249"
+        "backend/main.py:277"
       ],
       "module": "module:backend"
     },
@@ -421,7 +470,7 @@
       "kind": "route",
       "label": "POST /api/convert/odt-to-pdf",
       "sources": [
-        "backend/main.py:261"
+        "backend/main.py:289"
       ],
       "module": "module:backend"
     },
@@ -430,7 +479,7 @@
       "kind": "route",
       "label": "POST /api/convert/rtf-to-pdf",
       "sources": [
-        "backend/main.py:267"
+        "backend/main.py:295"
       ],
       "module": "module:backend"
     },
@@ -439,7 +488,7 @@
       "kind": "route",
       "label": "POST /api/convert/xlsx-to-pdf",
       "sources": [
-        "backend/main.py:255"
+        "backend/main.py:283"
       ],
       "module": "module:backend"
     },
@@ -448,7 +497,7 @@
       "kind": "route",
       "label": "POST /api/mail",
       "sources": [
-        "backend/main.py:414"
+        "backend/main.py:442"
       ],
       "module": "module:backend"
     },
@@ -457,7 +506,7 @@
       "kind": "route",
       "label": "POST /api/ocr",
       "sources": [
-        "backend/main.py:283"
+        "backend/main.py:311"
       ],
       "module": "module:backend"
     },

@@ -9,6 +9,25 @@ switch badges on
 set current state "As-is (code)"
 set target state "To-be (ontwerp)"
 
+Group laag_application "Applicatie" {
+    -width 420
+    -height 180
+}
+ApplicationInterface auto_api_api_anchor "Routes /api/anchor/* (1)" in laag_application {
+    -fill "#f5f3ff"
+    -stroke "#7c3aed"
+    -state current
+    -attr status = "alleen_code"
+    -attr feiten = "1"
+}
+Artifact auto_config "Configuratie (omgeving) (5)" in laag_application {
+    -fill "#f5f3ff"
+    -stroke "#7c3aed"
+    -state current
+    -attr status = "alleen_code"
+    -attr feiten = "5"
+}
+
 Group laag_technology "Technologie" {
     -width 1220
     -height 310
@@ -80,19 +99,22 @@ TechnologyService ts_smtp "Hostinger SMTP :587 STARTTLS (login info@icthorse.nl)
 }
 
 // Posities (deterministische raster-layout per ArchiMate-laag)
-pos laag_technology 40, 40
-pos nd_hc55 60, 90
-pos nd_hostinger 260, 90
-pos nd_icthorse 460, 90
-pos ss_uvicorn 660, 90
-pos ss_soffice 860, 90
-pos ss_ocrmypdf 1060, 90
-pos ss_slowapi 60, 220
-pos ss_test 260, 220
-pos ss_cleanup 460, 220
-pos ti_nginx_static 660, 220
-pos ti_nginx_api 860, 220
-pos ts_smtp 1060, 220
+pos laag_application 40, 40
+pos auto_api_api_anchor 60, 90
+pos auto_config 260, 90
+pos laag_technology 40, 260
+pos nd_hc55 60, 310
+pos nd_hostinger 260, 310
+pos nd_icthorse 460, 310
+pos ss_uvicorn 660, 310
+pos ss_soffice 860, 310
+pos ss_ocrmypdf 1060, 310
+pos ss_slowapi 60, 440
+pos ss_test 260, 440
+pos ss_cleanup 460, 440
+pos ti_nginx_static 660, 440
+pos ti_nginx_api 860, 440
+pos ts_smtp 1060, 440
 
 // Relaties — Dragon1-compatibel: werkwoordvorm, of ongetypeerd waar Dragon1 het type afleidt
 ts_smtp associates nd_hostinger "draait op"

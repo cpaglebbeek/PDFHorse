@@ -138,6 +138,13 @@ Artifact ar_env "Instellingen /opt/pdfhorse/.env (mode 600)" in laag_application
     -attr status = "gebouwd"
     -attr trace = "config:MAX_UPLOAD_SIZE_BYTES, config:MAX_SESSION_TOTAL_BYTES"
 }
+ApplicationInterface auto_api_api_anchor "Routes /api/anchor/* (1)" in laag_application {
+    -fill "#f5f3ff"
+    -stroke "#7c3aed"
+    -state current
+    -attr status = "alleen_code"
+    -attr feiten = "1"
+}
 
 // Posities (deterministische raster-layout per ArchiMate-laag)
 pos laag_application 40, 40
@@ -164,6 +171,7 @@ pos ac_donate 260, 480
 pos ac_pades 460, 480
 pos ac_pwa 660, 480
 pos ar_env 860, 480
+pos auto_api_api_anchor 1060, 480
 
 // Relaties — Dragon1-compatibel: werkwoordvorm, of ongetypeerd waar Dragon1 het type afleidt
 ac_frontend composes ac_bewerker
@@ -190,3 +198,4 @@ ac_payload accesses do_payload "schrijft en leest"
 ac_payload accesses do_sleutel "maakt en gebruikt"
 ai_convert accesses do_tmp "schrijft en wist"
 ai_ocr accesses do_tmp "schrijft en wist"
+ac_backend composes auto_api_api_anchor

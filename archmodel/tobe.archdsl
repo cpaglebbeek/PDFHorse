@@ -145,7 +145,7 @@ Node nd_hostinger "Hostinger (smtp.hostinger.com)" {
 }
 Node nd_icthorse "icthorse.nl/PDFHorse/ (reverse-proxy via Hostinger)" {
     -attr status = "gepland"
-    -description "README: gepland; nu LIVE op horsecloud55.ddns.net/PDFHorse/."
+    -description "README: gepland; nu LIVE op icthorsecloud.nl/PDFHorse/."
 }
 SystemSoftware ss_uvicorn "uvicorn :3963 (pdfhorse.service, 2 workers)" {
     -attr trace = "unit:pdfhorse.service, dep:pip:uvicorn, dep:pip:fastapi, dep:pip:python-multipart, config:APP_HOST, config:APP_PORT"

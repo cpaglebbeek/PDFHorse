@@ -47,7 +47,7 @@ Node nd_icthorse "icthorse.nl/PDFHorse/ (reverse-proxy via Hostinger)" in laag_t
     -stroke "#ea580c"
     -state target
     -attr status = "gepland"
-    -description "README: gepland; nu LIVE op horsecloud55.ddns.net/PDFHorse/."
+    -description "README: gepland; nu LIVE op icthorsecloud.nl/PDFHorse/."
 }
 SystemSoftware ss_uvicorn "uvicorn :3963 (pdfhorse.service, 2 workers)" in laag_technology {
     -stroke "#16a34a"

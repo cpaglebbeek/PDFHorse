@@ -28,7 +28,7 @@
 - [x] **docs/PRIVACY.md** privacyverklaring (04-06, v0.3.0-Putman)
 - [x] **docs/BUGLIST.md** skelet (04-06, v0.3.0-Putman)
 - [x] **CHANGELOG.md** 5 entries v0.0.1 → v0.3.0 + v0.4.0 + v0.5.0 (04-06)
-- [x] **HC55 MVP-deploy LIVE** op https://horsecloud55.ddns.net/PDFHorse/ (04-06)
+- [x] **HC55 MVP-deploy LIVE** op https://icthorsecloud.nl/PDFHorse/ (04-06)
 - [ ] OCR-endpoint (ocrmypdf + Tesseract nld+eng) op HC55
 - [ ] Mail-endpoint (SMTP Hostinger)
 - [ ] Cleanup-job `/tmp/pdfhorse/` (30 min)

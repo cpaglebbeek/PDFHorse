@@ -38,4 +38,4 @@ ingebed als (onzichtbare) base64-payload in de PDF, terug te lezen via modus **L
 
 ## Deploy
 Dev-clone push → `/opt/pdfhorse` pull → rsync → `/var/www/pdfhorse/frontend/`.
-Live: `https://horsecloud55.ddns.net/PDFHorse/` (poort 443).
+Live: `https://icthorsecloud.nl/PDFHorse/` (poort 443).

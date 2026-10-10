@@ -1,6 +1,6 @@
 """Genereert docs/screens/*.png via Playwright headless Chromium.
 
-Loopt door alle 6 tabs op https://horsecloud55.ddns.net/PDFHorse/ en schiet
+Loopt door alle 6 tabs op https://icthorsecloud.nl/PDFHorse/ en schiet
 een PNG per tab. Wordt incidenteel handmatig gerund (bij UI-wijziging).
 
 Run:
@@ -14,7 +14,7 @@ from pathlib import Path
 
 from playwright.sync_api import sync_playwright
 
-URL = "https://horsecloud55.ddns.net/PDFHorse/"
+URL = "https://icthorsecloud.nl/PDFHorse/"
 OUT_DIR = Path(__file__).resolve().parent.parent / "docs" / "screens"
 VIEWPORT = {"width": 1440, "height": 900}
 DEVICE_SCALE = 2  # retina

@@ -45,7 +45,7 @@ Nieuwe tab **💧 Watermerk** bovenop `window.PDFHorseWatermark` (engine v0.1.0)
 
 ## Deploy
 Dev-clone `~/projects/PDFHorse` → push origin → `/opt/pdfhorse` pull → rsync `frontend/`
-naar `/var/www/pdfhorse/frontend/`. Live op `https://horsecloud55.ddns.net/PDFHorse/`.
+naar `/var/www/pdfhorse/frontend/`. Live op `https://icthorsecloud.nl/PDFHorse/`.
 
 ## Open / volgende
 - Geavanceerde tab (payload-bestand base64 attach + optioneel encrypt/decrypt met keypair,

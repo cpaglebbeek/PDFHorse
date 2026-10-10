@@ -1,6 +1,6 @@
 # PDFHorse — UI screens
 
-Headless-screenshot-set van LIVE `https://horsecloud55.ddns.net/PDFHorse/`.
+Headless-screenshot-set van LIVE `https://icthorsecloud.nl/PDFHorse/`.
 Genereer-script: [`../../scripts/take_screens.py`](../../scripts/take_screens.py)
 (Playwright headless Chromium, viewport 1440×900, retina ×2).
 

@@ -57,4 +57,4 @@ Nieuwe tab **🔐 Geavanceerd** + engine `js/payload.js` (`window.PDFHorsePayloa
 
 ## Deploy
 Dev-clone push origin → `/opt/pdfhorse` pull → rsync `frontend/` → `/var/www/pdfhorse/frontend/`.
-Live: `https://horsecloud55.ddns.net/PDFHorse/`.
+Live: `https://icthorsecloud.nl/PDFHorse/`.

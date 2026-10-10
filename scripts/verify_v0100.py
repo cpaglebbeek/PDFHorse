@@ -1,6 +1,6 @@
 """Headless live-verificatie v0.10.0-Thanh op HC55.
 
-Test op https://horsecloud55.ddns.net/PDFHorse/:
+Test op https://icthorsecloud.nl/PDFHorse/:
   1. Pagina laadt zonder console/page errors.
   2. Header toont v0.10.0 — Thanh.
   3. Alle 6 tabs schakelbaar via goTab (geen error).
@@ -13,7 +13,7 @@ Run: ~/projects/PDFHorse/.venv/bin/python scripts/verify_v0100.py
 import sys
 from playwright.sync_api import sync_playwright
 
-URL = "https://horsecloud55.ddns.net/PDFHorse/"
+URL = "https://icthorsecloud.nl/PDFHorse/"
 TEST_PDF = "/tmp/pdfhorse_test.pdf"
 
 errors = []      # console/page errors

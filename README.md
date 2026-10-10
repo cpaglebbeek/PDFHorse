@@ -4,7 +4,7 @@
 >
 > Versie: **v0.18.0-Oberdiek** · Licentie: **AGPL-3.0** · Status: **alle features LIVE + AUTO-veldherkenning ook voor platte PDF's**
 
-🚀 **LIVE op https://horsecloud55.ddns.net/PDFHorse/** (sinds 2026-06-04)
+🚀 **LIVE op https://icthorsecloud.nl/PDFHorse/** (sinds 2026-06-04)
 Gepland (Hostinger reverse-proxy): https://icthorse.nl/PDFHorse/
 
 ## Wat doet PDFHorse?
@@ -42,7 +42,7 @@ PDF's en documenten kunnen gevoelig zijn. PDFHorse minimaliseert exposure:
 3. **DOCX/XLSX → PDF** vereist server-conversie via LibreOffice; upload is **tijdelijk** in `/tmp/pdfhorse/<uuid>/`, **direct gewist** via `BackgroundTask shutil.rmtree`.
 4. OCR (gepland) volgt hetzelfde patroon als docx/xlsx-conversie.
 5. Geen account, geen logs van bestandsinhoud (alleen aggregate request-metrics).
-6. HTTPS-only (Let's Encrypt cert op horsecloud55.ddns.net).
+6. HTTPS-only (Let's Encrypt cert op icthorsecloud.nl).
 7. Mail-functie verstuurt alleen naar opgegeven adres — geen BCC, geen archief (rate-limit 5/uur/IP, attachment max 5 MB).
 
 Volledige verklaring: [`docs/PRIVACY.md`](docs/PRIVACY.md).

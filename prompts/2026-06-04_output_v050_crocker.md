@@ -9,7 +9,7 @@ resume: ""
 
 **Agent:** Claude Opus 4.7 (1M context)
 **Repo:** PDFHorse + HC55 redeploy
-**LIVE URL:** `https://horsecloud55.ddns.net/PDFHorse/`
+**LIVE URL:** `https://icthorsecloud.nl/PDFHorse/`
 
 ## Opdracht
 

@@ -52,7 +52,7 @@ VERSION, CODENAME = _load_version()
 
 APP_HOST = os.environ.get("APP_HOST", "127.0.0.1")
 APP_PORT = int(os.environ.get("APP_PORT", "3963"))
-ALLOWED_ORIGIN = os.environ.get("ALLOWED_ORIGIN", "https://horsecloud55.ddns.net")
+ALLOWED_ORIGIN = os.environ.get("ALLOWED_ORIGIN", "https://icthorsecloud.nl")
 MAX_UPLOAD_SIZE_BYTES = int(os.environ.get("MAX_UPLOAD_SIZE_BYTES", str(50 * 1024 * 1024)))
 MAX_SESSION_TOTAL_BYTES = int(os.environ.get("MAX_SESSION_TOTAL_BYTES", str(100 * 1024 * 1024)))
 MAX_DOCX_BYTES = int(os.environ.get("MAX_DOCX_BYTES", str(20 * 1024 * 1024)))
@@ -392,7 +392,7 @@ def _default_mail_body(filename: str) -> str:
         "Hallo,\n\n"
         "Hierbij je PDFHorse-uitvoer in de bijlage"
         f" ({filename}).\n\n"
-        "Deze mail is verstuurd via https://horsecloud55.ddns.net/PDFHorse/ —\n"
+        "Deze mail is verstuurd via https://icthorsecloud.nl/PDFHorse/ —\n"
         "een anonieme, browser-first PDF-bewerker. Geen account, geen archief.\n\n"
         "Vragen? Reply op deze mail (komt aan op info@icthorse.nl).\n\n"
         "— PDFHorse"

@@ -6,6 +6,7 @@
 |---|---|
 | `nginx-pdfhorse.conf` | nginx-snippet voor `/PDFHorse/` (frontend) + `/PDFHorse/api/` (proxy → :3963) |
 | `pdfhorse.service` | systemd-unit voor FastAPI backend op HC55 |
+| `pdfhorse.tmpfiles.conf` | → `/etc/tmpfiles.d/pdfhorse.conf`: maakt `/tmp/pdfhorse` bij het opstarten aan (anders 226/NAMESPACE) |
 | `cleanup.cron` | (TBD v0.0.3) cron-regel voor `/tmp/pdfhorse/*` cleanup |
 
 ## HC55 install (TBD v0.0.3)

@@ -3,6 +3,12 @@
 > Versie-historie. Formaat: [Keep a Changelog](https://keepachangelog.com/) op hoofdlijnen, met PDFHorse-eigen codenamen (thema: PDF-pioniers).
 > Bijgewerkt bij elke release. Datums = release naar `main`.
 
+## [v0.25.1-Shamir] — 2026-11-06
+
+### Bugfix
+
+- **Dienst startte niet meer** (226/NAMESPACE, >638.000 herstarts): `/tmp/pdfhorse` ontbrak na een herstart van de server, terwijl de unit hem in `ReadWritePaths` noemt. Nieuw `deploy/pdfhorse.tmpfiles.conf` → `/etc/tmpfiles.d/pdfhorse.conf` maakt de map bij elke opstart aan.
+
 ## [v0.25.0-Shamir] — 2026-06-20
 
 > Codenaam **Adi Shamir** — de "S" in RSA (Rivest-Shamir-Adleman), uitvinder van **Shamir's Secret Sharing** (k-of-n threshold cryptography) en **Visual Cryptography**, mede-ontwerper van **Differential Cryptanalysis**. Passend bij eerste-eigenaar identity-bewijs via cryptografische signatures: identity binding is precies de "wie zegt dat dit van jou is?"-vraag die Shamir's werk over secret-binding adresseert. **ROOD** — meta-implicatie: van self-rapportage owner-veld naar cryptografisch verifieerbaar identity-bewijs.
